@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 16: Python &amp; FastAPI Deployment — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-5">Part 5 · Chapter 16</div>
+        <h1>Python &amp; FastAPI Deployment</h1>
+        <p class="chapter-intro">From local <code>uvicorn</code> to production ASGI with Gunicorn, Supervisor, and Docker.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>What you'll learn in this chapter</h4>
+        <ul>
+          <li>Why you should never run <code>python app.py</code> directly in production</li>
+          <li>The difference between WSGI and ASGI — and why it matters for FastAPI</li>
+          <li>Virtual environments and reproducible dependency management</li>
+          <li>Gunicorn with Uvicorn workers — the production-standard Python server setup</li>
+          <li>The Gunicorn config file for clean, version-controlled configuration</li>
+          <li>Supervisor — keeping your Python process alive across restarts</li>
+          <li>Dockerising a FastAPI application with best-practice layer caching</li>
+          <li>Database migrations with Alembic — never touch production data by hand</li>
+          <li>Flask deployment differences and when to use each framework</li>
+        </ul>
+      </div>
+
+      <h2>The Restaurant Kitchen Analogy</h2>
+      <p>
+        Imagine a busy restaurant. You have a brilliant head chef — that is your Python application,
+        the code that does the actual work. Now imagine the front-of-house: customers walk in, place
+        orders, and wait for food. The people who take those orders and deliver food back to the
+        tables are the <em>waiters</em> — that is your ASGI/WSGI server.
+      </p>
+      <p>
+        If you only have one waiter, customers wait in a single queue. That waiter can only handle one
+        table at a time. If a table's order is complex and takes ten minutes, everyone else is blocked.
+        This is what happens when you run <code>python app.py</code> or
+        <code>uvicorn main:app</code> without multiple workers — it is a restaurant with a brilliant
+        chef but only one waiter.
+      </p>
+      <p>
+        <strong>Gunicorn</strong> is the restaurant manager who hires multiple waiters (worker
+        processes). Each worker is a complete, independent Python process that can handle requests
+        in parallel. Five workers means five requests can be handled simultaneously. If one worker
+        crashes (the waiter spills something), Gunicorn replaces them immediately. The restaurant
+        keeps running.
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">🍽️ The Restaurant Kitchen</div>
+        <p>
+          <strong>Python app</strong> = the chef (the talent, the business logic)<br>
+          <strong>Uvicorn</strong> = one waiter (fast, async, handles one request path at a time)<br>
+          <strong>Gunicorn</strong> = the restaurant manager (runs many waiters in parallel, restarts
+          fallen ones, manages the floor)<br>
+          <strong>Nginx</strong> = the front door host (greets everyone, handles SSL, directs traffic
+          to the right section)
+        </p>
+      </div>
+
+      <h2>WSGI vs ASGI — The Two Worlds of Python Web</h2>
+      <p>
+        Python's web ecosystem has two competing standards for how web servers talk to Python
+        applications. Understanding which one your framework uses determines how you deploy it.
+      </p>
+
+      <div class="diagram">
+<pre>WSGI vs ASGI Comparison
+────────────────────────────────────────────────────────────────────
+                    WSGI                        ASGI
+────────────────────────────────────────────────────────────────────
+Full name    Web Server Gateway Interface   Async Server Gateway
+             (PEP 3333, 2003)               Interface (2019)
+
+Model        Synchronous                    Asynchronous
+
+Concurrency  Multiple processes             Multiple coroutines
+             (Gunicorn workers)             per worker + multiple workers
+
+Frameworks   Flask, Django (sync)           FastAPI, Starlette,
+                                            Django 4+ (async views)
+
+Server       Gunicorn, uWSGI               Uvicorn (single),
+                                            Gunicorn + UvicornWorker (multi)
+
+Best for     Traditional CRUD APIs,         High-concurrency APIs,
+             Django monoliths               WebSockets, streaming,
+                                            async database calls
+────────────────────────────────────────────────────────────────────</pre>
+      </div>
+
+      <p>
+        FastAPI is built entirely on ASGI. It is fast, modern, and supports Python's
+        <code>async/await</code> syntax natively. For production deployment, you run it with
+        Gunicorn acting as the process manager, but you swap out Gunicorn's default synchronous
+        workers for Uvicorn workers — which are asynchronous. This gives you the best of both
+        worlds: Gunicorn's process management stability with Uvicorn's async performance.
+      </p>
+
+      <div class="box key-term">
+        <div class="box-title">📖 FastAPI's Performance Advantage</div>
+        <p>
+          FastAPI is one of the fastest Python web frameworks ever benchmarked, on par with Node.js
+          and Go for many workloads. This is because it is built on Starlette (an ASGI framework)
+          and Pydantic (fast data validation). When a request comes in and waits for a database
+          query, an async worker can switch to handling another request in the meantime — no thread
+          is sitting idle. Traditional WSGI workers block during I/O.
+        </p>
+      </div>
+
+      <h2>A Production-Ready FastAPI Application</h2>
+      <p>
+        Before we talk about deployment, let's establish a clean application structure. Every
+        production FastAPI app should use the <code>lifespan</code> context manager for startup and
+        shutdown logic, expose a <code>/health</code> endpoint, and read configuration from
+        environment variables:
+      </p>
+
+      <pre><code><span class="cmt"># main.py — production-ready FastAPI application</span>
+<span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI, HTTPException
+<span class="kw">from</span> contextlib <span class="kw">import</span> asynccontextmanager
+<span class="kw">from</span> pydantic_settings <span class="kw">import</span> BaseSettings
+<span class="kw">import</span> os
+
+<span class="cmt"># Settings — read from environment variables automatically</span>
+<span class="kw">class</span> <span class="fn">Settings</span>(BaseSettings):
+    database_url: str
+    secret_key: str
+    app_version: str = <span class="str">"1.0.0"</span>
+    debug: bool = <span class="kw">False</span>
+
+    <span class="kw">class</span> Config:
+        env_file = <span class="str">".env"</span>
+
+settings = <span class="fn">Settings</span>()
+
+<span class="cmt"># Lifespan: startup and shutdown logic</span>
+<span class="kw">@asynccontextmanager</span>
+<span class="kw">async def</span> <span class="fn">lifespan</span>(app: FastAPI):
+    <span class="cmt"># Startup: connect to DB, warm caches, load models</span>
+    print(<span class="str">"Starting up..."</span>)
+    <span class="kw">yield</span>
+    <span class="cmt"># Shutdown: close connections, flush buffers</span>
+    print(<span class="str">"Shutting down..."</span>)
+
+app = <span class="fn">FastAPI</span>(
+    title=<span class="str">"My API"</span>,
+    version=settings.app_version,
+    lifespan=lifespan,
+    docs_url=<span class="kw">None</span> <span class="kw">if</span> <span class="kw">not</span> settings.debug <span class="kw">else</span> <span class="str">"/docs"</span>,  <span class="cmt"># hide docs in prod</span>
+)
+
+<span class="kw">@app.get</span>(<span class="str">"/health"</span>)
+<span class="kw">async def</span> <span class="fn">health</span>():
+    <span class="kw">return</span> {
+        <span class="str">"status"</span>: <span class="str">"ok"</span>,
+        <span class="str">"version"</span>: settings.app_version,
+    }
+
+<span class="kw">@app.get</span>(<span class="str">"/"</span>)
+<span class="kw">async def</span> <span class="fn">root</span>():
+    <span class="kw">return</span> {<span class="str">"message"</span>: <span class="str">"Hello World"</span>}</code></pre>
+
+      <h2>Virtual Environments and Dependency Management</h2>
+      <p>
+        Python's package system installs libraries globally by default. This is a disaster for
+        servers — different applications may need different versions of the same library, and a
+        global install means they fight. Virtual environments solve this: each project gets its own
+        isolated Python environment with its own packages.
+      </p>
+      <p>
+        Think of virtual environments like separate toolboxes. One project needs hammer v1.0, another
+        needs hammer v2.0. Without separate toolboxes, they'd clash. With virtual environments, each
+        project has its own hammer.
+      </p>
+
+      <pre><code><span class="cmt"># Create a virtual environment (do this once per project)</span>
+python3 -m venv venv
+
+<span class="cmt"># Activate it (you must activate before installing or running)</span>
+<span class="kw">source</span> venv/bin/activate      <span class="cmt"># Linux / macOS</span>
+venv\Scripts\activate         <span class="cmt"># Windows PowerShell</span>
+
+<span class="cmt"># Your shell prompt now shows (venv) — you are inside the environment</span>
+
+<span class="cmt"># Install your dependencies</span>
+pip install fastapi uvicorn gunicorn pydantic-settings sqlalchemy alembic
+
+<span class="cmt"># Pin exact versions for reproducibility</span>
+pip freeze > requirements.txt
+
+<span class="cmt"># On deployment server, install from requirements.txt</span>
+pip install -r requirements.txt
+
+<span class="cmt"># Deactivate when done</span>
+deactivate</code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 Use pip freeze for production, not pip install</div>
+        <p>
+          <code>pip freeze</code> captures the <em>exact</em> version of every installed package,
+          including transitive dependencies. A <code>requirements.txt</code> generated by
+          <code>pip freeze</code> will install exactly the same library versions on the deployment
+          server as on the developer's machine. Never leave version ranges in production
+          requirements files — a new minor version of a library can contain breaking changes.
+        </p>
+      </div>
+
+      <h2>Running with Gunicorn and Uvicorn Workers</h2>
+      <p>
+        Development uses a single Uvicorn process with hot-reload enabled. Production uses Gunicorn
+        managing a pool of Uvicorn workers. The classic rule of thumb for worker count is
+        <strong>(2 × CPU cores) + 1</strong>. For a 2-core server, that is 5 workers. For a
+        4-core server, 9 workers.
+      </p>
+
+      <pre><code><span class="cmt"># Development: single process, auto-reload on file changes</span>
+uvicorn main:app <span class="flag">--reload</span> <span class="flag">--port</span> 8000
+
+<span class="cmt"># Production: Gunicorn managing 4 Uvicorn workers</span>
+gunicorn main:app \
+  <span class="flag">--worker-class</span> uvicorn.workers.UvicornWorker \
+  <span class="flag">--workers</span> 4 \
+  <span class="flag">--bind</span> 0.0.0.0:8000 \
+  <span class="flag">--timeout</span> 120 \
+  <span class="flag">--keepalive</span> 5 \
+  <span class="flag">--access-logfile</span> /var/log/myapp/access.log \
+  <span class="flag">--error-logfile</span> /var/log/myapp/error.log \
+  <span class="flag">--log-level</span> info</code></pre>
+
+      <p>
+        The <code>--timeout 120</code> flag means Gunicorn will kill and restart a worker if it does
+        not respond within 120 seconds. This protects against hung workers caused by slow database
+        queries or infinite loops. The <code>--keepalive 5</code> flag tells Gunicorn to hold open
+        idle HTTP connections for 5 seconds, which reduces latency for clients making multiple
+        requests.
+      </p>
+
+      <h2>The Gunicorn Configuration File</h2>
+      <p>
+        Just like PM2 has an <code>ecosystem.config.js</code>, Gunicorn has a Python configuration
+        file. Store this in your repository alongside your code:
+      </p>
+
+      <pre><code><span class="cmt"># gunicorn.conf.py</span>
+<span class="kw">import</span> multiprocessing
+
+<span class="cmt"># Worker configuration</span>
+workers = multiprocessing.cpu_count() * 2 + 1  <span class="cmt"># auto-detect cores</span>
+worker_class = <span class="str">"uvicorn.workers.UvicornWorker"</span>
+worker_connections = 1000     <span class="cmt"># max simultaneous connections per worker</span>
+
+<span class="cmt"># Server socket</span>
+bind = <span class="str">"0.0.0.0:8000"</span>
+backlog = 2048                <span class="cmt"># pending connection queue size</span>
+
+<span class="cmt"># Process management</span>
+timeout = 120
+keepalive = 5
+max_requests = 1000           <span class="cmt"># restart worker after N requests (prevents memory leaks)</span>
+max_requests_jitter = 50      <span class="cmt"># randomise restart time to avoid thundering herd</span>
+preload_app = <span class="kw">True</span>           <span class="cmt"># load app before forking workers (faster startup)</span>
+
+<span class="cmt"># Logging</span>
+accesslog = <span class="str">"/var/log/myapp/access.log"</span>
+errorlog = <span class="str">"/var/log/myapp/error.log"</span>
+loglevel = <span class="str">"info"</span>
+access_log_format = <span class="str">'%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(D)s'</span></code></pre>
+
+      <p>Start Gunicorn pointing at this config file:</p>
+
+      <pre><code>gunicorn main:app -c gunicorn.conf.py</code></pre>
+
+      <div class="box fun-fact">
+        <div class="box-title">🔄 max_requests and Memory Leaks</div>
+        <p>
+          Python applications can accumulate memory over time — a phenomenon called a slow memory
+          leak. Even if the leak is tiny per request, after thousands of requests the worker bloats
+          and the server slows. The <code>max_requests</code> setting is a pragmatic solution:
+          restart each worker after it has handled a set number of requests, wiping its memory
+          slate clean. The <code>max_requests_jitter</code> adds randomness so all workers do not
+          restart simultaneously, which would cause a brief traffic spike on the remaining workers.
+        </p>
+      </div>
+
+      <h2>Supervisor — Keeping Gunicorn Running</h2>
+      <p>
+        Gunicorn manages Python workers, but who manages Gunicorn itself? On a bare Linux server,
+        you need a process supervisor. <strong>Supervisor</strong> is to Python what PM2 is to
+        Node.js — it monitors your Gunicorn process and restarts it if it dies. It also starts
+        automatically on system boot.
+      </p>
+
+      <pre><code><span class="cmt"># Install Supervisor</span>
+sudo apt install supervisor
+
+<span class="cmt"># Create a configuration file for your app</span>
+sudo nano /etc/supervisor/conf.d/myapp.conf</code></pre>
+
+      <pre><code><span class="cmt">; /etc/supervisor/conf.d/myapp.conf</span>
+[program:myapp]
+command=/var/www/myapp/venv/bin/gunicorn main:app -c /var/www/myapp/gunicorn.conf.py
+directory=/var/www/myapp
+user=www-data
+autostart=true
+autorestart=true
+stopasgroup=true          <span class="cmt">; also stop worker processes when stopping gunicorn</span>
+killasgroup=true
+stderr_logfile=/var/log/myapp/supervisor.err.log
+stdout_logfile=/var/log/myapp/supervisor.out.log
+stderr_logfile_maxbytes=50MB
+stdout_logfile_maxbytes=50MB
+stderr_logfile_backups=5
+stdout_logfile_backups=5
+environment=DATABASE_URL=<span class="str">"postgresql://user:pass@localhost:5432/mydb"</span>,SECRET_KEY=<span class="str">"..."</span></code></pre>
+
+      <pre><code><span class="cmt"># Load the new configuration</span>
+sudo supervisorctl reread
+sudo supervisorctl update
+
+<span class="cmt"># Control your application</span>
+sudo supervisorctl status myapp
+sudo supervisorctl restart myapp
+sudo supervisorctl stop myapp
+sudo supervisorctl start myapp
+
+<span class="cmt"># View all supervised processes</span>
+sudo supervisorctl status</code></pre>
+
+      <h2>FastAPI in Docker</h2>
+      <p>
+        Containers are the cleanest way to deploy Python applications. You eliminate the
+        "it works on my machine" problem completely — the container image contains your app, its
+        Python version, and every dependency. The key to efficient Docker builds is ordering your
+        <code>COPY</code> instructions so that the expensive <code>pip install</code> step is
+        cached on subsequent builds:
+      </p>
+
+      <pre><code><span class="cmt"># Dockerfile for FastAPI + Gunicorn + Uvicorn workers</span>
+
+<span class="kw">FROM</span> python:3.12-slim
+
+<span class="cmt"># Create a non-root user for security</span>
+<span class="kw">RUN</span> groupadd -r appuser &amp;&amp; useradd -r -g appuser appuser
+
+<span class="kw">WORKDIR</span> /app
+
+<span class="cmt"># Install dependencies FIRST (Docker will cache this layer)</span>
+<span class="cmt"># Only re-runs pip install when requirements.txt changes</span>
+<span class="kw">COPY</span> requirements.txt .
+<span class="kw">RUN</span> pip install --no-cache-dir -r requirements.txt
+
+<span class="cmt"># Copy application code (changes more often than dependencies)</span>
+<span class="kw">COPY</span> . .
+
+<span class="cmt"># Switch to non-root user</span>
+<span class="kw">USER</span> appuser
+
+<span class="kw">EXPOSE</span> 8000
+
+<span class="kw">CMD</span> [<span class="str">"gunicorn"</span>, <span class="str">"main:app"</span>, \
+     <span class="str">"--worker-class"</span>, <span class="str">"uvicorn.workers.UvicornWorker"</span>, \
+     <span class="str">"--workers"</span>, <span class="str">"4"</span>, \
+     <span class="str">"--bind"</span>, <span class="str">"0.0.0.0:8000"</span>, \
+     <span class="str">"--timeout"</span>, <span class="str">"120"</span>]</code></pre>
+
+      <p>Build and run:</p>
+
+      <pre><code><span class="cmt"># Build the image</span>
+docker build -t my-fastapi-app .
+
+<span class="cmt"># Run with environment variables</span>
+docker run -d \
+  -p 8000:8000 \
+  -e DATABASE_URL=postgresql://user:pass@db:5432/mydb \
+  -e SECRET_KEY=my-secret \
+  --name my-api \
+  my-fastapi-app
+
+<span class="cmt"># Check logs</span>
+docker logs -f my-api
+
+<span class="cmt"># Test the health endpoint</span>
+curl http://localhost:8000/health</code></pre>
+
+      <h2>Database Migrations with Alembic</h2>
+      <p>
+        A common horror story: a developer SSHes into a production database and runs
+        <code>ALTER TABLE</code> manually. The next week, a staging environment is out of sync.
+        Six months later, no one remembers what was changed. The production schema and the
+        application's assumptions diverge silently until something breaks.
+      </p>
+      <p>
+        <strong>Alembic</strong> is the migration tool for SQLAlchemy (Python's most popular ORM).
+        Every change to the database schema becomes a versioned migration script, committed to Git,
+        applied consistently across every environment.
+      </p>
+
+      <pre><code><span class="cmt"># Initialize Alembic in your project</span>
+alembic init alembic
+
+<span class="cmt"># Autogenerate a migration by comparing your SQLAlchemy models to the DB</span>
+alembic revision <span class="flag">--autogenerate</span> -m <span class="str">"add users table"</span>
+
+<span class="cmt"># Review the generated migration file in alembic/versions/</span>
+<span class="cmt"># Then apply all pending migrations</span>
+alembic upgrade head
+
+<span class="cmt"># Roll back one migration step</span>
+alembic downgrade -1
+
+<span class="cmt"># Check current migration version</span>
+alembic current
+
+<span class="cmt"># Show migration history</span>
+alembic history</code></pre>
+
+      <p>
+        In a Docker Compose or Kubernetes deployment, run migrations as an init step before starting
+        the application. In a Dockerfile, combine the steps using a shell command:
+      </p>
+
+      <pre><code><span class="cmt"># In Dockerfile CMD — run migrations, then start the server</span>
+<span class="kw">CMD</span> [<span class="str">"sh"</span>, <span class="str">"-c"</span>, <span class="str">"alembic upgrade head &amp;&amp; gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --workers 4 --bind 0.0.0.0:8000"</span>]</code></pre>
+
+      <div class="box warning">
+        <div class="box-title">⚠️ Never run migrations from multiple instances simultaneously</div>
+        <p>
+          If you are running 5 containers and all 5 run <code>alembic upgrade head</code> at
+          startup, they will try to apply the same migration simultaneously and conflict with each
+          other. The solution: run migrations as a dedicated Kubernetes Job or Compose service that
+          must complete before the main application starts, or use a distributed lock. Many teams
+          run migrations in their CI/CD pipeline before deploying new containers.
+        </p>
+      </div>
+
+      <h2>Flask Deployment</h2>
+      <p>
+        Flask uses WSGI instead of ASGI, but the deployment pattern is nearly identical. You swap
+        out the Uvicorn worker class for Gunicorn's default synchronous workers:
+      </p>
+
+      <pre><code><span class="cmt"># Flask production deployment (no need for uvicorn workers)</span>
+gunicorn app:app \
+  <span class="flag">--workers</span> 4 \
+  <span class="flag">--bind</span> 0.0.0.0:5000 \
+  <span class="flag">--timeout</span> 120 \
+  <span class="flag">--access-logfile</span> /var/log/myapp/access.log \
+  <span class="flag">--error-logfile</span> /var/log/myapp/error.log</code></pre>
+
+      <pre><code><span class="cmt"># Dockerfile for Flask</span>
+<span class="kw">FROM</span> python:3.12-slim
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> requirements.txt .
+<span class="kw">RUN</span> pip install --no-cache-dir -r requirements.txt
+<span class="kw">COPY</span> . .
+<span class="kw">EXPOSE</span> 5000
+<span class="kw">CMD</span> [<span class="str">"gunicorn"</span>, <span class="str">"app:app"</span>, <span class="str">"--workers"</span>, <span class="str">"4"</span>, <span class="str">"--bind"</span>, <span class="str">"0.0.0.0:5000"</span>]</code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 Django Deployment</div>
+        <p>
+          Django uses the same Gunicorn pattern as Flask — it is WSGI by default (though Django 4+
+          supports ASGI). The command is <code>gunicorn myproject.wsgi:application</code>. For
+          Django-specific production checklist items: set <code>DEBUG=False</code>, configure
+          <code>ALLOWED_HOSTS</code>, set up <code>STATIC_ROOT</code> and run
+          <code>python manage.py collectstatic</code>, and use a separate media file storage like
+          S3 for user uploads.
+        </p>
+      </div>
+
+      <h2>The Complete Python Deployment Diagram</h2>
+
+      <div class="diagram">
+<pre>Python Production Deployment Stack
+────────────────────────────────────────────────────────────────────
+Request
+  │
+  ▼
+┌──────────────────────────────────────┐
+│  Nginx (port 443)                    │  SSL, rate limiting, static files
+└──────────────────┬───────────────────┘
+                   │  proxy_pass → 127.0.0.1:8000
+                   ▼
+┌──────────────────────────────────────┐
+│  Gunicorn (process manager)          │
+│  ┌─────────┐ ┌─────────┐ ┌────────┐ │  (2 × CPU cores) + 1 workers
+│  │Worker 0 │ │Worker 1 │ │Worker 2│ │  Each = full Python interpreter
+│  │Uvicorn  │ │Uvicorn  │ │Uvicorn │ │  Async I/O inside each worker
+│  └─────────┘ └─────────┘ └────────┘ │
+└──────────────────┬───────────────────┘
+                   │
+                   ▼
+┌──────────────────────────────────────┐
+│  FastAPI Application                 │  Your code: routes, services, models
+└──────────────────┬───────────────────┘
+                   │
+         ┌─────────┴──────────┐
+         ▼                    ▼
+┌────────────────┐  ┌──────────────────┐
+│  PostgreSQL    │  │  Redis Cache     │
+│  (via async    │  │  (for sessions,  │
+│  SQLAlchemy)   │  │  rate limiting)  │
+└────────────────┘  └──────────────────┘
+
+Process supervision: Supervisor (bare metal) or Kubernetes (containers)
+────────────────────────────────────────────────────────────────────</pre>
+      </div>
+
+      <h2>Environment Variables and Secrets</h2>
+      <p>
+        Python reads environment variables through <code>os.environ</code>, or more cleanly through
+        <strong>Pydantic Settings</strong> (for FastAPI) or <strong>python-decouple</strong> (for
+        any Python project). Both read from environment variables and optionally fall back to a
+        <code>.env</code> file during local development:
+      </p>
+
+      <pre><code><span class="cmt"># Using pydantic-settings for clean settings management</span>
+<span class="kw">from</span> pydantic_settings <span class="kw">import</span> BaseSettings, SettingsConfigDict
+
+<span class="kw">class</span> <span class="fn">Settings</span>(BaseSettings):
+    <span class="cmt"># These are REQUIRED — missing = app refuses to start</span>
+    database_url: str
+    secret_key: str
+
+    <span class="cmt"># These have defaults</span>
+    port: int = 8000
+    debug: bool = <span class="kw">False</span>
+    allowed_origins: list[str] = [<span class="str">"https://myapp.com"</span>]
+
+    model_config = SettingsConfigDict(
+        env_file=<span class="str">".env"</span>,          <span class="cmt"># read from .env file in development</span>
+        case_sensitive=<span class="kw">False</span>,    <span class="cmt"># DATABASE_URL = database_url = same thing</span>
+    )
+
+<span class="cmt"># Instantiate once at module level — shared across the application</span>
+settings = <span class="fn">Settings</span>()</code></pre>
+
+      <p>On the production server, set environment variables through the supervisor config or
+      a systemd <code>EnvironmentFile</code>. Never commit <code>.env</code> files to Git.</p>
+
+      <div class="summary">
+        <h4>Chapter Summary</h4>
+        <ul>
+          <li>Never run <code>python app.py</code> or plain <code>uvicorn main:app</code> in production — these are single-process, single-point-of-failure configurations.</li>
+          <li><strong>WSGI</strong> (Flask, Django) is synchronous. <strong>ASGI</strong> (FastAPI, Starlette) is asynchronous. Your choice determines your server setup.</li>
+          <li><strong>Virtual environments</strong> isolate project dependencies. Always use one and pin exact versions with <code>pip freeze</code>.</li>
+          <li><strong>Gunicorn + Uvicorn workers</strong> is the production standard for FastAPI: Gunicorn manages processes, Uvicorn workers handle async requests.</li>
+          <li>Worker count rule of thumb: <strong>(2 × CPU cores) + 1</strong>.</li>
+          <li><strong>Supervisor</strong> keeps Gunicorn alive on bare metal servers, restarting it on crashes and enabling it at boot.</li>
+          <li>Docker images should <code>COPY requirements.txt</code> and run <code>pip install</code> before copying application code — this exploits Docker layer caching.</li>
+          <li><strong>Alembic</strong> manages database schema migrations as versioned, Git-tracked scripts — never alter production databases by hand.</li>
+          <li>Use <strong>Pydantic Settings</strong> to read configuration from environment variables, with automatic validation that catches missing secrets at startup.</li>
+        </ul>
+      </div>
+
+      <div class="nav-links">
+        <a href="chapter-15.html">&larr; Ch 15 &middot; Node.js &amp; PM2</a>
+        <a href="chapter-17.html">Ch 17 &middot; Java Services &rarr;</a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">&#9776;</button>
+<script src="../nav.js"></script>
+</body>
+</html>

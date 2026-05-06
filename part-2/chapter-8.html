@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 8: ArgoCD &amp; GitOps — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-2">Part 2 · Chapter 8</div>
+        <h1>ArgoCD &amp; GitOps</h1>
+        <p class="chapter-intro">Git becomes the single source of truth for everything in your cluster.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>What you'll learn in this chapter</h4>
+        <ul>
+          <li>What GitOps is and why it is a better model than manual kubectl deployments</li>
+          <li>How ArgoCD works: watching Git, detecting drift, and synchronizing the cluster</li>
+          <li>How to install ArgoCD and access its UI</li>
+          <li>How to write an ArgoCD Application manifest</li>
+          <li>The complete GitOps workflow from code change to production deploy</li>
+          <li>Kustomize and Helm — two approaches to managing Kubernetes configuration</li>
+          <li>The ArgoCD CLI for daily operations</li>
+          <li>How to structure a GitOps repository for multiple environments</li>
+        </ul>
+      </div>
+
+      <h2>The Magic Mirror Analogy</h2>
+      <p>
+        Imagine you have a magic mirror in your house. The mirror is connected to a special notebook.
+        Whenever you write something in that notebook — "three blue chairs in the living room,"
+        "a plant by the window," "the bookshelf on the left wall" — the mirror makes it so.
+        You never need to physically move furniture. You just write what you want, and the mirror
+        rearranges the house to match exactly. If a chair falls over by itself, the mirror notices
+        the discrepancy, compares it to the notebook, and rights the chair. If someone rearranges
+        the furniture without updating the notebook, the mirror changes it back. The notebook is
+        always the truth. The house always matches the notebook.
+      </p>
+      <p>
+        That is GitOps. Your Git repository is the notebook. Your Kubernetes cluster is the house.
+        ArgoCD is the magic mirror — it continuously watches the repository and ensures the cluster
+        matches what is written in Git, always.
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">🪞 The Magic Mirror Analogy</div>
+        <p>
+          In GitOps, Git is the single source of truth. If you want to change anything about
+          the cluster — update an image, change a replica count, add an environment variable —
+          you change it in Git. ArgoCD notices and makes the cluster match. If anyone makes
+          a change directly in the cluster (bypassing Git), ArgoCD notices the drift and
+          can automatically revert it.
+        </p>
+      </div>
+
+      <h2>The Problem GitOps Solves</h2>
+      <p>
+        Before GitOps, deploying to Kubernetes looked like this. A developer (or an automated
+        pipeline) would run <code>kubectl apply -f deployment.yaml</code> from their laptop or
+        a CI server. The deployment would happen. The state of the cluster would change.
+        But that change lived only in the cluster — not necessarily in the Git repository.
+        Over time, the cluster would accumulate changes made by different people at different
+        times. Nobody could be completely sure what was actually deployed. "What's running in
+        production?" became a question that required checking the cluster directly, not the
+        code repository.
+      </p>
+      <p>
+        Rollbacks were frightening. "Which YAML file represents what was deployed before the
+        last change?" If nobody tracked that carefully, you might not know. And if a cluster
+        failed completely and had to be rebuilt from scratch, you might not have a reliable
+        source of truth to recreate it from.
+      </p>
+      <p>
+        GitOps eliminates all of this. Every deployment is a Git commit. Every change to
+        infrastructure is reviewed, approved, and tracked. The entire history of your cluster
+        configuration is the history of your Git repository. Rollback is just reverting a commit.
+        Disaster recovery is just pointing ArgoCD at the repository and letting it sync.
+      </p>
+
+      <div class="box key-term">
+        <div class="box-title">📚 Key Term: GitOps</div>
+        <p>
+          <strong>GitOps</strong> is an operational model where the desired state of infrastructure
+          and applications is stored in Git as the single source of truth. Automated agents (like
+          ArgoCD) continuously reconcile the actual state of the system with the desired state
+          in Git. All changes flow through Git — enabling version history, code review, rollback,
+          and audit trails for every infrastructure change.
+        </p>
+      </div>
+
+      <h2>ArgoCD Architecture</h2>
+      <p>
+        ArgoCD itself runs as a set of Pods inside your Kubernetes cluster — it is a Kubernetes
+        application that manages other Kubernetes applications. This is elegant: ArgoCD can manage
+        itself using GitOps principles.
+      </p>
+
+      <p>
+        ArgoCD's components:
+      </p>
+      <ul>
+        <li><strong>argocd-server</strong> — the API server and Web UI. You interact with it via the browser or the argocd CLI.</li>
+        <li><strong>argocd-repo-server</strong> — clones Git repositories and generates Kubernetes manifests (running Helm or Kustomize if needed).</li>
+        <li><strong>argocd-application-controller</strong> — the reconciliation loop. It continuously compares the live cluster state with the desired state in Git and reports drift.</li>
+        <li><strong>argocd-dex-server</strong> — handles SSO authentication (GitHub, GitLab, LDAP).</li>
+      </ul>
+
+      <div class="diagram">
+<pre>ARGOCD GITOPS FLOW
+
+  ┌──────────────────┐         ┌──────────────────────┐
+  │   Git Repository  │         │   Container Registry  │
+  │  (source of truth)│         │  (image storage)      │
+  │                   │         │                       │
+  │  k8s/production/ ◄─────────┐│  myapp:sha-a3f9bc2    │
+  │    deployment.yaml│  polls  ││                       │
+  │    service.yaml   │         │└──────────────────────┘
+  └──────────────────┘         │
+         │                     │
+         │ detects change      │
+         ▼                     │
+  ┌──────────────────────────┐  │
+  │         ArgoCD            │  │
+  │  ┌────────────────────┐  │  │
+  │  │  app-controller     │  │  │
+  │  │  (reconcile loop)  │  │  │
+  │  └────────────────────┘  │  │
+  └───────────┬───────────────┘  │
+              │ kubectl apply     │
+              ▼                   │
+  ┌──────────────────────────┐    │
+  │   Kubernetes Cluster      │◄───┘
+  │  (actual state matches    │
+  │   desired state in Git)   │
+  └──────────────────────────┘</pre>
+      </div>
+
+      <h2>Installing ArgoCD</h2>
+      <p>
+        ArgoCD installs into your cluster with a single manifest file. Once running, you access
+        the UI via port-forwarding for local clusters, or via an Ingress for production.
+      </p>
+
+      <pre><code><span class="cmt"># Create a dedicated namespace for ArgoCD</span>
+<span class="fn">kubectl create namespace</span> <span class="str">argocd</span>
+
+<span class="cmt"># Install ArgoCD — this applies all the CRDs, Deployments, Services, RBAC rules</span>
+<span class="fn">kubectl apply</span> <span class="flag">-n</span> <span class="str">argocd</span> <span class="flag">-f</span> \
+  <span class="str">https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml</span>
+
+<span class="cmt"># Wait for all ArgoCD Pods to be ready</span>
+<span class="fn">kubectl wait</span> <span class="flag">--for=condition=available</span> <span class="str">deployment argocd-server</span> \
+  <span class="flag">-n</span> <span class="str">argocd</span> <span class="flag">--timeout=120s</span>
+
+<span class="cmt"># Port-forward the ArgoCD web UI to your local machine</span>
+<span class="cmt"># Access it at: https://localhost:8080</span>
+<span class="fn">kubectl port-forward</span> <span class="str">svc/argocd-server</span> <span class="flag">-n</span> <span class="str">argocd 8080:443</span>
+
+<span class="cmt"># Retrieve the initial admin password (auto-generated at install)</span>
+<span class="fn">kubectl get secret</span> <span class="str">argocd-initial-admin-secret</span> <span class="flag">-n</span> <span class="str">argocd</span> \
+  <span class="flag">-o</span> <span class="str">jsonpath="{.data.password}"</span> | <span class="fn">base64 -d</span> &amp;&amp; <span class="fn">echo</span>
+
+<span class="cmt"># Log in with username "admin" and the password above</span>
+<span class="cmt"># Then change the password in the UI settings</span></code></pre>
+
+      <p>
+        Once you open the UI at <code>https://localhost:8080</code>, you will see ArgoCD's
+        dashboard. It shows all your Applications, their sync status (Synced or OutOfSync),
+        and their health status (Healthy, Degraded, Missing). The UI gives you a visual diff
+        of what is in Git versus what is in the cluster — a tool that pays for itself the
+        first time you use it to understand a production discrepancy.
+      </p>
+
+      <h2>Creating an ArgoCD Application</h2>
+      <p>
+        An ArgoCD Application is a Kubernetes custom resource that tells ArgoCD: "watch this
+        Git repository path and keep this namespace synchronized to match it." You can create
+        Applications through the UI, the CLI, or — following GitOps principles — as YAML manifests
+        stored in Git.
+      </p>
+
+      <pre><code><span class="cmt"># apps/my-app.yaml — stored in Git, applied to the argocd namespace</span>
+<span class="kw">apiVersion</span>: <span class="str">argoproj.io/v1alpha1</span>
+<span class="kw">kind</span>: <span class="str">Application</span>
+<span class="kw">metadata</span>:
+  <span class="kw">name</span>: <span class="str">my-app</span>
+  <span class="kw">namespace</span>: <span class="str">argocd</span>
+<span class="kw">spec</span>:
+  <span class="kw">project</span>: <span class="str">default</span>
+
+  <span class="cmt"># WHERE to look in Git</span>
+  <span class="kw">source</span>:
+    <span class="kw">repoURL</span>: <span class="str">https://github.com/myorg/my-app-config.git</span>
+    <span class="kw">targetRevision</span>: <span class="str">main</span>
+    <span class="kw">path</span>: <span class="str">k8s/production</span>    <span class="cmt"># only watch this subdirectory</span>
+
+  <span class="cmt"># WHERE to deploy in Kubernetes</span>
+  <span class="kw">destination</span>:
+    <span class="kw">server</span>: <span class="str">https://kubernetes.default.svc</span>   <span class="cmt"># the current cluster</span>
+    <span class="kw">namespace</span>: <span class="str">production</span>
+
+  <span class="cmt"># HOW to sync</span>
+  <span class="kw">syncPolicy</span>:
+    <span class="kw">automated</span>:
+      <span class="kw">prune</span>: <span class="str">true</span>       <span class="cmt"># delete resources removed from Git</span>
+      <span class="kw">selfHeal</span>: <span class="str">true</span>    <span class="cmt"># revert manual changes made directly in cluster</span>
+    <span class="kw">syncOptions</span>:
+      - <span class="str">CreateNamespace=true</span>    <span class="cmt"># create the namespace if it doesn't exist</span>
+      - <span class="str">ServerSideApply=true</span>    <span class="cmt"># use server-side apply for better conflict handling</span></code></pre>
+
+      <p>
+        The two most important settings in <code>syncPolicy</code> are <code>prune</code> and
+        <code>selfHeal</code>. With <code>prune: true</code>, if you delete a manifest from
+        Git, ArgoCD deletes the corresponding resource from the cluster. Without it, deleted
+        manifests leave orphaned resources behind. With <code>selfHeal: true</code>, if
+        someone runs <code>kubectl edit deployment my-app</code> and changes something directly
+        in the cluster, ArgoCD detects the drift and reverts the cluster to match Git. This
+        is the enforcement mechanism that makes Git truly the source of truth.
+      </p>
+
+      <h2>The Complete GitOps Workflow</h2>
+      <p>
+        GitOps splits your version control into two repositories. The first is your
+        <strong>application repository</strong> — it contains your source code. The second
+        is your <strong>configuration repository</strong> — it contains Kubernetes manifests
+        (or Helm/Kustomize configs) that describe how to deploy the application. This separation
+        is important: you do not want every code change to trigger a cluster sync, and you
+        want the deployment config to be auditable separately from the application code.
+      </p>
+
+      <div class="diagram">
+<pre>THE COMPLETE GITOPS PIPELINE
+
+  Developer pushes code to app repo
+           │
+           ▼
+  ┌────────────────────┐
+  │   GitHub Actions   │
+  │   CI Pipeline      │
+  │  ┌──────────────┐  │
+  │  │ 1. Run tests │  │
+  │  │ 2. Build img │  │
+  │  │ 3. Push img  │──────────────► Container Registry
+  │  │    :sha-abc  │  │              myapp:sha-abc123
+  │  └──────────────┘  │
+  │   4. Update config─────────────► Config Repository
+  │      repo with new │              k8s/production/
+  │      image tag     │              deployment.yaml
+  └────────────────────┘              (image: myapp:sha-abc123)
+                                                │
+                                                │ ArgoCD detects change
+                                                ▼
+                                     ┌────────────────────┐
+                                     │  ArgoCD            │
+                                     │  syncs cluster to  │
+                                     │  match new config  │
+                                     └────────────────────┘
+                                                │
+                                                ▼
+                                     Kubernetes cluster updated
+                                     (new image deployed, zero
+                                      kubectl commands run by humans)</pre>
+      </div>
+
+      <p>
+        Step 4 deserves special attention. After CI builds and pushes the new image, it updates
+        the image tag in the configuration repository. How? Typically using a tool like Kustomize's
+        image transformer or a simple <code>sed</code> command followed by a git commit and push.
+        Your CI pipeline needs write access to the config repository for this step.
+      </p>
+
+      <pre><code><span class="cmt"># In your GitHub Actions deploy step, after pushing the image:</span>
+<span class="cmt"># Update the image tag in the config repo</span>
+
+- <span class="kw">name</span>: <span class="str">Update image tag in config repo</span>
+  <span class="kw">env</span>:
+    <span class="kw">CONFIG_REPO_TOKEN</span>: <span class="str">${{ secrets.CONFIG_REPO_TOKEN }}</span>
+  <span class="kw">run</span>: |
+    <span class="fn">git clone</span> <span class="str">https://x-access-token:$CONFIG_REPO_TOKEN@github.com/myorg/my-app-config.git</span>
+    <span class="fn">cd</span> <span class="str">my-app-config</span>
+    <span class="cmt"># Update the image tag to the current commit SHA</span>
+    <span class="fn">sed -i</span> <span class="str">"s|image: myapp:.*|image: myapp:${{ github.sha }}|g"</span> \
+      <span class="str">k8s/production/deployment.yaml</span>
+    <span class="fn">git config user.email</span> <span class="str">"ci@myorg.com"</span>
+    <span class="fn">git config user.name</span>  <span class="str">"CI Bot"</span>
+    <span class="fn">git add</span> <span class="str">.</span>
+    <span class="fn">git commit</span> <span class="flag">-m</span> <span class="str">"deploy: update my-app to ${{ github.sha }}"</span>
+    <span class="fn">git push</span></code></pre>
+
+      <h2>Kustomize — Overlays for Multiple Environments</h2>
+      <p>
+        Kustomize is a configuration management tool built into kubectl. It uses an overlay
+        system: you define a base configuration once, then create environment-specific overlays
+        that patch or extend the base. Staging uses the same Deployment definition as production,
+        but with two replicas instead of five and a different domain name.
+      </p>
+
+      <p>A typical Kustomize directory structure:</p>
+
+      <div class="diagram">
+<pre>k8s/
+├── base/
+│   ├── deployment.yaml      ← shared base definition
+│   ├── service.yaml
+│   └── kustomization.yaml   ← lists the base resources
+│
+└── overlays/
+    ├── staging/
+    │   ├── kustomization.yaml     ← references base + staging patches
+    │   └── patch-replicas.yaml    ← replicas: 1
+    │
+    └── production/
+        ├── kustomization.yaml     ← references base + prod patches
+        └── patch-replicas.yaml    ← replicas: 5</pre>
+      </div>
+
+      <pre><code><span class="cmt"># k8s/base/kustomization.yaml</span>
+<span class="kw">apiVersion</span>: <span class="str">kustomize.config.k8s.io/v1beta1</span>
+<span class="kw">kind</span>: <span class="str">Kustomization</span>
+<span class="kw">resources</span>:
+  - <span class="str">deployment.yaml</span>
+  - <span class="str">service.yaml</span>
+
+<span class="cmt">---</span>
+<span class="cmt"># k8s/overlays/production/kustomization.yaml</span>
+<span class="kw">apiVersion</span>: <span class="str">kustomize.config.k8s.io/v1beta1</span>
+<span class="kw">kind</span>: <span class="str">Kustomization</span>
+<span class="kw">resources</span>:
+  - <span class="str">../../base</span>
+<span class="kw">patches</span>:
+  - <span class="kw">path</span>: <span class="str">patch-replicas.yaml</span>
+<span class="kw">images</span>:
+  - <span class="kw">name</span>: <span class="str">myapp</span>
+    <span class="kw">newTag</span>: <span class="str">sha-abc123</span>       <span class="cmt"># override image tag for production</span>
+
+<span class="cmt">---</span>
+<span class="cmt"># k8s/overlays/production/patch-replicas.yaml</span>
+<span class="kw">apiVersion</span>: <span class="str">apps/v1</span>
+<span class="kw">kind</span>: <span class="str">Deployment</span>
+<span class="kw">metadata</span>:
+  <span class="kw">name</span>: <span class="str">my-app</span>
+<span class="kw">spec</span>:
+  <span class="kw">replicas</span>: <span class="str">5</span>      <span class="cmt"># overrides the base definition's replica count</span></code></pre>
+
+      <p>
+        In your ArgoCD Application, set <code>path: k8s/overlays/production</code> and
+        ArgoCD will render the Kustomize overlay and apply the merged result to the cluster.
+        For staging, point a different ArgoCD Application at <code>k8s/overlays/staging</code>.
+        One base, maintained once, deployed everywhere consistently.
+      </p>
+
+      <h2>Helm — The Kubernetes Package Manager</h2>
+      <p>
+        Helm is the package manager for Kubernetes, similar to how npm is the package manager
+        for Node.js. A Helm <strong>chart</strong> is a package of Kubernetes templates plus a
+        <code>values.yaml</code> file that provides default configuration. To deploy a chart,
+        you provide a values file and Helm renders the templates with your values and applies
+        the result.
+      </p>
+      <p>
+        Helm is particularly useful for deploying third-party software. Instead of writing
+        Kubernetes manifests for PostgreSQL yourself, you run <code>helm install postgres
+        bitnami/postgresql --values my-values.yaml</code> and get a production-ready PostgreSQL
+        cluster in minutes.
+      </p>
+
+      <pre><code><span class="cmt"># Install a Helm chart from a repository</span>
+<span class="fn">helm repo add</span> <span class="str">bitnami https://charts.bitnami.com/bitnami</span>
+<span class="fn">helm repo update</span>
+
+<span class="cmt"># Deploy PostgreSQL with custom values</span>
+<span class="fn">helm install</span> <span class="str">postgres bitnami/postgresql</span> \
+  <span class="flag">--namespace</span> <span class="str">production</span> \
+  <span class="flag">--values</span> <span class="str">postgres-values.yaml</span>
+
+<span class="cmt"># Upgrade to a new chart version or new values</span>
+<span class="fn">helm upgrade</span> <span class="str">postgres bitnami/postgresql</span> \
+  <span class="flag">--namespace</span> <span class="str">production</span> \
+  <span class="flag">--values</span> <span class="str">postgres-values.yaml</span>
+
+<span class="cmt"># List installed releases</span>
+<span class="fn">helm list</span> <span class="flag">-n</span> <span class="str">production</span>
+
+<span class="cmt"># Roll back to a previous release version</span>
+<span class="fn">helm rollback</span> <span class="str">postgres 1</span> <span class="flag">-n</span> <span class="str">production</span></code></pre>
+
+      <p>
+        ArgoCD supports Helm natively. In your ArgoCD Application, specify the chart repository,
+        chart name, and your values file path. ArgoCD renders the Helm chart and treats the output
+        as the desired state in Git — giving you Helm's convenience with GitOps's auditability.
+      </p>
+
+      <h2>ArgoCD CLI — Day-to-Day Operations</h2>
+      <p>
+        The ArgoCD CLI lets you interact with your applications from the terminal — useful in
+        scripts, during incidents, and for developers who prefer the command line to the UI.
+      </p>
+
+      <pre><code><span class="cmt"># Install the argocd CLI (macOS)</span>
+<span class="fn">brew install</span> <span class="str">argocd</span>
+
+<span class="cmt"># Log in to your ArgoCD instance</span>
+<span class="fn">argocd login</span> <span class="str">localhost:8080</span> \
+  <span class="flag">--username</span> <span class="str">admin</span> \
+  <span class="flag">--password</span> <span class="str">your-password</span> \
+  <span class="flag">--insecure</span>    <span class="cmt"># skip TLS verification for local testing</span>
+
+<span class="cmt"># List all applications</span>
+<span class="fn">argocd app list</span>
+
+<span class="cmt"># Get detailed status of an application</span>
+<span class="fn">argocd app get</span> <span class="str">my-app</span>
+
+<span class="cmt"># Manually trigger a sync (re-apply what's in Git)</span>
+<span class="fn">argocd app sync</span> <span class="str">my-app</span>
+
+<span class="cmt"># Sync and wait until it's healthy</span>
+<span class="fn">argocd app sync</span> <span class="str">my-app</span> <span class="flag">--wait</span>
+
+<span class="cmt"># Roll back to a previous version (by history ID)</span>
+<span class="fn">argocd app rollback</span> <span class="str">my-app 1</span>
+
+<span class="cmt"># Show sync history</span>
+<span class="fn">argocd app history</span> <span class="str">my-app</span>
+
+<span class="cmt"># Diff what would change in the next sync</span>
+<span class="fn">argocd app diff</span> <span class="str">my-app</span>
+
+<span class="cmt"># Pause automated sync temporarily (useful during incidents)</span>
+<span class="fn">argocd app pause</span> <span class="str">my-app</span>
+
+<span class="cmt"># Resume automated sync</span>
+<span class="fn">argocd app resume</span> <span class="str">my-app</span></code></pre>
+
+      <h2>App of Apps — Managing Multiple Applications</h2>
+      <p>
+        When you have many services, you do not want to manually apply each ArgoCD Application
+        YAML. The "App of Apps" pattern solves this. You create a single root ArgoCD Application
+        that points to a directory of other ArgoCD Application manifests. When ArgoCD syncs the
+        root, it discovers and creates all child applications automatically.
+      </p>
+
+      <div class="diagram">
+<pre>App of Apps Pattern:
+
+  Git: apps/
+  ├── root-app.yaml          ← the "App of Apps" — points to apps/ directory
+  ├── api-service.yaml       ← ArgoCD Application for the API
+  ├── frontend.yaml          ← ArgoCD Application for the frontend
+  ├── worker.yaml            ← ArgoCD Application for the background worker
+  └── monitoring.yaml        ← ArgoCD Application for Prometheus/Grafana
+
+  ArgoCD syncs root-app
+    → creates api-service application
+    → creates frontend application
+    → creates worker application
+    → creates monitoring application
+  Each child app then manages its own Kubernetes resources.</pre>
+      </div>
+
+      <p>
+        This pattern scales to hundreds of services. It is how platform engineering teams manage
+        large organizations — the entire platform's desired state is expressed as a tree of Git
+        files. Onboarding a new service means adding one YAML file to the apps directory.
+        Decommissioning it means deleting that file.
+      </p>
+
+      <div class="box tip">
+        <div class="box-title">💡 Separate App Code from Deployment Config</div>
+        <p>
+          Keep your application source code repository separate from your Kubernetes configuration
+          repository. The config repo contains only YAML — no application code, no Dockerfiles.
+          This separation has important benefits: the config repo can have stricter access controls,
+          changes to it are always deployment-related (easy to audit), and the CI pipeline that
+          builds images does not need access to production infrastructure credentials.
+        </p>
+      </div>
+
+      <h2>ArgoCD Image Updater</h2>
+      <p>
+        A companion tool, ArgoCD Image Updater, watches your container registry for new image
+        tags and automatically updates the config repo with the new tag. This closes the loop
+        completely: push code, CI builds image, Image Updater updates config, ArgoCD deploys —
+        all without a human touching a single command.
+      </p>
+      <p>
+        You configure it with an annotation on your ArgoCD Application:
+      </p>
+
+      <pre><code><span class="kw">metadata</span>:
+  <span class="kw">annotations</span>:
+    <span class="cmt"># Watch for new tags matching this pattern</span>
+    <span class="kw">argocd-image-updater.argoproj.io/image-list</span>: <span class="str">myapp=ghcr.io/myorg/myapp</span>
+    <span class="kw">argocd-image-updater.argoproj.io/myapp.update-strategy</span>: <span class="str">newest-build</span>
+    <span class="cmt"># Write the new tag back to Git</span>
+    <span class="kw">argocd-image-updater.argoproj.io/write-back-method</span>: <span class="str">git</span></code></pre>
+
+      <div class="box fun-fact">
+        <div class="box-title">📊 Fun Fact: GitOps at Scale</div>
+        <p>
+          Weaveworks (the company that coined the term "GitOps" in 2017) reports that teams
+          using GitOps see 60-90% reduction in Mean Time to Recovery (MTTR) during incidents —
+          because rolling back is simply reverting a Git commit, not figuring out which kubectl
+          commands to run. The audit trail in Git also means security teams can see exactly
+          who deployed what and when, turning compliance from a burden into a natural byproduct
+          of the deployment process.
+        </p>
+      </div>
+
+      <div class="summary">
+        <h4>Chapter Summary</h4>
+        <ul>
+          <li>GitOps makes Git the single source of truth for cluster configuration. All changes flow through version control, giving you audit trails, rollback by commit revert, and disaster recovery from the repository.</li>
+          <li>ArgoCD runs inside Kubernetes and continuously watches Git repositories. When it detects a difference between Git and the cluster, it can auto-sync to reconcile the difference.</li>
+          <li>ArgoCD Applications are Kubernetes custom resources that link a Git path to a cluster namespace. Set <code>prune: true</code> and <code>selfHeal: true</code> for full GitOps enforcement.</li>
+          <li>The GitOps workflow: developer pushes code → CI builds and pushes image → CI updates image tag in config repo → ArgoCD detects change → ArgoCD deploys. No human runs kubectl in production.</li>
+          <li>Kustomize uses an overlay system (base + environment patches) to manage config for multiple environments from a single base definition. Helm uses templates and values files for packaging and deploying Kubernetes applications.</li>
+          <li>The App of Apps pattern lets ArgoCD manage dozens of services by treating a directory of ArgoCD Application manifests as a deployable unit itself.</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="chapter-7.html">
+          <span class="nav-label">&larr; Previous</span>
+          <span class="nav-title">Ch 7 &middot; Kubernetes</span>
+        </a>
+        <a href="exercises.html" class="next">
+          <span class="nav-label">Next &rarr;</span>
+          <span class="nav-title">Part 2 Exercises</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">&#9776;</button>
+<script src="../nav.js"></script>
+</body>
+</html>

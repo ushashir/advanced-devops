@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Part 2 Exercises — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-2">Part 2 · Exercises</div>
+        <h1>Part 2 Exercises</h1>
+        <p class="chapter-intro">Hands-on practice for Docker, CI/CD, Kubernetes, and ArgoCD.</p>
+      </div>
+
+      <p>
+        These exercises test your understanding of Part 2. Some require you to write code or
+        configuration; others ask you to explain concepts in your own words. Read each problem
+        carefully before you write a single line — understanding <em>what</em> is being asked
+        is half the work.
+      </p>
+
+      <div class="box tip">
+        <div class="box-title">💡 How to Use These Exercises</div>
+        <p>
+          For hands-on exercises, create a dedicated directory on your machine and actually run
+          the commands. The goal is not to write the right answer on paper — it is to develop
+          muscle memory by doing the thing for real. For conceptual questions, try to explain
+          the answer out loud to yourself before writing it down. If you cannot explain it out
+          loud simply, you do not understand it yet — and that is valuable information.
+        </p>
+      </div>
+
+      <div class="exercises">
+
+        <div class="exercise">
+          <div class="exercise-number">Exercise 1</div>
+          <div class="exercise-title">Write a Dockerfile for a Python Flask App</div>
+          <p>
+            You have a Python Flask application. The entry point is <code>app.py</code> and
+            the dependencies are listed in <code>requirements.txt</code>. The application
+            listens on port 5000.
+          </p>
+          <p>
+            Write a complete <code>Dockerfile</code> that:
+          </p>
+          <ul>
+            <li>Uses <code>python:3.12-slim</code> as the base image</li>
+            <li>Sets a working directory of <code>/app</code></li>
+            <li>Copies <code>requirements.txt</code> first (before copying the source code — why does this order matter?)</li>
+            <li>Installs dependencies with <code>pip install --no-cache-dir -r requirements.txt</code></li>
+            <li>Copies the rest of the application code</li>
+            <li>Exposes port 5000</li>
+            <li>Starts the app with <code>python app.py</code></li>
+          </ul>
+          <p>
+            After writing the Dockerfile, explain in one sentence why you copy
+            <code>requirements.txt</code> before copying the source code.
+          </p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-number">Exercise 2</div>
+          <div class="exercise-title">Build and Run Your Container Locally</div>
+          <p>
+            Using the Dockerfile you wrote in Exercise 1, complete the following steps:
+          </p>
+          <ol>
+            <li>Build the Docker image and tag it <code>flask-app:v1</code>.</li>
+            <li>Run the container in detached mode, mapping your machine's port 8080 to the container's port 5000. Give the container the name <code>flask-demo</code>.</li>
+            <li>Visit <code>http://localhost:8080</code> in your browser to verify it works.</li>
+            <li>View the container logs.</li>
+            <li>Open a shell inside the running container and list the files in <code>/app</code>.</li>
+            <li>Stop and remove the container.</li>
+          </ol>
+          <p>
+            Write out the exact commands you would run for each of the six steps.
+          </p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-number">Exercise 3</div>
+          <div class="exercise-title">Image vs Container — What's the Difference?</div>
+          <p>
+            In your own words (two to three sentences each), explain:
+          </p>
+          <ul>
+            <li>What is a Docker <strong>image</strong>? Use an analogy that doesn't involve food if you can think of one.</li>
+            <li>What is a Docker <strong>container</strong>? What is its relationship to an image?</li>
+            <li>Can you have ten containers running from the same image? What would happen if you deleted all the containers — would the image be affected?</li>
+          </ul>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-number">Exercise 4</div>
+          <div class="exercise-title">Write a docker-compose.yml for an App with a Database</div>
+          <p>
+            Write a <code>docker-compose.yml</code> file that defines:
+          </p>
+          <ul>
+            <li>A service called <code>api</code> that builds from a local Dockerfile and listens on port 4000 (mapped to host port 4000).</li>
+            <li>A service called <code>db</code> using the <code>postgres:16-alpine</code> image with environment variables for <code>POSTGRES_USER</code>, <code>POSTGRES_PASSWORD</code>, and <code>POSTGRES_DB</code>.</li>
+            <li>A named volume called <code>pgdata</code> mounted at <code>/var/lib/postgresql/data</code> inside the <code>db</code> container.</li>
+            <li>The <code>api</code> service should declare that it depends on the <code>db</code> service.</li>
+            <li>An environment variable <code>DATABASE_URL</code> in the <code>api</code> service that points to the <code>db</code> service using the service name as the hostname.</li>
+          </ul>
+          <p>
+            What single command would you run to start both services in the background?
+            What command stops and removes the containers but preserves the volume data?
+          </p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-number">Exercise 5</div>
+          <div class="exercise-title">Create a GitHub Actions Workflow That Runs Tests</div>
+          <p>
+            Create a file at <code>.github/workflows/ci.yml</code> in a project repository.
+            The workflow should:
+          </p>
+          <ul>
+            <li>Trigger on every push to any branch and on every pull request targeting <code>main</code>.</li>
+            <li>Have a single job called <code>test</code> that runs on <code>ubuntu-latest</code>.</li>
+            <li>Set up Node.js version 20 with npm caching enabled.</li>
+            <li>Run <code>npm ci</code> to install dependencies.</li>
+            <li>Run <code>npm test</code> to execute the tests.</li>
+          </ul>
+          <p>
+            Write the complete YAML file. Make sure the indentation is correct — YAML is
+            whitespace-sensitive and a single wrong indentation will break the workflow.
+          </p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-number">Exercise 6</div>
+          <div class="exercise-title">GitHub Actions Triggers — When Does a Workflow Run?</div>
+          <p>
+            For each of the following scenarios, write the correct <code>on:</code> trigger
+            block in a GitHub Actions workflow YAML:
+          </p>
+          <ol>
+            <li>Run on every push to the <code>main</code> branch only.</li>
+            <li>Run on every pull request targeting <code>main</code> or <code>develop</code>.</li>
+            <li>Run every day at midnight UTC (use a cron schedule).</li>
+            <li>Run only when manually triggered from the GitHub UI (no automatic trigger).</li>
+            <li>Run on pushes to <code>main</code> AND on pull requests to <code>main</code> (combine them in one block).</li>
+          </ol>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-number">Exercise 7</div>
+          <div class="exercise-title">CI vs CD — Explain the Difference</div>
+          <p>
+            A colleague tells you: "We have CI/CD. Our tests run automatically."
+            You suspect they only have CI, not CD. Explain to them, in plain language:
+          </p>
+          <ul>
+            <li>What <strong>Continuous Integration</strong> means, and what it does.</li>
+            <li>What <strong>Continuous Delivery</strong> adds on top of CI.</li>
+            <li>What <strong>Continuous Deployment</strong> means, and how it differs from Continuous Delivery.</li>
+            <li>What question you would ask them to determine which of the three they actually have.</li>
+          </ul>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-number">Exercise 8</div>
+          <div class="exercise-title">Write a Kubernetes Deployment for nginx</div>
+          <p>
+            Write a complete Kubernetes Deployment manifest with the following requirements:
+          </p>
+          <ul>
+            <li>Name: <code>nginx-web</code></li>
+            <li>Namespace: <code>default</code></li>
+            <li>3 replicas</li>
+            <li>Container image: <code>nginx:1.25-alpine</code></li>
+            <li>Container port: <code>80</code></li>
+            <li>Resource requests: <code>64Mi</code> memory, <code>100m</code> CPU</li>
+            <li>Resource limits: <code>128Mi</code> memory, <code>200m</code> CPU</li>
+            <li>A label <code>app: nginx-web</code> on both the Deployment and the Pod template</li>
+          </ul>
+          <p>
+            After writing the manifest, write the single <code>kubectl</code> command you
+            would use to apply it to a running cluster.
+          </p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-number">Exercise 9</div>
+          <div class="exercise-title">Kubernetes kubectl — Reading Pod Logs</div>
+          <p>
+            You have deployed an application to Kubernetes. The Pod name is
+            <code>api-server-7d4f9b-xk2pq</code> and it is in the <code>production</code> namespace.
+            Write the exact <code>kubectl</code> command for each scenario:
+          </p>
+          <ol>
+            <li>View the current (non-streaming) logs for this Pod.</li>
+            <li>Follow the logs in real time (streaming).</li>
+            <li>View logs from the <em>previous</em> container instance (it crashed and was restarted — you want to see what happened before the crash).</li>
+            <li>View only the last 50 lines of logs.</li>
+            <li>Open an interactive shell inside the running Pod.</li>
+          </ol>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-number">Exercise 10</div>
+          <div class="exercise-title">What Does a Kubernetes Service Do?</div>
+          <p>
+            Imagine you explain Kubernetes Services to a new developer who has never used
+            Kubernetes before. Write a clear explanation (3-5 sentences) that covers:
+          </p>
+          <ul>
+            <li>Why Pods alone cannot serve as stable network endpoints (think: what happens to a Pod's IP address when it is restarted?).</li>
+            <li>What a Service does to solve this problem.</li>
+            <li>How a Service knows which Pods to route traffic to (hint: labels).</li>
+            <li>The difference between a <code>ClusterIP</code> Service (internal only) and a <code>LoadBalancer</code> Service (internet-facing).</li>
+          </ul>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-number">Exercise 11</div>
+          <div class="exercise-title">What is GitOps — and Why Is It Better Than Manual kubectl?</div>
+          <p>
+            A senior engineer at your company is skeptical of GitOps. "Why do I need ArgoCD?
+            I can just run <code>kubectl apply</code> from my CI pipeline," they say.
+          </p>
+          <p>
+            Write a response that explains:
+          </p>
+          <ul>
+            <li>What GitOps means (one clear sentence definition).</li>
+            <li>Three specific problems with pushing from CI directly via <code>kubectl apply</code> — focus on real operational pain: drift, rollback, audit trail, disaster recovery.</li>
+            <li>How ArgoCD's <code>selfHeal</code> and <code>prune</code> settings address those problems.</li>
+            <li>One legitimate scenario where running kubectl directly (bypassing GitOps) might be acceptable.</li>
+          </ul>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-number">Exercise 12</div>
+          <div class="exercise-title">Liveness vs Readiness Probes — What's the Difference?</div>
+          <p>
+            Both liveness and readiness probes are defined in the same container spec, and both
+            make HTTP calls to your application. But they do very different things when they fail.
+          </p>
+          <p>Explain each of the following scenarios by choosing the correct probe type and justifying your answer:</p>
+          <ol>
+            <li>Your application has just started and is running database migrations. It will take 20 seconds before it is ready to accept HTTP requests. During this time, you do not want any traffic routed to it — but you also do not want Kubernetes to restart it. Which probe type handles this? What values would you set for <code>initialDelaySeconds</code>?</li>
+            <li>Your application has been running for three hours and has entered a deadlock — the process is alive and the port is open, but every request hangs forever. You want Kubernetes to detect this and restart the container. Which probe type handles this?</li>
+            <li>Your application's <code>/health</code> endpoint returns 200 even when the database connection pool is exhausted. Your <code>/ready</code> endpoint returns 503 in that case. Explain why having both endpoints return different values is architecturally correct.</li>
+          </ol>
+        </div>
+
+      </div>
+
+      <div class="box fun-fact">
+        <div class="box-title">📊 Bonus Challenge: End-to-End Pipeline</div>
+        <p>
+          If you have completed all twelve exercises, try building a complete pipeline from scratch:
+          create a simple web application (even just a static HTML page served by nginx), write a
+          Dockerfile, push it to GitHub, create a GitHub Actions workflow that builds and pushes
+          the Docker image to GitHub Container Registry on every push to <code>main</code>, write
+          Kubernetes manifests for the Deployment and Service, and install minikube locally to
+          apply them. When you can see your HTML page through a port-forwarded Kubernetes Service,
+          you have connected every concept in Part 2 in a single working system.
+        </p>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="chapter-8.html">
+          <span class="nav-label">&larr; Previous</span>
+          <span class="nav-title">Ch 8 &middot; ArgoCD &amp; GitOps</span>
+        </a>
+        <a href="../part-3/chapter-9.html" class="next">
+          <span class="nav-label">Next &rarr;</span>
+          <span class="nav-title">Ch 9 &middot; AWS: The Giant Supermarket</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">&#9776;</button>
+<script src="../nav.js"></script>
+</body>
+</html>

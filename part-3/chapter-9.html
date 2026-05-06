@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 9: AWS: The Giant Supermarket — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-3">Part 3 · Chapter 9</div>
+        <h1>AWS: The Giant Supermarket in the Sky</h1>
+        <p class="chapter-intro">Rent any computing resource in the world, on-demand, in seconds.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>What you'll learn in this chapter</h4>
+        <ul>
+          <li>Why cloud computing exists and the problem it solves for every company on earth</li>
+          <li>AWS's 200+ services, organized into categories you can actually remember</li>
+          <li>EC2 — launching and connecting to a virtual machine in the cloud</li>
+          <li>S3 — the infinitely scalable file storage bucket the entire internet uses</li>
+          <li>IAM — the security system that controls who can touch what</li>
+          <li>VPC — your private network inside AWS's data centers</li>
+          <li>RDS — a managed database so you never have to install Postgres yourself again</li>
+          <li>Lambda — running code without owning a single server</li>
+          <li>CloudWatch — monitoring everything that matters</li>
+        </ul>
+      </div>
+
+      <h2>The Supermarket Analogy</h2>
+      <p>
+        Imagine you decide to cook a big dinner for 200 guests. You could go the old-fashioned route:
+        buy your own refrigerator, your own industrial oven, your own plates, build a pantry stocked
+        with every possible ingredient, and then figure out what to do with all that equipment when
+        the dinner is over and nobody needs it anymore. Or — you could use a giant supermarket that
+        already has everything, fully stocked, where you pay only for what you take off the shelf.
+      </p>
+      <p>
+        That is exactly what AWS is. AWS (Amazon Web Services) is the world's largest technology
+        supermarket. Need a server? Rent one. Need a database? Rent one. Need to store a million
+        files? Rent the storage. Need ten thousand servers for Black Friday and zero servers in
+        January? Rent ten thousand, then return them. Pay by the hour, sometimes by the second.
+      </p>
+      <p>
+        The story of how AWS was born is fascinating. Amazon the retailer had to build a massive
+        internal infrastructure to handle their own e-commerce operations. They got very good at
+        building reliable, scalable computing systems. Around 2003, some engineers asked: what if
+        we rented this infrastructure to other companies? In 2006, AWS launched publicly — and
+        accidentally created the cloud computing industry. Today AWS powers roughly a third of the
+        entire internet, including Netflix, Airbnb, NASA, the CIA, and thousands of startups.
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">🛒 The Supermarket Analogy</div>
+        <p>
+          Before AWS: every company bought their own servers, hired IT staff to manage them, paid
+          electricity bills, and scrambled when traffic spiked. If you needed 100 servers, you
+          bought 100 — even if you used 10 most of the time and needed 100 only twice a year.
+          <br><br>
+          After AWS: rent exactly what you need, exactly when you need it. Scale up in minutes.
+          Scale down in minutes. Pay only for actual usage. No upfront cost. No idle hardware.
+          No data center lease.
+        </p>
+      </div>
+
+      <h2>Why Cloud Computing Exists</h2>
+      <p>
+        Before the cloud, every company that needed servers went through the same painful ritual.
+        First, you estimated how much computing power your application would ever need — which is
+        essentially impossible to predict accurately. Then you ordered physical servers, which took
+        weeks to arrive. Then you hired people to rack them in a data center, wire them up, install
+        the operating system, and configure the network. Then you paid rent for the data center
+        space, paid for electricity to run the servers and more electricity to cool them, and hoped
+        you guessed right about how much capacity you'd need.
+      </p>
+      <p>
+        If your traffic doubled unexpectedly — say, a celebrity tweeted about your product — you
+        were stuck. Your servers were already at capacity, and getting more would take weeks. If
+        your traffic halved — say, you lost a big customer — your paid-for servers sat idle,
+        burning money doing nothing. The economics were brutal and the operational overhead was
+        enormous.
+      </p>
+      <p>
+        Cloud computing flipped this completely. The cloud providers — AWS, Google, Microsoft —
+        built enormous data centers stuffed with hardware. They buy at such scale they get
+        hardware cheaper than any single company could. Then they rent it out, charging a premium
+        over their costs but still far cheaper than owning equivalent hardware. Everyone wins:
+        the cloud provider makes money, and the customer gets cheaper, more flexible infrastructure.
+      </p>
+
+      <div class="box key-term">
+        <div class="box-title">📚 Key Terms: Cloud Computing</div>
+        <p>
+          <strong>IaaS (Infrastructure as a Service)</strong>: rent raw virtual machines and
+          networking. You manage the OS and up. Example: EC2.<br><br>
+          <strong>PaaS (Platform as a Service)</strong>: rent a managed platform — you just deploy
+          code. Example: AWS Elastic Beanstalk, Heroku.<br><br>
+          <strong>SaaS (Software as a Service)</strong>: rent fully finished software. Example:
+          Gmail, Salesforce.<br><br>
+          <strong>Serverless</strong>: run code without thinking about servers at all. Pay per
+          execution. Example: AWS Lambda.
+        </p>
+      </div>
+
+      <h2>The Big Picture — AWS Service Categories</h2>
+      <p>
+        AWS has over 200 services. That sounds overwhelming, but they organize neatly into
+        categories. You don't need to know all 200 — most engineers work with about 15–20
+        regularly. Here are the main families:
+      </p>
+
+      <div class="diagram">
+<pre>AWS Service Families
+────────────────────────────────────────────────────────────────
+
+COMPUTE (run your code)
+  EC2          → Virtual machines (SSH in, install anything)
+  Lambda       → Serverless functions (run code, no server)
+  ECS          → Run Docker containers (AWS manages the fleet)
+  EKS          → Managed Kubernetes
+  Fargate      → Serverless containers (no EC2 to manage)
+
+STORAGE (keep your data)
+  S3           → Object storage (files, images, backups)
+  EBS          → Disk volumes attached to EC2
+  EFS          → Shared file system for multiple instances
+  Glacier      → Cheap, slow archive storage
+
+DATABASE (structure your data)
+  RDS          → Managed PostgreSQL / MySQL / MariaDB
+  Aurora       → AWS's own high-performance PostgreSQL/MySQL
+  DynamoDB     → Serverless NoSQL database
+  ElastiCache  → Managed Redis or Memcached
+  DocumentDB   → MongoDB-compatible document database
+
+NETWORKING (connect everything)
+  VPC          → Your private network in AWS
+  Route 53     → DNS (domain name system)
+  CloudFront   → CDN (serve content from 400+ global locations)
+  ALB / NLB    → Load balancers
+  API Gateway  → Managed HTTP API endpoint
+
+DEVOPS (build and deploy)
+  ECR          → Docker image registry
+  CodeBuild    → CI build service
+  CodeDeploy   → Deployment automation
+  CodePipeline → CI/CD orchestration
+  CloudFormation → Infrastructure as Code (AWS-native)
+
+SECURITY (protect everything)
+  IAM          → Who can do what (users, roles, policies)
+  KMS          → Encryption key management
+  Secrets Manager → Store passwords and API keys securely
+
+MONITORING (watch everything)
+  CloudWatch   → Metrics, logs, alarms, dashboards</pre>
+      </div>
+
+      <div class="box fun-fact">
+        <div class="box-title">🤯 Fun Fact: AWS Free Tier</div>
+        <p>
+          AWS offers a genuinely useful free tier: 750 hours/month of t3.micro EC2 instances
+          (enough to run one server 24/7 for a year), 5GB of S3 storage, 1 million Lambda
+          invocations per month, and a 750-hour free RDS instance. A complete side project
+          can run on AWS for free for 12 months — and some services (like Lambda's free tier)
+          never expire.
+        </p>
+      </div>
+
+      <h2>EC2 — Your Virtual Machine in the Cloud</h2>
+      <p>
+        EC2 (Elastic Compute Cloud) is the original AWS service. It gives you virtual machines —
+        called <strong>instances</strong> — running in AWS's data centers. You pick the operating
+        system, the size, the region, and you have a full Linux (or Windows) machine to SSH into
+        and do whatever you want with.
+      </p>
+      <p>
+        Think of an EC2 instance like renting a complete computer at a coffee shop — except the
+        coffee shop has locations in 30 countries, the computer can be any size from a tiny
+        netbook to a machine with 192 CPU cores and 24TB of RAM, and you pay by the second.
+      </p>
+
+      <h3>Instance Types</h3>
+      <p>
+        EC2 instance types follow a naming pattern: <code>family.size</code>. The family describes
+        what the machine is optimized for; the size describes how big it is.
+      </p>
+
+      <div class="diagram">
+<pre>Instance Name Anatomy:   t3.medium
+                         ││ │└──── size: nano/micro/small/medium/large/xlarge/2xlarge...
+                         ││ └───── generation: 3rd gen t-family
+                         │└─────── family: t = general purpose burstable
+                         └──────── (all families below)
+
+Common Families:
+  t3, t4g   → General purpose, burstable (cheap, good for variable workloads)
+  m6i, m7g  → General purpose, balanced (steady workloads)
+  c6i, c7g  → Compute optimized (high CPU: web servers, batch jobs)
+  r6i, r7g  → Memory optimized (databases, caches: high RAM)
+  g4dn, p3  → GPU instances (machine learning, video processing)
+  i3        → Storage optimized (fast NVMe disks)
+
+Common Sizes and Specs (t3 family):
+  t3.nano      0.5 GB RAM   2 vCPU   ~$0.005/hr
+  t3.micro     1 GB RAM     2 vCPU   ~$0.010/hr  ← Free Tier eligible
+  t3.small     2 GB RAM     2 vCPU   ~$0.021/hr
+  t3.medium    4 GB RAM     2 vCPU   ~$0.042/hr
+  t3.large     8 GB RAM     2 vCPU   ~$0.083/hr
+  t3.xlarge    16 GB RAM    4 vCPU   ~$0.166/hr
+  t3.2xlarge   32 GB RAM    8 vCPU   ~$0.333/hr</pre>
+      </div>
+
+      <h3>Key EC2 Concepts</h3>
+      <p>
+        Before launching an instance, you need to understand four things:
+      </p>
+      <ul>
+        <li><strong>AMI (Amazon Machine Image)</strong>: the pre-baked OS snapshot you start from. Think of it as the template. Amazon Linux 2023, Ubuntu 22.04, and Windows Server 2022 are popular choices. Thousands of community AMIs exist for pre-configured stacks.</li>
+        <li><strong>Key Pairs</strong>: SSH keys. AWS stores your public key; you keep the private key (<code>.pem</code> file). You need it to SSH into your instance. Lose it and you're locked out.</li>
+        <li><strong>Security Groups</strong>: virtual firewalls. You define which ports are open to which IP ranges. By default, everything is blocked. You explicitly allow SSH (port 22), HTTP (80), HTTPS (443), etc.</li>
+        <li><strong>Elastic IP</strong>: a static public IP address that doesn't change when you stop and restart your instance. By default, your instance gets a new IP every time it restarts.</li>
+      </ul>
+
+      <h3>Launching an Instance with the AWS CLI</h3>
+      <p>
+        The AWS CLI is the command-line interface for all AWS services. Install it with
+        <code>pip install awscli</code> or download from aws.amazon.com/cli. Configure it with
+        <code>aws configure</code> (you'll need your Access Key ID and Secret Access Key from IAM).
+      </p>
+
+      <pre><code><span class="cmt"># Launch an EC2 instance</span>
+aws ec2 run-instances \
+  <span class="flag">--image-id</span> ami-0c55b159cbfafe1f0 \
+  <span class="flag">--instance-type</span> t3.micro \
+  <span class="flag">--key-name</span> my-key \
+  <span class="flag">--security-group-ids</span> sg-12345678 \
+  <span class="flag">--subnet-id</span> subnet-12345678 \
+  <span class="flag">--tag-specifications</span> <span class="str">'ResourceType=instance,Tags=[{Key=Name,Value=my-server}]'</span>
+
+<span class="cmt"># List all running instances in a readable table</span>
+aws ec2 describe-instances \
+  <span class="flag">--query</span> <span class="str">'Reservations[*].Instances[*].[InstanceId,State.Name,PublicIpAddress,Tags[?Key==`Name`].Value|[0]]'</span> \
+  <span class="flag">--output</span> table
+
+<span class="cmt"># Stop an instance</span>
+aws ec2 stop-instances <span class="flag">--instance-ids</span> i-0abc12345def67890
+
+<span class="cmt"># Start it again</span>
+aws ec2 start-instances <span class="flag">--instance-ids</span> i-0abc12345def67890
+
+<span class="cmt"># Terminate (permanently destroy) an instance</span>
+aws ec2 terminate-instances <span class="flag">--instance-ids</span> i-0abc12345def67890
+
+<span class="cmt"># SSH into your running instance</span>
+<span class="cmt"># (chmod 400 protects the key file — SSH refuses to use world-readable keys)</span>
+chmod 400 my-key.pem
+ssh -i my-key.pem ec2-user@52.10.20.30
+
+<span class="cmt"># Allocate an Elastic IP and associate it with your instance</span>
+aws ec2 allocate-address <span class="flag">--domain</span> vpc
+aws ec2 associate-address \
+  <span class="flag">--instance-id</span> i-0abc12345def67890 \
+  <span class="flag">--public-ip</span> 54.200.100.10</code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 Tip: Use User Data to Bootstrap Your Server</div>
+        <p>
+          The <code>--user-data</code> flag lets you pass a shell script that runs automatically
+          when your instance first boots. This is how you install Nginx, Docker, or your app
+          without SSHing in manually. Pass a file with
+          <code>--user-data file://setup.sh</code>. The script runs as root on first boot.
+        </p>
+      </div>
+
+      <h2>S3 — Infinitely Scalable File Storage</h2>
+      <p>
+        S3 (Simple Storage Service) is one of the most brilliant pieces of infrastructure ever
+        built. It stores objects — any file, any size up to 5TB — inside containers called
+        <strong>buckets</strong>. There is no limit to how many objects you can store. S3
+        automatically replicates your data across multiple data centers in a region, giving you
+        99.999999999% (eleven nines) durability. In practical terms: the chance of losing a
+        file stored in S3 is essentially zero.
+      </p>
+      <p>
+        S3 is used for everything: serving static websites, storing user profile photos, archiving
+        log files, distributing software builds, hosting Docker layer caches, storing Terraform
+        state files, and delivering video assets through CloudFront. If something needs to be stored
+        and retrieved, S3 is usually the answer.
+      </p>
+      <p>
+        Bucket names must be globally unique across all AWS accounts. Think of buckets like domain
+        names — there's only one <code>my-app-uploads</code> in the world.
+      </p>
+
+      <pre><code><span class="cmt"># Create a bucket (name must be globally unique)</span>
+aws s3 mb s3://my-unique-bucket-name-2024
+
+<span class="cmt"># Upload a single file</span>
+aws s3 cp photo.jpg s3://my-bucket/uploads/
+
+<span class="cmt"># Upload an entire directory (sync — only copies changed files)</span>
+aws s3 sync ./dist/ s3://my-bucket/ <span class="flag">--delete</span>
+
+<span class="cmt"># Download a file</span>
+aws s3 cp s3://my-bucket/uploads/photo.jpg ./local-photo.jpg
+
+<span class="cmt"># List all objects in a bucket</span>
+aws s3 ls s3://my-bucket/ <span class="flag">--recursive</span> <span class="flag">--human-readable</span>
+
+<span class="cmt"># Make a specific file publicly readable</span>
+aws s3api put-object-acl \
+  <span class="flag">--bucket</span> my-bucket \
+  <span class="flag">--key</span> uploads/photo.jpg \
+  <span class="flag">--acl</span> public-read
+
+<span class="cmt"># Enable static website hosting on a bucket</span>
+aws s3 website s3://my-bucket \
+  <span class="flag">--index-document</span> index.html \
+  <span class="flag">--error-document</span> 404.html
+
+<span class="cmt"># Set a lifecycle policy to auto-delete old files after 30 days</span>
+aws s3api put-bucket-lifecycle-configuration \
+  <span class="flag">--bucket</span> my-bucket \
+  <span class="flag">--lifecycle-configuration</span> file://lifecycle.json
+
+<span class="cmt"># Generate a pre-signed URL (temporary access link, expires in 1 hour)</span>
+aws s3 presign s3://my-bucket/secret-report.pdf <span class="flag">--expires-in</span> 3600</code></pre>
+
+      <div class="box key-term">
+        <div class="box-title">📚 Key Term: S3 Storage Classes</div>
+        <p>
+          S3 has multiple storage classes at different price points:
+          <strong>Standard</strong> — fast, expensive, frequently accessed data;
+          <strong>Standard-IA</strong> (Infrequent Access) — cheaper, slightly slower retrieval,
+          for data you access a few times a month;
+          <strong>Glacier</strong> — very cheap archive storage, takes minutes to hours to retrieve.
+          You can set lifecycle policies to automatically move objects between classes as they age.
+        </p>
+      </div>
+
+      <h2>IAM — Who Can Do What</h2>
+      <p>
+        IAM (Identity and Access Management) is the security backbone of every AWS account.
+        Before a single AWS API call succeeds, IAM checks: "Is this entity allowed to do this
+        thing on this resource?" Every access request — from your CLI, from a Lambda function,
+        from an EC2 instance — goes through IAM.
+      </p>
+      <p>
+        Think of IAM like a hotel key card system. Every person (user) or machine (role) gets a
+        key card. The key card only opens certain doors. The security manager (IAM) decides which
+        doors each card can open. The golden rule: give each card access to only the doors it
+        actually needs — nothing more. This is called the <strong>principle of least privilege</strong>.
+      </p>
+
+      <h3>The Four IAM Building Blocks</h3>
+      <ul>
+        <li><strong>Users</strong>: individual human beings or service accounts with long-term credentials (access key + secret key). Use IAM users for humans who need console or CLI access.</li>
+        <li><strong>Roles</strong>: not credentials — a role is a set of permissions that a resource assumes temporarily. An EC2 instance assumes a role to call S3. A Lambda function assumes a role to write to DynamoDB. Roles are safer than users for machine-to-machine access because the credentials rotate automatically.</li>
+        <li><strong>Policies</strong>: JSON documents that define permissions. A policy says: allow or deny this action on this resource. Attach policies to users, roles, or groups.</li>
+        <li><strong>Groups</strong>: collections of users who share the same policies. Instead of attaching the same policy to 20 developers individually, attach it to a "Developers" group and add them all.</li>
+      </ul>
+
+      <div class="box warning">
+        <div class="box-title">⚠️ Never Use Root Credentials</div>
+        <p>
+          When you first create an AWS account, you have root credentials — an email/password
+          combination that can do literally anything to your account, including deleting
+          everything and racking up a $50,000 bill. Lock root credentials away immediately.
+          Enable MFA on root. Create an IAM admin user for daily work. Never use root
+          credentials for programmatic access.
+        </p>
+      </div>
+
+      <h3>Writing an IAM Policy</h3>
+      <p>
+        Policies are JSON. Each policy contains statements. Each statement has an Effect (Allow or
+        Deny), one or more Actions (what API calls), and one or more Resources (what specific
+        AWS resources). Here is a minimal policy granting read-only access to one specific S3 bucket:
+      </p>
+
+      <pre><code><span class="cmt">// IAM Policy: read-only access to a specific S3 bucket</span>
+{
+  <span class="str">"Version"</span>: <span class="str">"2012-10-17"</span>,
+  <span class="str">"Statement"</span>: [
+    {
+      <span class="str">"Effect"</span>: <span class="str">"Allow"</span>,
+      <span class="str">"Action"</span>: [
+        <span class="str">"s3:GetObject"</span>,
+        <span class="str">"s3:ListBucket"</span>
+      ],
+      <span class="str">"Resource"</span>: [
+        <span class="str">"arn:aws:s3:::my-app-bucket"</span>,
+        <span class="str">"arn:aws:s3:::my-app-bucket/*"</span>
+      ]
+    }
+  ]
+}</code></pre>
+
+      <p>
+        The ARN (Amazon Resource Name) is the unique identifier for every resource in AWS.
+        The pattern is <code>arn:partition:service:region:account-id:resource</code>.
+        The first ARN targets the bucket itself (needed for <code>ListBucket</code>);
+        the second targets all objects inside it (needed for <code>GetObject</code>).
+      </p>
+
+      <pre><code><span class="cmt"># Create a policy from a JSON file</span>
+aws iam create-policy \
+  <span class="flag">--policy-name</span> S3ReadOnlyMyBucket \
+  <span class="flag">--policy-document</span> file://policy.json
+
+<span class="cmt"># Attach the policy to a role</span>
+aws iam attach-role-policy \
+  <span class="flag">--role-name</span> my-app-role \
+  <span class="flag">--policy-arn</span> arn:aws:iam::123456789012:policy/S3ReadOnlyMyBucket
+
+<span class="cmt"># Create an IAM user</span>
+aws iam create-user <span class="flag">--user-name</span> alice
+
+<span class="cmt"># Create CLI access keys for a user</span>
+aws iam create-access-key <span class="flag">--user-name</span> alice</code></pre>
+
+      <h2>VPC — Your Private Network</h2>
+      <p>
+        By default, every AWS resource you create goes into a default VPC (Virtual Private Cloud) —
+        a private network that AWS sets up for you automatically. But for production systems, you
+        should design your own VPC from scratch.
+      </p>
+      <p>
+        Think of a VPC as a private office building on AWS's campus. The building has its own
+        address range. Only resources inside the building can talk to each other directly.
+        Certain doors (gateways) connect the building to the outside world. You decide which
+        floors (subnets) are accessible from the street and which floors are internal-only.
+      </p>
+
+      <div class="diagram">
+<pre>Your VPC  (10.0.0.0/16 — 65,536 private IP addresses)
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│  Public Subnet (10.0.1.0/24)    Private Subnet (10.0.2.0/24)│
+│  ┌─────────────────────────┐    ┌──────────────────────────┐│
+│  │  Load Balancer          │    │  App Server (EC2)        ││
+│  │  Bastion Host (SSH)     │    │  Database (RDS)          ││
+│  │  NAT Gateway            │    │  (no direct internet)    ││
+│  └───────────┬─────────────┘    └──────────────────────────┘│
+│              │                                              │
+└──────────────┼──────────────────────────────────────────────┘
+               │
+        Internet Gateway
+               │
+           The Internet</pre>
+      </div>
+
+      <p>Key VPC concepts you must know:</p>
+      <ul>
+        <li><strong>Subnets</strong>: subdivisions of your VPC's IP range. Public subnets have a route to the Internet Gateway. Private subnets don't — traffic can only come from within the VPC or through the NAT Gateway.</li>
+        <li><strong>Internet Gateway</strong>: the door between your VPC and the public internet. Without it, nothing can reach the internet.</li>
+        <li><strong>NAT Gateway</strong>: allows resources in private subnets to initiate outbound connections to the internet (to download updates, call external APIs) without being reachable from the internet.</li>
+        <li><strong>Route Tables</strong>: rules that say "traffic destined for X goes via Y." Public subnets have a route sending internet-bound traffic through the Internet Gateway. Private subnets route internet-bound traffic through the NAT Gateway.</li>
+        <li><strong>Security Groups</strong>: stateful firewalls attached to individual resources. Think of them as a bodyguard for each server.</li>
+        <li><strong>NACLs (Network ACLs)</strong>: stateless firewalls applied at the subnet level. Blunter and faster than Security Groups.</li>
+      </ul>
+
+      <h2>RDS — Your Managed Database</h2>
+      <p>
+        Running a production database is hard. You need automated backups, point-in-time recovery,
+        failover to a standby when the primary crashes, security patching, performance monitoring,
+        and careful storage management. RDS (Relational Database Service) handles all of that for
+        you. You just connect to it with a standard connection string.
+      </p>
+      <p>
+        RDS supports PostgreSQL, MySQL, MariaDB, Oracle, and SQL Server. For most new projects,
+        use PostgreSQL on RDS — it's the industry standard for relational data. If you want
+        better performance and AWS-native features, look at Aurora (AWS's own PostgreSQL-compatible
+        engine with up to 5x the throughput of standard RDS Postgres).
+      </p>
+
+      <pre><code><span class="cmt"># Create an RDS PostgreSQL instance</span>
+aws rds create-db-instance \
+  <span class="flag">--db-instance-identifier</span> myapp-db \
+  <span class="flag">--db-instance-class</span> db.t3.micro \
+  <span class="flag">--engine</span> postgres \
+  <span class="flag">--engine-version</span> <span class="str">"15.4"</span> \
+  <span class="flag">--master-username</span> admin \
+  <span class="flag">--master-user-password</span> <span class="str">"SuperSecret123!"</span> \
+  <span class="flag">--allocated-storage</span> 20 \
+  <span class="flag">--db-subnet-group-name</span> my-db-subnet-group \
+  <span class="flag">--vpc-security-group-ids</span> sg-12345678 \
+  <span class="flag">--backup-retention-period</span> 7 \
+  <span class="flag">--no-publicly-accessible</span>
+
+<span class="cmt"># Wait until the instance is available</span>
+aws rds wait db-instance-available \
+  <span class="flag">--db-instance-identifier</span> myapp-db
+
+<span class="cmt"># Get the endpoint to connect to</span>
+aws rds describe-db-instances \
+  <span class="flag">--db-instance-identifier</span> myapp-db \
+  <span class="flag">--query</span> <span class="str">'DBInstances[0].Endpoint.Address'</span> \
+  <span class="flag">--output</span> text
+
+<span class="cmt"># Create a snapshot (manual backup)</span>
+aws rds create-db-snapshot \
+  <span class="flag">--db-instance-identifier</span> myapp-db \
+  <span class="flag">--db-snapshot-identifier</span> myapp-db-snapshot-2024-01-15</code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 Tip: Place RDS in a Private Subnet</div>
+        <p>
+          Your RDS instance should <em>never</em> be publicly accessible. Place it in a private
+          subnet where only your application servers (in the same VPC) can connect to it.
+          Access it from your local machine via an SSH tunnel through a bastion host, or use
+          AWS Systems Manager Session Manager for secure access without opening port 22.
+        </p>
+      </div>
+
+      <h2>Lambda — Serverless Code Execution</h2>
+      <p>
+        Lambda is one of the most transformative ideas in cloud computing. The concept is simple:
+        you give AWS a function (a piece of code). AWS runs it whenever a trigger fires — an HTTP
+        request via API Gateway, an S3 file upload, a DynamoDB record change, a cron schedule.
+        You pay per execution and per 100ms of execution time. When no triggers fire, you pay
+        nothing. There is no server to provision, no OS to patch, no idle compute to pay for.
+      </p>
+      <p>
+        Think of Lambda like a vending machine. You put in a coin (an event), the machine runs
+        for a moment, and gives you a result. The machine doesn't run between uses. You pay per
+        use, not per hour you own the machine.
+      </p>
+
+      <pre><code><span class="cmt">// Lambda function: Node.js 20 — simple HTTP handler</span>
+<span class="kw">export const</span> <span class="fn">handler</span> = <span class="kw">async</span> (event) => {
+  <span class="kw">const</span> name = event.queryStringParameters?.name || <span class="str">'World'</span>;
+  <span class="kw">const</span> region = process.env.AWS_REGION;
+
+  <span class="kw">return</span> {
+    statusCode: <span class="str">200</span>,
+    headers: {
+      <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span>,
+      <span class="str">'X-Region'</span>: region
+    },
+    body: JSON.<span class="fn">stringify</span>({
+      message: <span class="str">`Hello, ${name}!`</span>,
+      timestamp: <span class="kw">new</span> <span class="fn">Date</span>().toISOString()
+    })
+  };
+};</code></pre>
+
+      <pre><code><span class="cmt"># Create a Lambda function from a zip file</span>
+zip function.zip index.mjs
+
+aws lambda create-function \
+  <span class="flag">--function-name</span> hello-api \
+  <span class="flag">--runtime</span> nodejs20.x \
+  <span class="flag">--role</span> arn:aws:iam::123456789012:role/lambda-execution-role \
+  <span class="flag">--handler</span> index.handler \
+  <span class="flag">--zip-file</span> fileb://function.zip \
+  <span class="flag">--timeout</span> 30 \
+  <span class="flag">--memory-size</span> 256
+
+<span class="cmt"># Update the function code</span>
+aws lambda update-function-code \
+  <span class="flag">--function-name</span> hello-api \
+  <span class="flag">--zip-file</span> fileb://function.zip
+
+<span class="cmt"># Invoke the function manually</span>
+aws lambda invoke \
+  <span class="flag">--function-name</span> hello-api \
+  <span class="flag">--payload</span> <span class="str">'{"queryStringParameters": {"name": "AWS"}}'</span> \
+  response.json
+
+<span class="cmt"># View recent logs</span>
+aws logs tail /aws/lambda/hello-api <span class="flag">--follow</span></code></pre>
+
+      <div class="box key-term">
+        <div class="box-title">📚 Key Term: Cold Start</div>
+        <p>
+          When a Lambda function hasn't run recently, AWS needs to spin up a container for it —
+          this takes 100–500ms extra. This is called a <strong>cold start</strong>. For
+          latency-sensitive apps, you can use Provisioned Concurrency to keep containers
+          pre-warmed. For most workloads, cold starts are not a practical problem.
+        </p>
+      </div>
+
+      <h2>CloudWatch — Monitoring Everything</h2>
+      <p>
+        If AWS is the supermarket, CloudWatch is the security system, inventory tracker, and
+        analytics dashboard all in one. Every AWS service sends data to CloudWatch automatically.
+        EC2 sends CPU usage, memory, disk I/O. RDS sends database connections, query latency.
+        Lambda sends invocation count, error rate, duration. You can also send your own custom
+        metrics and logs from application code.
+      </p>
+
+      <pre><code><span class="cmt"># Create a CloudWatch alarm: alert when CPU exceeds 80% for 5 minutes</span>
+aws cloudwatch put-metric-alarm \
+  <span class="flag">--alarm-name</span> HighCPUAlert \
+  <span class="flag">--metric-name</span> CPUUtilization \
+  <span class="flag">--namespace</span> AWS/EC2 \
+  <span class="flag">--statistic</span> Average \
+  <span class="flag">--period</span> 300 \
+  <span class="flag">--threshold</span> 80 \
+  <span class="flag">--comparison-operator</span> GreaterThanThreshold \
+  <span class="flag">--evaluation-periods</span> 1 \
+  <span class="flag">--dimensions</span> Name=InstanceId,Value=i-0abc12345def67890 \
+  <span class="flag">--alarm-actions</span> arn:aws:sns:us-east-1:123456789012:alerts-topic \
+  <span class="flag">--alarm-description</span> <span class="str">"EC2 CPU too high — check the server"</span>
+
+<span class="cmt"># Create a log group</span>
+aws logs create-log-group <span class="flag">--log-group-name</span> /myapp/production
+
+<span class="cmt"># Set log retention to 30 days (prevent unbounded cost)</span>
+aws logs put-retention-policy \
+  <span class="flag">--log-group-name</span> /myapp/production \
+  <span class="flag">--retention-in-days</span> 30
+
+<span class="cmt"># Tail logs in real time (like `tail -f` but for CloudWatch)</span>
+aws logs tail /myapp/production <span class="flag">--follow</span>
+
+<span class="cmt"># Query logs using CloudWatch Logs Insights</span>
+aws logs start-query \
+  <span class="flag">--log-group-name</span> /myapp/production \
+  <span class="flag">--start-time</span> $(date -d <span class="str">'1 hour ago'</span> +%s) \
+  <span class="flag">--end-time</span> $(date +%s) \
+  <span class="flag">--query-string</span> <span class="str">'fields @timestamp, @message | filter @message like /ERROR/ | limit 50'</span></code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 Tip: Set Log Retention Periods</div>
+        <p>
+          CloudWatch Logs never expire by default. If you forget to set a retention policy and
+          your app logs 10GB/day, you'll eventually have a surprisingly large bill. Always
+          set <code>--retention-in-days</code> when creating log groups. 30 days is a good
+          default for application logs; 7 days for debug/trace logs.
+        </p>
+      </div>
+
+      <h2>Putting It All Together: A Typical AWS Architecture</h2>
+      <p>
+        Here is what a production-ready web application on AWS looks like. This is not over-engineering
+        — it's the sensible minimum for anything with real users:
+      </p>
+
+      <div class="diagram">
+<pre>User's Browser
+      │
+      ▼
+Route 53 (DNS — points your domain to CloudFront)
+      │
+      ▼
+CloudFront (CDN — caches static assets globally, terminates SSL)
+      │
+      ▼
+ALB — Application Load Balancer (in Public Subnet)
+      │
+      ├──▶ ECS/EC2 App Servers (in Private Subnet)
+      │         │
+      │         ├──▶ RDS PostgreSQL (in Private Subnet)
+      │         │         └── RDS Read Replica (for read-heavy queries)
+      │         │
+      │         └──▶ ElastiCache Redis (for session cache)
+      │
+      └──▶ S3 (static assets: images, JS, CSS)
+
+All EC2/ECS instances have IAM Roles (no hardcoded credentials)
+All resources in a custom VPC (public + private subnets)
+CloudWatch collects all logs and metrics
+Secrets Manager holds all passwords and API keys</pre>
+      </div>
+
+      <div class="summary">
+        <h4>Chapter Summary</h4>
+        <ul>
+          <li>AWS is the world's largest cloud provider — rent any infrastructure on demand, pay per use, scale in seconds.</li>
+          <li>AWS has 200+ services organized into Compute, Storage, Database, Networking, DevOps, Security, and Monitoring families.</li>
+          <li>EC2 provides virtual machines; choose an instance type based on your workload (t3 for general purpose, c6i for CPU-heavy, r6i for memory-heavy).</li>
+          <li>S3 is infinitely scalable object storage with 11 nines of durability — the backbone of most AWS architectures.</li>
+          <li>IAM controls all access in AWS. Use roles for machines, users for humans, groups for teams. Always apply least privilege.</li>
+          <li>VPC gives you a private network with public and private subnets, controlled internet access, and security groups as firewalls.</li>
+          <li>RDS provides managed databases — PostgreSQL, MySQL, MariaDB — with automatic backups, failover, and patching.</li>
+          <li>Lambda lets you run code without servers, triggered by events, billed per execution.</li>
+          <li>CloudWatch collects metrics, logs, and alarms for everything in your AWS account.</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="../part-2/chapter-8.html">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Ch 8 · ArgoCD &amp; GitOps</span>
+        </a>
+        <a href="chapter-10.html" class="next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Ch 10 · GCP &amp; Azure</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">☰</button>
+<script src="../nav.js"></script>
+</body>
+</html>

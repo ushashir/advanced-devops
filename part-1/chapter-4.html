@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 4: Git, Bash &amp; Python — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-1">Part 1 · Chapter 4</div>
+        <h1>Git, Bash &amp; Python</h1>
+        <p class="chapter-intro">Version control and automation — three tools that belong in every DevOps engineer's daily toolkit.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>What you'll learn in this chapter</h4>
+        <ul>
+          <li>What Git is and why it is the foundation of all modern software development</li>
+          <li>The core Git workflow: init, clone, add, commit, push, pull, branch, merge</li>
+          <li>Branching strategies — and why long-lived branches are painful</li>
+          <li>Bash scripting: writing automation scripts that save hours of manual work</li>
+          <li>Python for DevOps: parsing APIs, checking health, and automating cloud tasks</li>
+        </ul>
+      </div>
+
+      <h2>Git — The World's Best Time Machine</h2>
+      <p>
+        Imagine you are writing a novel. It is a long one — 400 pages. You have been working on it
+        for months. At some point, you decide to experiment with a completely different ending.
+        You rewrite the last 80 pages. Then you decide you preferred the original. If you do not
+        have a backup, you are in trouble.
+      </p>
+      <p>
+        Now imagine a system that lets you save named checkpoints at any moment. "Chapter 3 done,"
+        "Added the villain," "Rewrote the ending — take 2." You can go back to any of these
+        checkpoints instantly. Better yet, you can create a parallel version of your story —
+        experiment wildly without ever risking the original — and then merge the best parts back
+        in. Other authors can work on their own parallel versions simultaneously, and the system
+        intelligently combines everyone's changes.
+      </p>
+      <p>
+        That system is <strong>Git</strong>.
+      </p>
+      <p>
+        Before Git (and version control in general), developers would upload files via FTP,
+        overwriting each other's work constantly. Someone would make a change, upload it, not
+        realise their colleague had changed the same file an hour earlier, and that colleague's
+        work would simply be gone. It was a chaotic way to collaborate, and it cost teams
+        enormous amounts of wasted effort.
+      </p>
+      <p>
+        Git was created by Linus Torvalds — the same person who created Linux — in 2005, when
+        he needed a version control system for the Linux kernel. It became the standard for
+        software development and, by extension, for all of DevOps.
+      </p>
+
+      <div class="box key-term">
+        <div class="box-title">📚 Core Git Concepts</div>
+        <p><strong>Repository (repo):</strong> Your project's complete time machine — every file and every change ever made to them, stored in a <code>.git</code> folder.</p>
+        <p><strong>Commit:</strong> A named snapshot of your project at a specific point in time. Every commit has a unique ID (a hash) and a message describing what changed.</p>
+        <p><strong>Branch:</strong> A parallel version of your codebase. The main branch (usually called <code>main</code>) is the official version; feature branches are where you experiment.</p>
+        <p><strong>Merge:</strong> Combining two branches — incorporating the changes from a feature branch back into <code>main</code>.</p>
+        <p><strong>Remote:</strong> A copy of your repository hosted somewhere else — GitHub, GitLab, Bitbucket. Used for backup and collaboration.</p>
+        <p><strong>Pull Request (PR):</strong> A proposal to merge your branch into another. Allows code review before changes are accepted.</p>
+      </div>
+
+      <h2>Setting Up and the Daily Workflow</h2>
+      <p>
+        Git is pre-installed on most Linux systems. On macOS, it comes with Xcode Command Line
+        Tools. On Windows, download Git for Windows. The first thing to do is tell Git who you are:
+      </p>
+
+      <pre><code><span class="cmt"># Tell Git your name and email (do this once on each machine)</span>
+<span class="fn">git</span> config <span class="flag">--global</span> user.name <span class="str">"Ushahemba Shir"</span>
+<span class="fn">git</span> config <span class="flag">--global</span> user.email <span class="str">"you@example.com"</span>
+
+<span class="cmt"># Set VS Code as your default editor (optional but recommended)</span>
+<span class="fn">git</span> config <span class="flag">--global</span> core.editor <span class="str">"code --wait"</span></code></pre>
+
+      <h3>Starting a Project</h3>
+      <pre><code><span class="cmt"># Start a new Git repository in the current directory</span>
+<span class="fn">git</span> init
+
+<span class="cmt"># Copy (clone) an existing repository from GitHub</span>
+<span class="fn">git</span> clone https://github.com/username/my-project.git
+
+<span class="cmt"># Clone into a specific folder name</span>
+<span class="fn">git</span> clone https://github.com/username/my-project.git my-app</code></pre>
+
+      <h3>The Everyday Cycle</h3>
+      <p>
+        Every working day with Git follows the same rhythm. You make changes, you check what you
+        changed, you stage the changes you want to save, you commit them with a message, and you
+        push to the remote so your team can see your work.
+      </p>
+
+      <pre><code><span class="cmt"># See what's changed (this is the command you run most often)</span>
+<span class="fn">git</span> status
+
+<span class="cmt"># See the exact line-by-line changes you made</span>
+<span class="fn">git</span> diff
+
+<span class="cmt"># Stage a specific file for the next commit</span>
+<span class="fn">git</span> add src/server.js
+
+<span class="cmt"># Stage everything in the current directory</span>
+<span class="fn">git</span> add .
+
+<span class="cmt"># Create a commit with a descriptive message</span>
+<span class="fn">git</span> commit <span class="flag">-m</span> <span class="str">"Add user authentication endpoint"</span>
+
+<span class="cmt"># Push your commits to the remote (origin = GitHub/GitLab)</span>
+<span class="fn">git</span> push origin main
+
+<span class="cmt"># Get the latest changes from the remote</span>
+<span class="fn">git</span> pull
+
+<span class="cmt"># Fetch updates without merging (safer — review before merging)</span>
+<span class="fn">git</span> fetch origin</code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 Write Good Commit Messages</div>
+        <p>
+          A commit message should answer the question: "Why did I make this change?" Not "what" —
+          the diff shows that. Bad: <code>"fix bug"</code>. Better: <code>"Fix null pointer crash when user has no profile picture"</code>.
+          Good commit messages are a gift to your future self and your teammates. The rule of thumb:
+          write the message as if completing the sentence "When applied, this commit will..."
+        </p>
+      </div>
+
+      <h2>Branching — Working in Parallel</h2>
+      <p>
+        Branches are one of Git's superpowers. They let you work on a new feature without
+        disturbing the stable code on <code>main</code>. While you build a new login system
+        on your <code>feature/new-auth</code> branch, your teammate can be fixing a bug on
+        <code>fix/payment-timeout</code>, and another person can be writing documentation on
+        <code>docs/api-reference</code> — all simultaneously, all without interfering with each other.
+      </p>
+
+      <pre><code><span class="cmt"># See all branches (the * marks the current branch)</span>
+<span class="fn">git</span> branch
+
+<span class="cmt"># Create a new branch</span>
+<span class="fn">git</span> branch feature/user-settings
+
+<span class="cmt"># Switch to an existing branch</span>
+<span class="fn">git</span> checkout feature/user-settings
+
+<span class="cmt"># Create AND switch to a new branch (the shortcut — use this)</span>
+<span class="fn">git</span> checkout <span class="flag">-b</span> feature/user-settings
+
+<span class="cmt"># Modern equivalent (git 2.23+)</span>
+<span class="fn">git</span> switch <span class="flag">-c</span> feature/user-settings
+
+<span class="cmt"># Switch back to main</span>
+<span class="fn">git</span> checkout main
+
+<span class="cmt"># Merge a feature branch into main</span>
+<span class="fn">git</span> merge feature/user-settings
+
+<span class="cmt"># Delete a branch (after merging)</span>
+<span class="fn">git</span> branch <span class="flag">-d</span> feature/user-settings
+
+<span class="cmt"># Push a branch to the remote</span>
+<span class="fn">git</span> push origin feature/user-settings</code></pre>
+
+      <h2>Viewing History</h2>
+      <pre><code><span class="cmt"># See the commit history (each commit on one line)</span>
+<span class="fn">git</span> log <span class="flag">--oneline</span>
+
+<span class="cmt"># See history with a visual branch graph</span>
+<span class="fn">git</span> log <span class="flag">--oneline --graph --all</span>
+
+<span class="cmt"># See the full details of the last commit</span>
+<span class="fn">git</span> show HEAD
+
+<span class="cmt"># See details of a specific commit by its hash</span>
+<span class="fn">git</span> show abc1234
+
+<span class="cmt"># See who last changed each line of a file (very useful for blame)</span>
+<span class="fn">git</span> blame src/server.js
+
+<span class="cmt"># Search commit messages for a keyword</span>
+<span class="fn">git</span> log <span class="flag">--grep</span>=<span class="str">"authentication"</span>
+
+<span class="cmt"># See changes between two commits</span>
+<span class="fn">git</span> diff abc1234..def5678</code></pre>
+
+      <h2>Undoing Things</h2>
+      <p>
+        Every developer needs to know how to reverse their mistakes. Git makes this safe — you
+        can almost always undo something without losing work permanently.
+      </p>
+
+      <pre><code><span class="cmt"># Undo changes to a file (before staging)</span>
+<span class="fn">git</span> checkout -- src/server.js
+
+<span class="cmt"># Unstage a file (remove from the next commit, but keep changes)</span>
+<span class="fn">git</span> reset HEAD src/server.js
+
+<span class="cmt"># Undo the last commit but keep the changes staged</span>
+<span class="fn">git</span> reset <span class="flag">--soft</span> HEAD~1
+
+<span class="cmt"># Create a new commit that reverses a previous commit (safe for shared branches)</span>
+<span class="fn">git</span> revert abc1234</code></pre>
+
+      <div class="box warning">
+        <div class="box-title">⚠️ Never Force-Push to Main</div>
+        <p>
+          <code>git push --force</code> rewrites history on the remote. If your teammates have
+          based their work on commits you just deleted, their repositories are now out of sync in
+          painful ways. Never force-push to <code>main</code> or any shared branch. On feature
+          branches that only you use, it is sometimes acceptable — but use it with intention.
+        </p>
+      </div>
+
+      <h2>Branching Strategy: How Teams Organize Their Work</h2>
+      <p>
+        Not all branching strategies are equal. The two most common are:
+      </p>
+      <p>
+        <strong>Gitflow</strong> uses a structured set of branches: <code>main</code> (production),
+        <code>develop</code> (integration), feature branches, release branches, and hotfix branches.
+        This was the dominant pattern for years and works well for teams with scheduled releases.
+        But it creates long-lived branches that diverge significantly from main, leading to painful
+        "merge hell" when it's time to integrate.
+      </p>
+      <p>
+        <strong>Trunk-Based Development</strong> is the model preferred by elite DevOps teams.
+        Everyone commits directly to <code>main</code> (the "trunk") multiple times per day.
+        Features that aren't ready are hidden using <em>feature flags</em> (code switches that
+        can be toggled on or off without deployment). Branches, when used, are short-lived —
+        never longer than one or two days before being merged back in.
+      </p>
+      <p>
+        Trunk-based development is what makes CI/CD pipelines fast and reliable. When branches
+        live for a day instead of a week, merge conflicts are small. When everyone integrates
+        frequently, integration surprises never have time to grow.
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">🌳 Trunk-Based Development Analogy</div>
+        <p>
+          Imagine building a house. With Gitflow, each worker disappears into their own room
+          for two weeks and builds their part in isolation. When they come back together, nothing
+          quite fits. With trunk-based development, everyone works in the same shared space,
+          commits small changes hourly, and problems are caught and fixed immediately — before
+          they compound.
+        </p>
+      </div>
+
+      <h2>Bash Scripting — Automating the Boring Stuff</h2>
+      <p>
+        Bash is the native language of Linux. It is not designed to be pretty. The syntax has
+        quirks that will trip you up for years. But it is <em>everywhere</em> — every Linux
+        machine has it, every CI/CD pipeline uses it, every deployment script in the world is
+        written in it or something very similar. You cannot avoid Bash, and once you understand
+        it, you would not want to.
+      </p>
+      <p>
+        Think of Bash as a set of instructions for a very literal robot assistant. The robot
+        does exactly what each line says, one at a time, from top to bottom. If you need to
+        do a task 100 times, you write it once and the robot does it 100 times. If you need
+        to deploy to 50 servers, you write one loop, not 50 commands.
+      </p>
+
+      <h3>Variables</h3>
+      <pre><code><span class="cmt">#!/bin/bash</span>
+<span class="cmt"># The first line tells the OS which interpreter to use</span>
+
+<span class="cmt"># Assign a variable (no spaces around the = sign)</span>
+NAME=<span class="str">"Ushahemba"</span>
+APP_PORT=<span class="num">3000</span>
+
+<span class="cmt"># Use a variable with $</span>
+<span class="fn">echo</span> <span class="str">"Hello, $NAME"</span>
+<span class="fn">echo</span> <span class="str">"App runs on port $APP_PORT"</span>
+
+<span class="cmt"># Command substitution: capture command output into a variable</span>
+CURRENT_DATE=<span class="fn">$(</span>date +%Y-%m-%d<span class="fn">)</span>
+<span class="fn">echo</span> <span class="str">"Today is $CURRENT_DATE"</span></code></pre>
+
+      <h3>Conditionals</h3>
+      <pre><code><span class="cmt"># Check if a file exists</span>
+<span class="kw">if</span> [ <span class="flag">-f</span> <span class="str">".env"</span> ]; <span class="kw">then</span>
+    <span class="fn">echo</span> <span class="str">".env file found"</span>
+<span class="kw">else</span>
+    <span class="fn">echo</span> <span class="str">"No .env file — creating from template"</span>
+    <span class="fn">cp</span> .env.example .env
+<span class="kw">fi</span>
+
+<span class="cmt"># Check if a directory exists</span>
+<span class="kw">if</span> [ <span class="flag">-d</span> <span class="str">"node_modules"</span> ]; <span class="kw">then</span>
+    <span class="fn">echo</span> <span class="str">"Dependencies already installed"</span>
+<span class="kw">fi</span>
+
+<span class="cmt"># Compare strings</span>
+ENVIRONMENT=<span class="str">"production"</span>
+<span class="kw">if</span> [ <span class="str">"$ENVIRONMENT"</span> = <span class="str">"production"</span> ]; <span class="kw">then</span>
+    <span class="fn">echo</span> <span class="str">"Running in production mode"</span>
+<span class="kw">fi</span>
+
+<span class="cmt"># Common test flags:</span>
+<span class="cmt"># -f  file exists and is a regular file</span>
+<span class="cmt"># -d  directory exists</span>
+<span class="cmt"># -z  string is empty</span>
+<span class="cmt"># -n  string is not empty</span>
+<span class="cmt"># -eq equal (numbers)  -ne not equal  -lt less than  -gt greater than</span></code></pre>
+
+      <h3>Loops</h3>
+      <pre><code><span class="cmt"># Loop over a list of items</span>
+<span class="kw">for</span> SERVER <span class="kw">in</span> web1 web2 web3; <span class="kw">do</span>
+    <span class="fn">echo</span> <span class="str">"Deploying to $SERVER"</span>
+    <span class="fn">ssh</span> ubuntu@$SERVER <span class="str">"cd /var/www/app && git pull && systemctl restart app"</span>
+<span class="kw">done</span>
+
+<span class="cmt"># Loop over files matching a pattern</span>
+<span class="kw">for</span> FILE <span class="kw">in</span> /var/log/nginx/*.log; <span class="kw">do</span>
+    <span class="fn">echo</span> <span class="str">"Processing: $FILE"</span>
+    <span class="fn">gzip</span> $FILE
+<span class="kw">done</span>
+
+<span class="cmt"># While loop</span>
+COUNT=<span class="num">1</span>
+<span class="kw">while</span> [ $COUNT <span class="flag">-le</span> 5 ]; <span class="kw">do</span>
+    <span class="fn">echo</span> <span class="str">"Attempt $COUNT"</span>
+    COUNT=<span class="fn">$((</span>COUNT + 1<span class="fn">))</span>
+<span class="kw">done</span></code></pre>
+
+      <h3>Functions</h3>
+      <pre><code><span class="cmt"># Define a function</span>
+<span class="fn">log</span>() {
+    <span class="fn">echo</span> <span class="str">"[$(date +%H:%M:%S)] $1"</span>
+}
+
+<span class="fn">deploy_app</span>() {
+    <span class="kw">local</span> APP_DIR=<span class="str">"$1"</span>
+    <span class="fn">log</span> <span class="str">"Deploying from $APP_DIR"</span>
+    <span class="fn">cd</span> $APP_DIR
+    <span class="fn">git</span> pull origin main
+    <span class="fn">npm</span> install <span class="flag">--production</span>
+    <span class="fn">log</span> <span class="str">"Deploy complete"</span>
+}
+
+<span class="cmt"># Call a function</span>
+<span class="fn">deploy_app</span> <span class="str">"/var/www/myapp"</span></code></pre>
+
+      <h3>Exit Codes and Error Handling</h3>
+      <p>
+        Every command in Linux exits with a code. Zero means success. Anything else means failure.
+        This is how scripts know if the previous step worked before continuing.
+      </p>
+
+      <pre><code><span class="cmt"># Check the exit code of the last command</span>
+<span class="fn">git</span> pull
+<span class="fn">echo</span> <span class="str">"Exit code was: $?"</span>    <span class="cmt"># 0 = success</span>
+
+<span class="cmt"># set -e makes the entire script exit if any command fails</span>
+<span class="cmt"># This is the most important line in any deployment script</span>
+<span class="kw">set</span> <span class="flag">-e</span>
+
+<span class="cmt"># set -u fails if an undefined variable is used (catches typos)</span>
+<span class="kw">set</span> <span class="flag">-u</span>
+
+<span class="cmt"># Use && to chain commands that should only run if previous succeeded</span>
+<span class="fn">npm</span> install &amp;&amp; <span class="fn">npm</span> run build &amp;&amp; <span class="fn">systemctl</span> restart myapp</code></pre>
+
+      <h3>Pipelines — Chaining Commands</h3>
+      <p>
+        One of Bash's most powerful features is the pipe (<code>|</code>). It takes the output
+        of one command and feeds it as input to the next. Pipelines let you build sophisticated
+        data processing from simple, single-purpose tools.
+      </p>
+
+      <pre><code><span class="cmt"># Count how many error lines are in a log file</span>
+<span class="fn">cat</span> /var/log/app.log | <span class="fn">grep</span> <span class="str">"ERROR"</span> | <span class="fn">wc</span> <span class="flag">-l</span>
+
+<span class="cmt"># Find the 5 most common errors</span>
+<span class="fn">grep</span> <span class="str">"ERROR"</span> /var/log/app.log | <span class="fn">sort</span> | <span class="fn">uniq</span> <span class="flag">-c</span> | <span class="fn">sort</span> <span class="flag">-rn</span> | <span class="fn">head</span> <span class="flag">-5</span>
+
+<span class="cmt"># Find all running Node.js processes and show their memory usage</span>
+<span class="fn">ps</span> <span class="flag">aux</span> | <span class="fn">grep</span> node | <span class="fn">awk</span> <span class="str">'{print $1, $6, $11}'</span></code></pre>
+
+      <h3>A Real Deployment Script</h3>
+      <p>
+        Here is a complete, production-quality deployment script that pulls the latest code,
+        installs dependencies, builds the app, and restarts the service — with error handling:
+      </p>
+
+      <pre><code><span class="cmt">#!/bin/bash</span>
+<span class="kw">set</span> <span class="flag">-euo</span> pipefail  <span class="cmt"># Exit on error, undefined vars, and pipe failures</span>
+
+<span class="cmt"># --- Configuration ---</span>
+APP_DIR=<span class="str">"/var/www/myapp"</span>
+APP_SERVICE=<span class="str">"myapp"</span>
+DEPLOY_BRANCH=<span class="str">"main"</span>
+LOG_FILE=<span class="str">"/var/log/deploy.log"</span>
+
+<span class="cmt"># --- Helper function ---</span>
+<span class="fn">log</span>() {
+    <span class="fn">echo</span> <span class="str">"[$(date '+%Y-%m-%d %H:%M:%S')] $1"</span> | <span class="fn">tee</span> <span class="flag">-a</span> $LOG_FILE
+}
+
+<span class="fn">log</span> <span class="str">"=== Deployment started ==="</span>
+
+<span class="cmt"># --- Step 1: Pull latest code ---</span>
+<span class="fn">log</span> <span class="str">"Pulling latest code from $DEPLOY_BRANCH..."</span>
+<span class="fn">cd</span> $APP_DIR
+<span class="fn">git</span> pull origin $DEPLOY_BRANCH
+
+<span class="cmt"># --- Step 2: Install dependencies ---</span>
+<span class="fn">log</span> <span class="str">"Installing dependencies..."</span>
+<span class="fn">npm</span> ci <span class="flag">--production</span>   <span class="cmt"># npm ci is faster and more reliable than npm install</span>
+
+<span class="cmt"># --- Step 3: Build ---</span>
+<span class="fn">log</span> <span class="str">"Building application..."</span>
+<span class="fn">npm</span> run build
+
+<span class="cmt"># --- Step 4: Restart service ---</span>
+<span class="fn">log</span> <span class="str">"Restarting $APP_SERVICE service..."</span>
+<span class="fn">systemctl</span> restart $APP_SERVICE
+
+<span class="cmt"># --- Step 5: Verify it started ---</span>
+<span class="fn">sleep</span> 3
+<span class="kw">if</span> <span class="fn">systemctl</span> is-active <span class="flag">--quiet</span> $APP_SERVICE; <span class="kw">then</span>
+    <span class="fn">log</span> <span class="str">"=== Deployment successful ==="</span>
+<span class="kw">else</span>
+    <span class="fn">log</span> <span class="str">"=== ERROR: Service failed to start ==="</span>
+    <span class="fn">systemctl</span> status $APP_SERVICE
+    <span class="kw">exit</span> 1
+<span class="kw">fi</span></code></pre>
+
+      <h2>Python for DevOps Automation</h2>
+      <p>
+        Bash is excellent for gluing commands together and orchestrating processes. But when
+        your task involves parsing JSON, making multiple API calls, handling complex logic, or
+        interacting with cloud provider APIs, Python is the better tool. Python is readable,
+        has a rich ecosystem of libraries, and is available on virtually every system.
+      </p>
+
+      <h3>The Basics You Need for DevOps</h3>
+      <pre><code><span class="cmt"># Run a Python script</span>
+python3 script.py
+
+<span class="cmt"># Install a package (pip is Python's package manager)</span>
+pip3 install requests boto3 pyyaml</code></pre>
+
+      <pre><code><span class="cmt"># Reading environment variables (the safe way to handle secrets)</span>
+<span class="kw">import</span> os
+
+API_KEY = os.environ.get(<span class="str">'API_KEY'</span>)
+<span class="kw">if not</span> API_KEY:
+    <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="str">"API_KEY environment variable is required"</span>)
+
+APP_URL = os.environ.get(<span class="str">'APP_URL'</span>, <span class="str">'http://localhost:3000'</span>)
+<span class="cmt"># The second argument is the default value if the variable isn't set</span></code></pre>
+
+      <pre><code><span class="cmt"># Making HTTP requests with the requests library</span>
+<span class="kw">import</span> requests
+
+response = requests.get(<span class="str">'https://api.example.com/users'</span>, headers={
+    <span class="str">'Authorization'</span>: <span class="fn">f</span><span class="str">'Bearer {API_KEY}'</span>,
+    <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span>
+})
+
+<span class="cmt"># Check if request succeeded</span>
+response.raise_for_status()   <span class="cmt"># Raises exception for 4xx/5xx status codes</span>
+
+<span class="cmt"># Parse the JSON response</span>
+data = response.json()        <span class="cmt"># Converts JSON string to Python dict/list</span>
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"Found {len(data['users'])} users"</span>)</code></pre>
+
+      <h3>A Real-World Health Check Script</h3>
+      <p>
+        Here is a Python script that checks whether an application is healthy. If it is not,
+        it sends an alert to a Slack channel. This exact pattern is used in production monitoring
+        systems at every scale.
+      </p>
+
+      <pre><code><span class="cmt">#!/usr/bin/env python3</span>
+<span class="str">"""
+Application health check script.
+Checks the /health endpoint and sends a Slack alert on failure.
+Usage: python3 health_check.py
+Environment variables: APP_URL, SLACK_WEBHOOK
+"""</span>
+
+<span class="kw">import</span> requests
+<span class="kw">import</span> os
+<span class="kw">import</span> sys
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+
+<span class="kw">def</span> <span class="fn">check_health</span>(url: str) -> <span class="fn">dict</span>:
+    <span class="str">"""Check the health endpoint. Returns a status dict."""</span>
+    <span class="kw">try</span>:
+        response = requests.<span class="fn">get</span>(<span class="fn">f</span><span class="str">"{url}/health"</span>, timeout=<span class="num">10</span>)
+        <span class="kw">if</span> response.status_code == <span class="num">200</span>:
+            <span class="kw">return</span> {<span class="str">"status"</span>: <span class="str">"healthy"</span>, <span class="str">"code"</span>: <span class="num">200</span>}
+        <span class="kw">else</span>:
+            <span class="kw">return</span> {
+                <span class="str">"status"</span>: <span class="str">"unhealthy"</span>,
+                <span class="str">"code"</span>: response.status_code,
+                <span class="str">"message"</span>: <span class="fn">f</span><span class="str">"Unexpected status: {response.status_code}"</span>
+            }
+    <span class="kw">except</span> requests.exceptions.ConnectionError:
+        <span class="kw">return</span> {<span class="str">"status"</span>: <span class="str">"down"</span>, <span class="str">"message"</span>: <span class="str">"Connection refused — app is not running"</span>}
+    <span class="kw">except</span> requests.exceptions.Timeout:
+        <span class="kw">return</span> {<span class="str">"status"</span>: <span class="str">"down"</span>, <span class="str">"message"</span>: <span class="str">"Request timed out after 10 seconds"</span>}
+
+
+<span class="kw">def</span> <span class="fn">send_slack_alert</span>(webhook_url: str, message: str):
+    <span class="str">"""Send an alert to a Slack channel via webhook."""</span>
+    timestamp = datetime.<span class="fn">now</span>().<span class="fn">strftime</span>(<span class="str">"%Y-%m-%d %H:%M:%S"</span>)
+    payload = {
+        <span class="str">"text"</span>: <span class="fn">f</span><span class="str">"*ALERT* [{timestamp}] {message}"</span>
+    }
+    <span class="kw">try</span>:
+        requests.<span class="fn">post</span>(webhook_url, json=payload, timeout=<span class="num">5</span>)
+    <span class="kw">except</span> Exception <span class="kw">as</span> e:
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Failed to send Slack alert: {e}"</span>, file=sys.stderr)
+
+
+<span class="kw">def</span> <span class="fn">main</span>():
+    app_url = os.environ.<span class="fn">get</span>(<span class="str">"APP_URL"</span>, <span class="str">"http://localhost:3000"</span>)
+    slack_webhook = os.environ.<span class="fn">get</span>(<span class="str">"SLACK_WEBHOOK"</span>)
+
+    result = <span class="fn">check_health</span>(app_url)
+
+    <span class="kw">if</span> result[<span class="str">"status"</span>] == <span class="str">"healthy"</span>:
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"OK: {app_url} is healthy"</span>)
+    <span class="kw">else</span>:
+        error_msg = result.<span class="fn">get</span>(<span class="str">"message"</span>, <span class="str">"Unknown error"</span>)
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"FAIL: {app_url} is {result['status']}: {error_msg}"</span>, file=sys.stderr)
+
+        <span class="kw">if</span> slack_webhook:
+            <span class="fn">send_slack_alert</span>(slack_webhook, <span class="fn">f</span><span class="str">"{app_url} is {result['status']}: {error_msg}"</span>)
+
+        sys.<span class="fn">exit</span>(<span class="num">1</span>)   <span class="cmt"># Non-zero exit code signals failure to calling scripts</span>
+
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    <span class="fn">main</span>()</code></pre>
+
+      <h3>Python for File and Config Operations</h3>
+      <pre><code><span class="kw">import</span> json
+<span class="kw">import</span> yaml
+
+<span class="cmt"># Read a JSON configuration file</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"config.json"</span>) <span class="kw">as</span> f:
+    config = json.<span class="fn">load</span>(f)
+    database_url = config[<span class="str">"database"</span>][<span class="str">"url"</span>]
+
+<span class="cmt"># Read a YAML file (Kubernetes configs, CI/CD pipelines use YAML)</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"deployment.yaml"</span>) <span class="kw">as</span> f:
+    deployment = yaml.<span class="fn">safe_load</span>(f)
+    image = deployment[<span class="str">"spec"</span>][<span class="str">"template"</span>][<span class="str">"spec"</span>][<span class="str">"containers"</span>][<span class="num">0</span>][<span class="str">"image"</span>]
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Deploying image: {image}"</span>)
+
+<span class="cmt"># Count lines in a log file</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"/var/log/app.log"</span>) <span class="kw">as</span> f:
+    lines = f.<span class="fn">readlines</span>()
+    error_count = <span class="fn">sum</span>(<span class="num">1</span> <span class="kw">for</span> line <span class="kw">in</span> lines <span class="kw">if</span> <span class="str">"ERROR"</span> <span class="kw">in</span> line)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Found {error_count} errors in {len(lines)} total log lines"</span>)</code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 When to Use Bash vs. Python</div>
+        <p>
+          Use <strong>Bash</strong> for: running other programs, piping commands together, simple
+          file operations, and deployment scripts that are mostly shell commands with a little glue.
+        </p>
+        <p>
+          Use <strong>Python</strong> for: parsing JSON or YAML, making API calls, complex logic,
+          cloud SDK interactions (AWS boto3, GCP libraries), and any script that will grow beyond
+          20-30 lines.
+        </p>
+        <p>
+          Even a 5-line script that saves you 10 minutes every day saves you over 60 hours a year.
+          The first time you automate a repetitive task, it pays for itself within a week.
+        </p>
+      </div>
+
+      <div class="box fun-fact">
+        <div class="box-title">📊 Fun Fact: Git by the Numbers</div>
+        <p>
+          GitHub alone hosts over 420 million repositories. The Linux kernel — which Linus Torvalds
+          created Git specifically to manage — has over 1 million commits in its Git history, made
+          by over 21,000 developers over 30+ years. Git was able to store and navigate all of that
+          history. A <code>git log --oneline</code> on the Linux kernel takes less than a second.
+        </p>
+      </div>
+
+      <div class="summary">
+        <h4>Chapter Summary</h4>
+        <ul>
+          <li>Git is a version control system that saves named checkpoints (commits) of your project and lets you branch, experiment, and merge changes safely.</li>
+          <li>The daily Git workflow: <code>git status</code> → <code>git add</code> → <code>git commit</code> → <code>git push</code> → <code>git pull</code>.</li>
+          <li>Branches allow parallel development. Keep feature branches short-lived. Trunk-based development (committing to main frequently) works best for CI/CD.</li>
+          <li>Bash scripting automates repetitive tasks. Master variables, conditionals, loops, functions, and exit codes. Always use <code>set -e</code> in deployment scripts.</li>
+          <li>Pipelines (<code>|</code>) are one of Bash's superpowers: chain simple commands into powerful data-processing workflows.</li>
+          <li>Python is the right tool for complex DevOps automation: API calls, JSON parsing, cloud SDK interactions, health checks, and anything that outgrows a simple shell script.</li>
+          <li>Read environment variables for secrets and configuration. Never hardcode credentials in scripts.</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="chapter-3.html">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Ch 3 · The Internet's Invisible Roads</span>
+        </a>
+        <a href="exercises.html" class="next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Part 1 Exercises</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">☰</button>
+<script src="../nav.js"></script>
+</body>
+</html>

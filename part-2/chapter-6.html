@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 6: CI/CD &amp; GitHub Actions — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-2">Part 2 · Chapter 6</div>
+        <h1>CI/CD &amp; GitHub Actions</h1>
+        <p class="chapter-intro">How code goes from a git push to a running production deployment, automatically.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>What you'll learn in this chapter</h4>
+        <ul>
+          <li>What CI and CD mean and why the distinction matters</li>
+          <li>How GitHub Actions works: workflows, jobs, steps, triggers, and runners</li>
+          <li>A complete, production-ready CI/CD pipeline for a Node.js application</li>
+          <li>How to use secrets, caching, and the Actions Marketplace</li>
+          <li>GitLab CI/CD and how it compares to GitHub Actions</li>
+          <li>Branch protection rules and PR gates — how teams ship code confidently</li>
+          <li>Deployment strategies: rolling, blue/green, and canary releases</li>
+        </ul>
+      </div>
+
+      <h2>The Factory Assembly Line Analogy</h2>
+      <p>
+        Before assembly lines, cars were built by hand — one at a time, by skilled craftspeople who each
+        assembled an entire car from start to finish. It took weeks. The quality varied depending on who
+        built it and on what day. Scaling up meant hiring more craftspeople and hoping each one worked
+        the same way.
+      </p>
+      <p>
+        Henry Ford's insight was not that workers were lazy. It was that the <em>process</em> was
+        inefficient. Break the work into standardized steps. Have each step performed in sequence by
+        a specialist. Automate what can be automated. The result: cars built identically, reliably,
+        in a fraction of the time.
+      </p>
+      <p>
+        CI/CD is your software factory assembly line. Every time a developer pushes code, a robot
+        factory takes over. It checks out the code, installs dependencies, runs the linter, runs the
+        tests, builds the Docker image, pushes it to a registry, and deploys it to the server.
+        No human needs to type a single command. No steps get accidentally skipped on a Friday
+        afternoon when everyone wants to go home. The process is identical every single time.
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">🏭 The Assembly Line Analogy</div>
+        <p>
+          CI/CD is your software assembly line. A developer's <code>git push</code> is the raw
+          material entering the factory. The pipeline is the conveyor belt — each station (job)
+          performs one task. The finished product rolling off the end is a verified, tested,
+          deployed application running in production. No human hands touch it between the push
+          and the deploy.
+        </p>
+      </div>
+
+      <h2>CI vs CD — What's the Difference?</h2>
+      <p>
+        These two terms are often used together, but they mean different things and represent
+        different levels of automation maturity.
+      </p>
+
+      <h3>Continuous Integration (CI)</h3>
+      <p>
+        Continuous Integration means that every time a developer pushes code — even a small
+        change to a single file — an automated process immediately kicks off: check out the
+        code, install dependencies, run the linter, run the tests, report a pass or fail.
+        The key word is <em>continuous</em>. Not "we run tests before big releases." Not
+        "we run tests when someone remembers." Every. Single. Push.
+      </p>
+      <p>
+        The benefit: bugs are caught within minutes of being introduced. When you write the
+        breaking code and the test fails five minutes later, you know exactly what you did.
+        Compare that to finding the same bug two weeks later when ten other developers have
+        built on top of your code. CI compresses the feedback loop dramatically.
+      </p>
+
+      <h3>Continuous Delivery (CD)</h3>
+      <p>
+        Continuous Delivery adds the next step: the application is always in a deployable state.
+        After CI passes, the artifact (a Docker image, a zip file, a binary) is built and
+        packaged, ready to be deployed at any time with a single button click. The deployment
+        itself may still require a human decision — but the preparation is automatic. Teams
+        practicing Continuous Delivery can deploy on demand, multiple times a day if they choose.
+      </p>
+
+      <h3>Continuous Deployment</h3>
+      <p>
+        Continuous Deployment removes even the human decision: if the tests pass, the code
+        goes straight to production automatically. No button press. This is the most aggressive
+        form of CD, practiced by companies like Netflix, Amazon, and Etsy. When you push 50
+        small commits a day and trust your test suite completely, this level of automation
+        makes sense. For most teams starting out, Continuous Delivery is the right target.
+      </p>
+
+      <div class="diagram">
+<pre>Continuous Integration:
+  git push → checkout → install → lint → test → report ✓/✗
+
+Continuous Delivery:
+  git push → checkout → lint → test → build image → push to registry → [HUMAN APPROVES] → deploy
+
+Continuous Deployment:
+  git push → checkout → lint → test → build image → push to registry → deploy automatically</pre>
+      </div>
+
+      <div class="box key-term">
+        <div class="box-title">📚 Key Term: Pipeline</div>
+        <p>
+          A <strong>CI/CD pipeline</strong> is the automated sequence of steps that runs when
+          code is pushed. Each step either passes or fails. If any step fails, the pipeline stops
+          and the team is notified. A pipeline ensures that every piece of code that reaches
+          production has been through the same quality gates, every time.
+        </p>
+      </div>
+
+      <h2>GitHub Actions — The Concepts</h2>
+      <p>
+        GitHub Actions is the CI/CD platform built directly into GitHub. It is free for public
+        repositories and has a generous free tier for private ones. Because it lives inside GitHub,
+        it has deep integration: it can read your code, use your secrets, report status on pull
+        requests, and deploy using your repository's identity — with no third-party service needed.
+      </p>
+
+      <h3>Workflows</h3>
+      <p>
+        A <strong>workflow</strong> is a YAML file that lives in the <code>.github/workflows/</code>
+        directory of your repository. You can have many workflow files — one for CI, one for
+        scheduled tasks, one for releasing. Each workflow runs independently.
+      </p>
+
+      <h3>Triggers (on)</h3>
+      <p>
+        Workflows run in response to <strong>events</strong> — things that happen in your repository.
+        The most common triggers are <code>push</code> (code pushed to a branch), <code>pull_request</code>
+        (a PR is opened, updated, or merged), and <code>schedule</code> (run on a cron schedule).
+        You can also trigger workflows manually with <code>workflow_dispatch</code>.
+      </p>
+
+      <h3>Jobs</h3>
+      <p>
+        A workflow contains one or more <strong>jobs</strong>. Each job runs on a fresh virtual machine
+        called a <strong>runner</strong>. Jobs run in parallel by default. If one job needs the result
+        of another, you use <code>needs:</code> to declare the dependency, and GitHub will run them
+        in sequence.
+      </p>
+
+      <h3>Steps</h3>
+      <p>
+        Each job contains a list of <strong>steps</strong>. A step is either a shell command
+        (<code>run:</code>) or a pre-built action (<code>uses:</code>). Steps within a job
+        share the same filesystem and runner environment, so a file created in one step is
+        available in the next.
+      </p>
+
+      <h3>Actions</h3>
+      <p>
+        An <strong>action</strong> is a reusable, pre-built step published to the GitHub Marketplace.
+        <code>actions/checkout@v4</code> checks out your code. <code>actions/setup-node@v4</code>
+        installs Node.js. <code>docker/build-push-action@v5</code> builds and pushes a Docker image.
+        There are thousands of community-built actions for almost any task imaginable.
+      </p>
+
+      <h2>A Production-Ready GitHub Actions Pipeline</h2>
+      <p>
+        Here is a complete, real-world CI/CD workflow for a Node.js application. It has three jobs
+        that run in sequence: test, then build and push the Docker image, then deploy to a server.
+        Study this carefully — it follows patterns you will see in virtually every professional
+        GitHub Actions setup.
+      </p>
+
+      <pre><code><span class="cmt"># .github/workflows/ci-cd.yml</span>
+<span class="kw">name</span>: <span class="str">CI/CD Pipeline</span>
+
+<span class="kw">on</span>:
+  <span class="kw">push</span>:
+    <span class="kw">branches</span>: [<span class="str">main</span>]
+  <span class="kw">pull_request</span>:
+    <span class="kw">branches</span>: [<span class="str">main</span>]
+
+<span class="kw">env</span>:
+  <span class="kw">NODE_VERSION</span>: <span class="str">'20'</span>
+  <span class="kw">REGISTRY</span>: <span class="str">ghcr.io</span>
+  <span class="kw">IMAGE_NAME</span>: <span class="str">${{ github.repository }}</span>
+
+<span class="kw">jobs</span>:
+  <span class="cmt">##############################################</span>
+  <span class="cmt"># JOB 1 — Test: lint, unit tests, integration</span>
+  <span class="cmt">##############################################</span>
+  <span class="fn">test</span>:
+    <span class="kw">name</span>: <span class="str">Test</span>
+    <span class="kw">runs-on</span>: <span class="str">ubuntu-latest</span>
+
+    <span class="kw">services</span>:
+      <span class="cmt"># Spin up a real PostgreSQL database for integration tests</span>
+      <span class="fn">postgres</span>:
+        <span class="kw">image</span>: <span class="str">postgres:16</span>
+        <span class="kw">env</span>:
+          <span class="kw">POSTGRES_PASSWORD</span>: <span class="str">testpass</span>
+          <span class="kw">POSTGRES_DB</span>: <span class="str">testdb</span>
+        <span class="kw">options</span>: &gt;-
+          <span class="str">--health-cmd pg_isready</span>
+          <span class="str">--health-interval 10s</span>
+          <span class="str">--health-timeout 5s</span>
+          <span class="str">--health-retries 5</span>
+
+    <span class="kw">steps</span>:
+      - <span class="kw">name</span>: <span class="str">Checkout code</span>
+        <span class="kw">uses</span>: <span class="str">actions/checkout@v4</span>
+
+      - <span class="kw">name</span>: <span class="str">Setup Node.js</span>
+        <span class="kw">uses</span>: <span class="str">actions/setup-node@v4</span>
+        <span class="kw">with</span>:
+          <span class="kw">node-version</span>: <span class="str">${{ env.NODE_VERSION }}</span>
+          <span class="kw">cache</span>: <span class="str">'npm'</span>         <span class="cmt"># caches node_modules between runs</span>
+
+      - <span class="kw">name</span>: <span class="str">Install dependencies</span>
+        <span class="kw">run</span>: <span class="fn">npm ci</span>
+
+      - <span class="kw">name</span>: <span class="str">Run linter</span>
+        <span class="kw">run</span>: <span class="fn">npm run lint</span>
+
+      - <span class="kw">name</span>: <span class="str">Run tests</span>
+        <span class="kw">run</span>: <span class="fn">npm test</span>
+        <span class="kw">env</span>:
+          <span class="kw">DATABASE_URL</span>: <span class="str">postgresql://postgres:testpass@localhost:5432/testdb</span>
+
+  <span class="cmt">##############################################</span>
+  <span class="cmt"># JOB 2 — Build image and push to registry</span>
+  <span class="cmt"># Only runs after test passes, and only on main</span>
+  <span class="cmt">##############################################</span>
+  <span class="fn">build-and-push</span>:
+    <span class="kw">name</span>: <span class="str">Build &amp; Push Docker Image</span>
+    <span class="kw">needs</span>: <span class="str">test</span>                          <span class="cmt"># only runs if test passes</span>
+    <span class="kw">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="kw">if</span>: <span class="str">github.ref == 'refs/heads/main'</span>   <span class="cmt"># only on main branch</span>
+
+    <span class="kw">permissions</span>:
+      <span class="kw">contents</span>: <span class="str">read</span>
+      <span class="kw">packages</span>: <span class="str">write</span>                    <span class="cmt"># needed to push to GHCR</span>
+
+    <span class="kw">steps</span>:
+      - <span class="kw">uses</span>: <span class="str">actions/checkout@v4</span>
+
+      - <span class="kw">name</span>: <span class="str">Log in to GitHub Container Registry</span>
+        <span class="kw">uses</span>: <span class="str">docker/login-action@v3</span>
+        <span class="kw">with</span>:
+          <span class="kw">registry</span>: <span class="str">${{ env.REGISTRY }}</span>
+          <span class="kw">username</span>: <span class="str">${{ github.actor }}</span>
+          <span class="kw">password</span>: <span class="str">${{ secrets.GITHUB_TOKEN }}</span>
+
+      - <span class="kw">name</span>: <span class="str">Extract image metadata</span>
+        <span class="kw">id</span>: <span class="str">meta</span>
+        <span class="kw">uses</span>: <span class="str">docker/metadata-action@v5</span>
+        <span class="kw">with</span>:
+          <span class="kw">images</span>: <span class="str">${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}</span>
+          <span class="kw">tags</span>: |
+            <span class="str">type=sha</span>               <span class="cmt"># tag with git commit SHA</span>
+            <span class="str">type=raw,value=latest</span>
+
+      - <span class="kw">name</span>: <span class="str">Build and push Docker image</span>
+        <span class="kw">uses</span>: <span class="str">docker/build-push-action@v5</span>
+        <span class="kw">with</span>:
+          <span class="kw">context</span>: <span class="str">.</span>
+          <span class="kw">push</span>: <span class="str">true</span>
+          <span class="kw">tags</span>: <span class="str">${{ steps.meta.outputs.tags }}</span>
+          <span class="kw">cache-from</span>: <span class="str">type=gha</span>   <span class="cmt"># use GitHub Actions layer cache</span>
+          <span class="kw">cache-to</span>: <span class="str">type=gha,mode=max</span>
+
+  <span class="cmt">##############################################</span>
+  <span class="cmt"># JOB 3 — Deploy to production server via SSH</span>
+  <span class="cmt">##############################################</span>
+  <span class="fn">deploy</span>:
+    <span class="kw">name</span>: <span class="str">Deploy to Production</span>
+    <span class="kw">needs</span>: <span class="str">build-and-push</span>
+    <span class="kw">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="kw">if</span>: <span class="str">github.ref == 'refs/heads/main'</span>
+
+    <span class="kw">steps</span>:
+      - <span class="kw">name</span>: <span class="str">Deploy via SSH</span>
+        <span class="kw">uses</span>: <span class="str">appleboy/ssh-action@v1</span>
+        <span class="kw">with</span>:
+          <span class="kw">host</span>: <span class="str">${{ secrets.SERVER_HOST }}</span>
+          <span class="kw">username</span>: <span class="str">${{ secrets.SERVER_USER }}</span>
+          <span class="kw">key</span>: <span class="str">${{ secrets.SSH_PRIVATE_KEY }}</span>
+          <span class="kw">script</span>: |
+            <span class="fn">docker pull</span> <span class="str">ghcr.io/${{ github.repository }}:latest</span>
+            <span class="fn">docker stop</span> <span class="str">myapp</span> || <span class="fn">true</span>
+            <span class="fn">docker rm</span>   <span class="str">myapp</span> || <span class="fn">true</span>
+            <span class="fn">docker run</span> <span class="flag">-d --name</span> <span class="str">myapp</span> \
+              <span class="flag">-p</span> <span class="str">3000:3000</span> \
+              <span class="flag">--env-file</span> <span class="str">/etc/myapp.env</span> \
+              <span class="flag">--restart</span> <span class="str">unless-stopped</span> \
+              <span class="str">ghcr.io/${{ github.repository }}:latest</span></code></pre>
+
+      <p>
+        Let's trace what happens when a developer pushes to main. The <code>test</code> job starts
+        immediately on a fresh Ubuntu runner. It spins up a real PostgreSQL service container in the
+        same runner network, installs Node.js, runs the linter, and runs the tests against the real
+        database. If any step fails, the pipeline stops and the developer gets an email and a red
+        indicator on their commit.
+      </p>
+      <p>
+        If all tests pass, the <code>build-and-push</code> job starts. It logs into GitHub Container
+        Registry using the automatically-provided <code>GITHUB_TOKEN</code> (no manual secret needed),
+        builds the Docker image, and pushes it tagged with both the commit SHA and <code>latest</code>.
+      </p>
+      <p>
+        Finally, the <code>deploy</code> job SSHes into the production server, pulls the new image,
+        stops and removes the old container, and starts a fresh one. The entire process — from push
+        to live production — takes about four minutes.
+      </p>
+
+      <h2>Secrets and Environment Variables</h2>
+      <p>
+        Pipelines need sensitive information: SSH keys, database passwords, API tokens. You never
+        put these in your YAML file or in your repository. GitHub Actions has a Secrets system:
+        go to your repository's Settings, find Secrets and Variables under Actions, and add
+        key-value pairs. They are encrypted at rest and masked in logs — even if a step accidentally
+        prints them, GitHub replaces the value with asterisks.
+      </p>
+      <p>
+        In your workflow, reference them as <code>${{ secrets.SECRET_NAME }}</code>. The value
+        is injected at runtime and never visible to anyone after it is saved.
+      </p>
+
+      <div class="box warning">
+        <div class="box-title">⚠️ Never Commit Secrets</div>
+        <p>
+          It sounds obvious, but it happens constantly. A developer accidentally commits a
+          <code>.env</code> file with real credentials. GitHub scans public repositories for
+          known secret patterns and will alert you — but if the repository was public even for
+          a minute, assume the secret was already harvested by automated scrapers. Rotate
+          it immediately. Use a <code>.gitignore</code> that excludes <code>.env</code> files,
+          and use repository secrets for anything sensitive in pipelines.
+        </p>
+      </div>
+
+      <h2>Caching Dependencies for Speed</h2>
+      <p>
+        Every job starts on a fresh runner. That means every run starts with no <code>node_modules</code>,
+        no npm cache, nothing. Without caching, every run re-downloads hundreds of megabytes of
+        dependencies. With caching, the second run and every run after it reuses the cached modules.
+        The difference is often three minutes versus fifteen seconds for the install step alone.
+      </p>
+      <p>
+        The <code>actions/setup-node@v4</code> action handles caching automatically when you add
+        <code>cache: 'npm'</code>. It caches based on a hash of your <code>package-lock.json</code>.
+        If your dependencies haven't changed, the cached version is restored. If <code>package-lock.json</code>
+        changes (you added or removed a package), it reinstalls fresh and saves a new cache.
+      </p>
+
+      <h2>Matrix Builds — Test Against Multiple Versions</h2>
+      <p>
+        What if your library needs to work on Node.js 18, 20, and 22? Instead of three separate
+        jobs, use a matrix strategy. GitHub Actions runs the job once for each combination of
+        the matrix values, in parallel.
+      </p>
+
+      <pre><code><span class="fn">test</span>:
+  <span class="kw">strategy</span>:
+    <span class="kw">matrix</span>:
+      <span class="kw">node-version</span>: [<span class="str">18</span>, <span class="str">20</span>, <span class="str">22</span>]
+      <span class="kw">os</span>: [<span class="str">ubuntu-latest</span>, <span class="str">windows-latest</span>]
+
+  <span class="kw">runs-on</span>: <span class="str">${{ matrix.os }}</span>
+
+  <span class="kw">steps</span>:
+    - <span class="kw">uses</span>: <span class="str">actions/checkout@v4</span>
+    - <span class="kw">uses</span>: <span class="str">actions/setup-node@v4</span>
+      <span class="kw">with</span>:
+        <span class="kw">node-version</span>: <span class="str">${{ matrix.node-version }}</span>
+    - <span class="kw">run</span>: <span class="fn">npm ci &amp;&amp; npm test</span></code></pre>
+
+      <p>
+        This creates six parallel runs: Node 18+Ubuntu, Node 18+Windows, Node 20+Ubuntu, Node 20+Windows,
+        Node 22+Ubuntu, Node 22+Windows. If any combination fails, you know exactly which environment
+        breaks. GitHub reports all six results in the pull request.
+      </p>
+
+      <h2>GitLab CI/CD — The Alternative</h2>
+      <p>
+        Not every team uses GitHub. GitLab is widely used in enterprise and self-hosted environments.
+        GitLab CI/CD works similarly but uses a single <code>.gitlab-ci.yml</code> at the root of
+        your repository. The concepts map directly: stages instead of jobs with dependencies,
+        the same idea of runners, the same idea of secrets (called CI/CD variables in GitLab).
+      </p>
+
+      <pre><code><span class="cmt"># .gitlab-ci.yml</span>
+<span class="kw">stages</span>:
+  - <span class="str">test</span>
+  - <span class="str">build</span>
+  - <span class="str">deploy</span>
+
+<span class="fn">test</span>:
+  <span class="kw">stage</span>: <span class="str">test</span>
+  <span class="kw">image</span>: <span class="str">node:20-alpine</span>
+  <span class="kw">services</span>:
+    - <span class="str">postgres:16</span>
+  <span class="kw">variables</span>:
+    <span class="kw">POSTGRES_PASSWORD</span>: <span class="str">testpass</span>
+    <span class="kw">DATABASE_URL</span>: <span class="str">postgresql://postgres:testpass@postgres:5432/postgres</span>
+  <span class="kw">script</span>:
+    - <span class="fn">npm ci</span>
+    - <span class="fn">npm run lint</span>
+    - <span class="fn">npm test</span>
+
+<span class="fn">build</span>:
+  <span class="kw">stage</span>: <span class="str">build</span>
+  <span class="kw">image</span>: <span class="str">docker:24</span>
+  <span class="kw">services</span>:
+    - <span class="str">docker:dind</span>           <span class="cmt"># Docker-in-Docker — lets you run Docker inside CI</span>
+  <span class="kw">script</span>:
+    - <span class="fn">docker build</span> <span class="flag">-t</span> <span class="str">$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .</span>
+    - <span class="fn">docker push</span> <span class="str">$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA</span>
+    - <span class="fn">docker tag</span> <span class="str">$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:latest</span>
+    - <span class="fn">docker push</span> <span class="str">$CI_REGISTRY_IMAGE:latest</span>
+  <span class="kw">only</span>:
+    - <span class="str">main</span>
+
+<span class="fn">deploy</span>:
+  <span class="kw">stage</span>: <span class="str">deploy</span>
+  <span class="kw">script</span>:
+    - <span class="fn">ssh</span> <span class="str">deploy@$SERVER_HOST</span> <span class="str">"docker pull $CI_REGISTRY_IMAGE:latest &amp;&amp; docker compose up -d"</span>
+  <span class="kw">environment</span>:
+    <span class="kw">name</span>: <span class="str">production</span>
+    <span class="kw">url</span>: <span class="str">https://myapp.example.com</span>
+  <span class="kw">only</span>:
+    - <span class="str">main</span></code></pre>
+
+      <h2>Branch Protection and PR Gates</h2>
+      <p>
+        A CI pipeline is only useful if it can actually block bad code from reaching production.
+        That is where branch protection rules come in. In GitHub, go to your repository's
+        Settings &rarr; Branches, and add a branch protection rule for <code>main</code>.
+      </p>
+      <p>
+        The key settings to enable: "Require a pull request before merging" (no pushing directly
+        to main), "Require status checks to pass before merging" (CI must pass), and "Require
+        branches to be up to date before merging" (prevents merging stale PRs).
+      </p>
+      <p>
+        With these rules in place, this is the only path to production: open a PR, CI runs,
+        a team member reviews, CI passes, only then can it be merged. This process catches
+        bugs, enforces standards, and creates a paper trail of every change. Elite engineering
+        teams live and breathe this workflow.
+      </p>
+
+      <div class="box tip">
+        <div class="box-title">💡 Environments and Approval Gates</div>
+        <p>
+          GitHub Actions supports "Environments" — named deployment targets like
+          <code>staging</code> and <code>production</code>. You can require manual approval
+          before a job that targets the production environment runs. This gives you automated
+          builds and tests while still keeping a human in the loop for the final deploy to
+          production — the best of both worlds for risk-conscious teams.
+        </p>
+      </div>
+
+      <h2>Deployment Strategies</h2>
+      <p>
+        How you replace an old version of your application with a new one matters enormously
+        for reliability. There are three main strategies, each with different tradeoffs.
+      </p>
+
+      <h3>Rolling Deployment</h3>
+      <p>
+        Replace running instances of the old version one by one with the new version. At any
+        point during the rollout, some instances run the new version and some run the old.
+        Traffic is distributed across all of them. This achieves zero-downtime deploys but
+        means briefly running two versions simultaneously — a problem if the new version is
+        not backward-compatible with the old one's database schema.
+      </p>
+
+      <h3>Blue/Green Deployment</h3>
+      <p>
+        Run two identical production environments: "blue" (current) and "green" (new).
+        Deploy the new version to green. Run tests against green. When you're confident,
+        flip a load balancer switch to send all traffic to green in an instant. Blue is now
+        idle but available. If something goes wrong, flip the switch back — rollback is
+        immediate and zero-risk. The cost: you are running double the infrastructure
+        during the transition.
+      </p>
+
+      <h3>Canary Deployment</h3>
+      <p>
+        Named after the canary-in-a-coal-mine concept — use a small group to detect danger
+        before the whole group is exposed. Deploy the new version to a small percentage of
+        servers (say, 5%). Route 5% of real user traffic to the new version while 95% stays
+        on the old. Monitor error rates, latency, and user behavior. If the canary looks
+        healthy, gradually increase to 10%, then 25%, then 50%, then 100%. If the canary
+        looks sick, roll back immediately — only 5% of users ever saw the broken version.
+        This is the gold standard for large-scale production deployments.
+      </p>
+
+      <div class="diagram">
+<pre>Blue/Green:
+  Load Balancer → [Blue: v1.0] 100% traffic → test passes → switch
+  Load Balancer → [Green: v2.0] 100% traffic → rollback = flip back
+
+Canary:
+  t=0:   [v1.0] 95%  [v2.0] 5%   → watch metrics
+  t=1h:  [v1.0] 75%  [v2.0] 25%  → still healthy
+  t=4h:  [v1.0] 0%   [v2.0] 100% → full rollout complete</pre>
+      </div>
+
+      <h2>Useful Patterns and Pro Tips</h2>
+
+      <h3>Reusable Workflows</h3>
+      <p>
+        GitHub Actions lets you define a workflow in one repository and call it from others using
+        <code>uses: myorg/shared-workflows/.github/workflows/build.yml@main</code>. This is how
+        large organizations standardize their CI/CD patterns across dozens of repositories without
+        copy-pasting YAML everywhere.
+      </p>
+
+      <h3>Composite Actions</h3>
+      <p>
+        If you find yourself repeating the same three steps (setup Node, install, build) across
+        multiple workflows, package them into a composite action. A composite action is a local
+        folder with an <code>action.yml</code> file that bundles steps together. Call it with
+        <code>uses: ./.github/actions/build-node-app</code>.
+      </p>
+
+      <h3>Artifact Uploads</h3>
+      <p>
+        Need to pass files between jobs (like a compiled binary, or test coverage reports)?
+        Use <code>actions/upload-artifact</code> to save them from one job and
+        <code>actions/download-artifact</code> to retrieve them in the next.
+      </p>
+
+      <div class="summary">
+        <h4>Chapter Summary</h4>
+        <ul>
+          <li>Continuous Integration means every code push automatically triggers testing — catching bugs within minutes of introduction rather than weeks later.</li>
+          <li>Continuous Delivery ensures the application is always in a deployable state. Continuous Deployment goes further and deploys automatically when tests pass.</li>
+          <li>GitHub Actions uses YAML workflows in <code>.github/workflows/</code>. Workflows have triggers, jobs, and steps. Jobs run on fresh runners and can depend on each other.</li>
+          <li>Use repository secrets for sensitive data — never put credentials in YAML files. Reference them as <code>${{ secrets.MY_SECRET }}</code>.</li>
+          <li>Branch protection rules enforce that CI must pass and code must be reviewed before anything merges to main — the foundation of reliable team workflows.</li>
+          <li>Rolling deployments replace instances one by one. Blue/green runs two environments and switches traffic instantly. Canary gradually rolls out to a small percentage before going to 100%.</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="chapter-5.html">
+          <span class="nav-label">&larr; Previous</span>
+          <span class="nav-title">Ch 5 &middot; Docker</span>
+        </a>
+        <a href="chapter-7.html" class="next">
+          <span class="nav-label">Next &rarr;</span>
+          <span class="nav-title">Ch 7 &middot; Kubernetes</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">&#9776;</button>
+<script src="../nav.js"></script>
+</body>
+</html>

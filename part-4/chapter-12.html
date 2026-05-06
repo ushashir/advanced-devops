@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 12: Terraform: LEGO for Servers — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-4">Part 4 · Chapter 12</div>
+        <h1>Terraform: LEGO Instructions for Servers</h1>
+        <p class="chapter-intro">Write code once, build infrastructure anywhere — repeatably and reliably.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>What you'll learn in this chapter</h4>
+        <ul>
+          <li>What Infrastructure as Code (IaC) is and why it solved one of DevOps's biggest headaches</li>
+          <li>Terraform's core concepts: providers, resources, variables, outputs, state, and modules</li>
+          <li>How to write a complete Terraform configuration that builds real AWS infrastructure</li>
+          <li>The three-command Terraform workflow: init, plan, apply</li>
+          <li>Why Terraform state is sacred and how to manage it safely with remote backends</li>
+          <li>How to build reusable infrastructure with Terraform modules</li>
+          <li>OpenTofu — the open-source Terraform fork and why it exists</li>
+        </ul>
+      </div>
+
+      <h2>The LEGO Instructions Analogy</h2>
+      <p>
+        Imagine you spent a weekend building an incredible LEGO castle — towers, a drawbridge, a throne room,
+        the whole thing. Your friend sees it and says: "I want the exact same castle for my desk." You could
+        sit down with them and describe it verbally. "OK, first you put three 2x4 bricks here, then a 1x2
+        on top, then..." But no matter how carefully you describe it, they'll build something slightly different.
+        A tower ends up a block taller. The drawbridge faces the wrong way. It's close, but not the same.
+      </p>
+      <p>
+        The other option: you write precise, numbered LEGO instructions with pictures. Now anyone, anywhere,
+        at any time, can build the exact same castle perfectly. You could build it again yourself after taking
+        it apart. You could build ten castles simultaneously. The instructions are the source of truth.
+      </p>
+      <p>
+        <strong>Terraform is that instruction manual — but for cloud infrastructure instead of LEGO bricks.</strong>
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">🏰 The Problem Terraform Solves</div>
+        <p>
+          Before Infrastructure as Code (IaC), setting up servers meant clicking around in the AWS console —
+          manually creating VPCs, subnets, EC2 instances, security groups, load balancers, one by one.
+          Engineers would spend hours clicking through menus. If you needed to recreate the environment
+          for staging, or for disaster recovery, or for a new region, you'd have to click everything again —
+          from memory. And if you misremembered one setting, your staging environment would be subtly different
+          from production. Bugs would hide in those differences.
+        </p>
+        <p>
+          Terraform lets you write your entire infrastructure as code — plain text files that precisely describe
+          every server, network, database, and load balancer you need. Run <code>terraform apply</code> and it
+          builds everything, identically, every time. Your infrastructure is now version-controlled, reviewable
+          in pull requests, and perfectly reproducible.
+        </p>
+      </div>
+
+      <h2>The Terraform Workflow — Three Commands to Rule Them All</h2>
+      <p>
+        Terraform's daily workflow is remarkably simple. Think of it like a pilot's pre-flight checklist:
+        prepare, review, confirm. Three stages, in order, every time.
+      </p>
+
+      <div class="diagram">
+        <strong>The Core Terraform Loop</strong><br><br>
+        Write .tf files
+        &nbsp;→&nbsp; <code>terraform init</code> (download plugins)
+        &nbsp;→&nbsp; <code>terraform plan</code> (preview changes)
+        &nbsp;→&nbsp; <code>terraform apply</code> (make it real)
+        &nbsp;→&nbsp; <code>terraform destroy</code> (tear it down)
+      </div>
+
+      <ul>
+        <li><strong><code>terraform init</code></strong> — Downloads providers and modules. Like <code>npm install</code> before running a Node project. Must run this first in any new project directory.</li>
+        <li><strong><code>terraform plan</code></strong> — Shows exactly what Terraform would create, change, or destroy — without actually doing anything. This is your safety net. Read the plan before every apply.</li>
+        <li><strong><code>terraform apply</code></strong> — Executes the changes. Terraform shows you the plan one more time and asks for confirmation before touching anything.</li>
+        <li><strong><code>terraform destroy</code></strong> — Tears down all infrastructure managed by Terraform in the current configuration. Use with care.</li>
+      </ul>
+
+      <div class="box tip">
+        <div class="box-title">💡 Always Plan Before Apply</div>
+        <p>
+          The <code>plan</code> command is your best friend. It shows you the exact diff of what will change:
+          green <code>+</code> for creates, yellow <code>~</code> for updates, red <code>-</code> for destroys.
+          Make it a habit to always read the plan output carefully before typing <code>yes</code> on apply.
+          Many production incidents have been caused by someone applying without reading the plan.
+        </p>
+      </div>
+
+      <h2>Terraform Core Concepts</h2>
+      <p>
+        Terraform has a small vocabulary. Learn these seven terms and you understand 90% of how Terraform works.
+      </p>
+
+      <div class="box key-term">
+        <div class="box-title">📖 Key Terms</div>
+        <ul>
+          <li><strong>Provider</strong>: the plugin that talks to a specific platform (AWS, GCP, Azure, Cloudflare, GitHub, Datadog...). Like a driver for your specific car — Terraform's engine is the same, but the provider is what speaks AWS's language.</li>
+          <li><strong>Resource</strong>: a single piece of infrastructure that Terraform manages. An EC2 instance, an S3 bucket, a DNS record, a database — each is a resource block in your code.</li>
+          <li><strong>Data Source</strong>: a way to look up existing infrastructure that Terraform didn't create. "Find me the ID of the latest Ubuntu AMI" — that's a data source.</li>
+          <li><strong>Variable</strong>: an input parameter that makes your config reusable. Instead of hardcoding "us-east-1" in fifty places, define a variable and reference it everywhere.</li>
+          <li><strong>Output</strong>: a value that Terraform exports after apply. "Here is the IP address of the server I just created." Outputs are how stacks communicate with each other.</li>
+          <li><strong>State</strong>: Terraform's memory. It remembers every resource it ever created in a file called <code>terraform.tfstate</code>. Without state, Terraform doesn't know what already exists.</li>
+          <li><strong>Module</strong>: a reusable group of resources packaged as a directory. Like a function in programming — call it with inputs, get infrastructure out.</li>
+        </ul>
+      </div>
+
+      <h2>Your First Terraform Configuration</h2>
+      <p>
+        Let's build something real. The following configuration creates a complete AWS environment:
+        a VPC (private network), a public subnet, an internet gateway, a security group, and an EC2
+        instance running Nginx. This is a real, working setup you can deploy.
+      </p>
+      <p>
+        Terraform configurations live in files ending in <code>.tf</code>. By convention, teams split
+        configs across multiple files: <code>provider.tf</code> for provider setup, <code>variables.tf</code>
+        for inputs, <code>main.tf</code> for resources, and <code>outputs.tf</code> for exports.
+      </p>
+
+      <h3>provider.tf — Setting Up the AWS Connection</h3>
+      <pre><code><span class="cmt"># provider.tf</span>
+<span class="kw">terraform</span> {
+  required_version = <span class="str">&quot;&gt;= 1.5&quot;</span>
+  required_providers {
+    <span class="fn">aws</span> = {
+      source  = <span class="str">&quot;hashicorp/aws&quot;</span>
+      version = <span class="str">&quot;~&gt; 5.0&quot;</span>
+    }
+  }
+
+  <span class="cmt"># Store state in S3 — essential for teams</span>
+  <span class="kw">backend</span> <span class="str">&quot;s3&quot;</span> {
+    bucket = <span class="str">&quot;my-terraform-state-bucket&quot;</span>
+    key    = <span class="str">&quot;production/terraform.tfstate&quot;</span>
+    region = <span class="str">&quot;us-east-1&quot;</span>
+  }
+}
+
+<span class="kw">provider</span> <span class="str">&quot;aws&quot;</span> {
+  region = <span class="fn">var</span>.aws_region
+}</code></pre>
+
+      <h3>variables.tf — Input Parameters</h3>
+      <pre><code><span class="cmt"># variables.tf</span>
+<span class="kw">variable</span> <span class="str">&quot;aws_region&quot;</span> {
+  description = <span class="str">&quot;AWS region to deploy into&quot;</span>
+  type        = <span class="fn">string</span>
+  default     = <span class="str">&quot;us-east-1&quot;</span>
+}
+
+<span class="kw">variable</span> <span class="str">&quot;environment&quot;</span> {
+  description = <span class="str">&quot;Environment name (production, staging)&quot;</span>
+  type        = <span class="fn">string</span>
+}
+
+<span class="kw">variable</span> <span class="str">&quot;instance_type&quot;</span> {
+  description = <span class="str">&quot;EC2 instance type&quot;</span>
+  type        = <span class="fn">string</span>
+  default     = <span class="str">&quot;t3.micro&quot;</span>
+}</code></pre>
+
+      <h3>main.tf — The Infrastructure Resources</h3>
+      <pre><code><span class="cmt"># main.tf</span>
+
+<span class="cmt"># VPC — our private network in AWS</span>
+<span class="kw">resource</span> <span class="str">&quot;aws_vpc&quot;</span> <span class="str">&quot;main&quot;</span> {
+  cidr_block           = <span class="str">&quot;10.0.0.0/16&quot;</span>
+  enable_dns_hostnames = <span class="kw">true</span>
+
+  tags = {
+    Name        = <span class="str">&quot;${var.environment}-vpc&quot;</span>
+    Environment = <span class="fn">var</span>.environment
+  }
+}
+
+<span class="cmt"># Public subnet — where our web server lives</span>
+<span class="kw">resource</span> <span class="str">&quot;aws_subnet&quot;</span> <span class="str">&quot;public&quot;</span> {
+  vpc_id                  = <span class="fn">aws_vpc.main.id</span>
+  cidr_block              = <span class="str">&quot;10.0.1.0/24&quot;</span>
+  availability_zone       = <span class="str">&quot;${var.aws_region}a&quot;</span>
+  map_public_ip_on_launch = <span class="kw">true</span>
+
+  tags = {
+    Name = <span class="str">&quot;${var.environment}-public-subnet&quot;</span>
+  }
+}
+
+<span class="cmt"># Internet Gateway — the door to the outside world</span>
+<span class="kw">resource</span> <span class="str">&quot;aws_internet_gateway&quot;</span> <span class="str">&quot;main&quot;</span> {
+  vpc_id = <span class="fn">aws_vpc.main.id</span>
+  tags   = { Name = <span class="str">&quot;${var.environment}-igw&quot;</span> }
+}
+
+<span class="cmt"># Security Group — allow HTTP, HTTPS, and SSH</span>
+<span class="kw">resource</span> <span class="str">&quot;aws_security_group&quot;</span> <span class="str">&quot;web&quot;</span> {
+  name   = <span class="str">&quot;${var.environment}-web-sg&quot;</span>
+  vpc_id = <span class="fn">aws_vpc.main.id</span>
+
+  <span class="kw">ingress</span> {
+    from_port   = <span class="fn">80</span>
+    to_port     = <span class="fn">80</span>
+    protocol    = <span class="str">&quot;tcp&quot;</span>
+    cidr_blocks = [<span class="str">&quot;0.0.0.0/0&quot;</span>]
+  }
+
+  <span class="kw">ingress</span> {
+    from_port   = <span class="fn">443</span>
+    to_port     = <span class="fn">443</span>
+    protocol    = <span class="str">&quot;tcp&quot;</span>
+    cidr_blocks = [<span class="str">&quot;0.0.0.0/0&quot;</span>]
+  }
+
+  <span class="kw">ingress</span> {
+    from_port   = <span class="fn">22</span>
+    to_port     = <span class="fn">22</span>
+    protocol    = <span class="str">&quot;tcp&quot;</span>
+    cidr_blocks = [<span class="str">&quot;YOUR_IP/32&quot;</span>]  <span class="cmt"># Always restrict SSH to your IP</span>
+  }
+
+  <span class="kw">egress</span> {
+    from_port   = <span class="fn">0</span>
+    to_port     = <span class="fn">0</span>
+    protocol    = <span class="str">&quot;-1&quot;</span>
+    cidr_blocks = [<span class="str">&quot;0.0.0.0/0&quot;</span>]
+  }
+}
+
+<span class="cmt"># EC2 Instance — the web server itself</span>
+<span class="kw">resource</span> <span class="str">&quot;aws_instance&quot;</span> <span class="str">&quot;web&quot;</span> {
+  ami                    = <span class="fn">data.aws_ami.ubuntu.id</span>
+  instance_type          = <span class="fn">var</span>.instance_type
+  subnet_id              = <span class="fn">aws_subnet.public.id</span>
+  vpc_security_group_ids = [<span class="fn">aws_security_group.web.id</span>]
+  key_name               = <span class="str">&quot;my-key-pair&quot;</span>
+
+  user_data = <span class="str">&lt;&lt;-EOF
+    #!/bin/bash
+    apt-get update
+    apt-get install -y nginx
+    systemctl enable nginx
+    systemctl start nginx
+  EOF</span>
+
+  tags = {
+    Name        = <span class="str">&quot;${var.environment}-web-server&quot;</span>
+    Environment = <span class="fn">var</span>.environment
+  }
+}
+
+<span class="cmt"># Data source: look up the latest Ubuntu 22.04 AMI</span>
+<span class="kw">data</span> <span class="str">&quot;aws_ami&quot;</span> <span class="str">&quot;ubuntu&quot;</span> {
+  most_recent = <span class="kw">true</span>
+  owners      = [<span class="str">&quot;099720109477&quot;</span>]  <span class="cmt"># Canonical's AWS account ID</span>
+
+  filter {
+    name   = <span class="str">&quot;name&quot;</span>
+    values = [<span class="str">&quot;ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*&quot;</span>]
+  }
+}</code></pre>
+
+      <h3>outputs.tf — Export Useful Values</h3>
+      <pre><code><span class="cmt"># outputs.tf</span>
+<span class="kw">output</span> <span class="str">&quot;web_server_ip&quot;</span> {
+  description = <span class="str">&quot;Public IP of the web server&quot;</span>
+  value       = <span class="fn">aws_instance.web.public_ip</span>
+}
+
+<span class="kw">output</span> <span class="str">&quot;vpc_id&quot;</span> {
+  description = <span class="str">&quot;ID of the created VPC&quot;</span>
+  value       = <span class="fn">aws_vpc.main.id</span>
+}</code></pre>
+
+      <h3>Deploying the Configuration</h3>
+      <pre><code><span class="cmt"># Step 1: Initialize (download the AWS provider plugin)</span>
+<span class="fn">terraform</span> init
+
+<span class="cmt"># Step 2: Preview what will be created</span>
+<span class="fn">terraform</span> plan <span class="flag">-var=</span><span class="str">"environment=staging"</span>
+
+<span class="cmt"># Step 3: Apply using a variables file</span>
+<span class="fn">terraform</span> apply <span class="flag">-var-file=</span><span class="str">"staging.tfvars"</span>
+
+<span class="cmt"># Show the current state of infrastructure</span>
+<span class="fn">terraform</span> show
+
+<span class="cmt"># List all resources Terraform is tracking</span>
+<span class="fn">terraform</span> state list
+
+<span class="cmt"># Tear everything down (prompts for confirmation)</span>
+<span class="fn">terraform</span> destroy</code></pre>
+
+      <div class="box fun-fact">
+        <div class="box-title">🤯 Fun Fact: How Fast Is Terraform?</div>
+        <p>
+          A well-written Terraform configuration can spin up a complete production environment — VPC,
+          subnets, security groups, load balancer, multiple EC2 instances, RDS database, and S3 buckets —
+          in under five minutes. What used to take a senior engineer an entire day of clicking through
+          AWS console is now five minutes of automated, reproducible, version-controlled work.
+        </p>
+      </div>
+
+      <h2>Terraform State — The Sacred Memory</h2>
+      <p>
+        Here's something that trips up every Terraform beginner: Terraform doesn't just look at your
+        <code>.tf</code> files and compare them to live AWS. It also keeps a <em>state file</em>
+        (<code>terraform.tfstate</code>) that records every resource it has ever created — the resource
+        IDs, IP addresses, configuration — everything.
+      </p>
+      <p>
+        Think of it like a landlord's ledger. The landlord (Terraform) keeps detailed records of every
+        apartment they manage. When you ask for changes, they check their ledger first: "I already created
+        that VPC — its ID is vpc-0abc123. I'll update it rather than create a new one." Without the ledger,
+        the landlord would try to create a brand new apartment in an already-occupied building — chaos.
+      </p>
+
+      <div class="diagram">
+        <strong>The State File Flow</strong><br><br>
+        Your .tf files (desired state)
+        &nbsp;+&nbsp; terraform.tfstate (current state)
+        &nbsp;→&nbsp; Terraform computes the diff
+        &nbsp;→&nbsp; Applies only what's necessary
+      </div>
+
+      <div class="box warning">
+        <div class="box-title">⚠️ The Three Rules of Terraform State</div>
+        <ol>
+          <li><strong>Never edit <code>terraform.tfstate</code> manually.</strong> The file has a precise format and internal checksums. Manual edits corrupt it. Use <code>terraform state</code> commands if you need to manipulate state.</li>
+          <li><strong>Never delete the state file.</strong> If you delete it, Terraform loses track of what it created. Your next <code>apply</code> will try to create everything again, causing resource conflicts and duplicate infrastructure.</li>
+          <li><strong>Never commit state to Git.</strong> State files contain sensitive values — database passwords, private keys, API tokens — in plain text. Store state in a remote backend like AWS S3 with DynamoDB for locking.</li>
+        </ol>
+      </div>
+
+      <h3>Remote State with S3 and DynamoDB</h3>
+      <p>
+        For any team project (more than one person), you must store state remotely so everyone shares
+        the same truth. AWS S3 stores the file; DynamoDB provides locking so two engineers can't
+        apply at the same time and corrupt the state.
+      </p>
+      <pre><code><span class="cmt"># First, create the S3 bucket and DynamoDB table (once, manually or via a bootstrap config)</span>
+
+<span class="cmt"># Then reference the backend in your config:</span>
+<span class="kw">backend</span> <span class="str">&quot;s3&quot;</span> {
+  bucket         = <span class="str">&quot;my-company-terraform-state&quot;</span>
+  key            = <span class="str">&quot;production/terraform.tfstate&quot;</span>
+  region         = <span class="str">&quot;us-east-1&quot;</span>
+  encrypt        = <span class="kw">true</span>
+  dynamodb_table = <span class="str">&quot;terraform-state-lock&quot;</span>  <span class="cmt"># Prevents concurrent applies</span>
+}</code></pre>
+
+      <h2>Terraform Modules — Reusable Infrastructure Blueprints</h2>
+      <p>
+        Once you've written Terraform code for a VPC, why write it again for your staging environment?
+        And again for your QA environment? Modules let you package infrastructure as a reusable component —
+        like a function in programming. Call the module with different inputs; get consistent infrastructure out.
+      </p>
+      <p>
+        Here's how you call a module you've written locally or downloaded from the Terraform Registry:
+      </p>
+      <pre><code><span class="cmt"># Use a local module</span>
+<span class="kw">module</span> <span class="str">&quot;web_server&quot;</span> {
+  source        = <span class="str">&quot;./modules/ec2-web-server&quot;</span>
+  environment   = <span class="str">&quot;production&quot;</span>
+  instance_type = <span class="str">&quot;t3.medium&quot;</span>
+  vpc_id        = <span class="fn">module.vpc.id</span>
+}
+
+<span class="cmt"># Use a community module from the Terraform Registry</span>
+<span class="kw">module</span> <span class="str">&quot;vpc&quot;</span> {
+  source  = <span class="str">&quot;terraform-aws-modules/vpc/aws&quot;</span>
+  version = <span class="str">&quot;5.0.0&quot;</span>
+
+  name = <span class="str">&quot;${var.environment}-vpc&quot;</span>
+  cidr = <span class="str">&quot;10.0.0.0/16&quot;</span>
+
+  azs             = [<span class="str">&quot;us-east-1a&quot;</span>, <span class="str">&quot;us-east-1b&quot;</span>, <span class="str">&quot;us-east-1c&quot;</span>]
+  private_subnets = [<span class="str">&quot;10.0.1.0/24&quot;</span>, <span class="str">&quot;10.0.2.0/24&quot;</span>, <span class="str">&quot;10.0.3.0/24&quot;</span>]
+  public_subnets  = [<span class="str">&quot;10.0.101.0/24&quot;</span>, <span class="str">&quot;10.0.102.0/24&quot;</span>, <span class="str">&quot;10.0.103.0/24&quot;</span>]
+
+  enable_nat_gateway = <span class="kw">true</span>
+}</code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 The Terraform Registry</div>
+        <p>
+          Visit <strong>registry.terraform.io</strong> — it's full of battle-tested community modules for
+          common patterns: AWS VPC, EKS cluster, RDS PostgreSQL, S3 website, and hundreds more. Instead
+          of writing 200 lines of VPC Terraform code from scratch, you can use a well-tested module with
+          10 lines of configuration. Check download counts and GitHub stars to identify quality modules.
+        </p>
+      </div>
+
+      <h2>Terraform Workspaces — One Config, Multiple Environments</h2>
+      <p>
+        Workspaces let you manage multiple environments (staging, production, QA) from a single Terraform
+        configuration. Each workspace has its own state file, so staging and production don't interfere
+        with each other. Think of workspaces like Git branches — same code, different state.
+      </p>
+      <pre><code><span class="cmt"># Create and switch to a staging workspace</span>
+<span class="fn">terraform</span> workspace <span class="kw">new</span> staging
+<span class="fn">terraform</span> workspace select staging
+
+<span class="cmt"># List all workspaces (* marks current)</span>
+<span class="fn">terraform</span> workspace list
+<span class="cmt">#   default
+# * staging
+#   production</span>
+
+<span class="cmt"># In your .tf files, reference the workspace name</span>
+<span class="kw">resource</span> <span class="str">&quot;aws_instance&quot;</span> <span class="str">&quot;web&quot;</span> {
+  instance_type = <span class="fn">terraform.workspace</span> == <span class="str">&quot;production&quot;</span> ? <span class="str">&quot;t3.medium&quot;</span> : <span class="str">&quot;t3.micro&quot;</span>
+}</code></pre>
+
+      <h2>OpenTofu — The Open Source Fork</h2>
+      <p>
+        In August 2023, HashiCorp (the company that created Terraform) changed Terraform's license from
+        the Mozilla Public License (fully open source) to the Business Source License (BSL). The BSL
+        restricts commercial use — specifically, you cannot build competing products that substantially
+        use Terraform. This change concerned the open source community significantly.
+      </p>
+      <p>
+        The community responded by forking the last open-source version of Terraform into a new project
+        called <strong>OpenTofu</strong>, now managed by the Linux Foundation. OpenTofu is 100% syntactically
+        compatible with Terraform — the same HCL syntax, the same provider ecosystem, the same commands.
+        You can switch from Terraform to OpenTofu by simply replacing the binary.
+      </p>
+
+      <div class="box key-term">
+        <div class="box-title">📖 OpenTofu vs Terraform</div>
+        <ul>
+          <li><strong>OpenTofu</strong>: truly open source (MPL 2.0 license), managed by the Linux Foundation, community-driven, 100% compatible with Terraform syntax and providers</li>
+          <li><strong>Terraform</strong>: BSL license (restricts competing commercial use), managed by HashiCorp (now IBM), the most widely-used and has a larger existing ecosystem</li>
+          <li><strong>When to use OpenTofu</strong>: open-source projects, organizations concerned about licensing, when building tooling that extends Terraform's functionality</li>
+          <li><strong>When to use Terraform</strong>: established teams already using it, when Terraform-specific enterprise features (Terraform Cloud, HCP Terraform) are valuable</li>
+        </ul>
+      </div>
+
+      <pre><code><span class="cmt"># Install OpenTofu (drop-in replacement for Terraform)</span>
+<span class="fn">brew</span> install opentofu           <span class="cmt"># macOS</span>
+<span class="fn">winget</span> install OpenTofu.OpenTofu <span class="cmt"># Windows</span>
+
+<span class="cmt"># All commands are identical — just replace "terraform" with "tofu"</span>
+<span class="fn">tofu</span> init
+<span class="fn">tofu</span> plan
+<span class="fn">tofu</span> apply</code></pre>
+
+      <h2>Terraform in a CI/CD Pipeline</h2>
+      <p>
+        In a mature team, engineers don't run <code>terraform apply</code> from their laptops. Instead,
+        Terraform runs inside a CI/CD pipeline. A pull request gets opened with infrastructure changes,
+        the pipeline runs <code>terraform plan</code> and posts the output as a PR comment, a senior engineer
+        reviews the plan, merges the PR, and the pipeline automatically applies. This is the GitOps model
+        applied to infrastructure.
+      </p>
+      <pre><code><span class="cmt"># Example GitHub Actions workflow for Terraform</span>
+<span class="kw">name</span>: Terraform Plan and Apply
+
+<span class="kw">on</span>:
+  <span class="fn">pull_request</span>:
+    branches: [main]
+
+<span class="kw">jobs</span>:
+  <span class="fn">terraform</span>:
+    runs-on: ubuntu-latest
+    steps:
+      <span class="flag">- uses</span>: actions/checkout@v4
+
+      <span class="flag">- name</span>: Setup Terraform
+        <span class="fn">uses</span>: hashicorp/setup-terraform@v3
+
+      <span class="flag">- name</span>: Terraform Init
+        <span class="fn">run</span>: terraform init
+
+      <span class="flag">- name</span>: Terraform Plan
+        <span class="fn">run</span>: terraform plan <span class="flag">-no-color</span> <span class="flag">-out=</span>plan.tfplan
+
+      <span class="flag">- name</span>: Post Plan to PR
+        <span class="fn">uses</span>: actions/github-script@v7
+        <span class="cmt"># Posts the plan output as a comment on the pull request</span></code></pre>
+
+      <div class="summary">
+        <h4>Chapter Summary</h4>
+        <ul>
+          <li>Terraform is Infrastructure as Code — write text files that describe your infrastructure, and Terraform builds it identically every time.</li>
+          <li>The core workflow is three steps: <code>init</code> (download plugins), <code>plan</code> (preview changes), <code>apply</code> (execute).</li>
+          <li>The seven core concepts are: Provider, Resource, Data Source, Variable, Output, State, and Module.</li>
+          <li>Terraform state (<code>terraform.tfstate</code>) is Terraform's memory. Store it remotely in S3, never in Git, never edit it manually.</li>
+          <li>Modules are reusable infrastructure components. The Terraform Registry offers thousands of battle-tested modules for common patterns.</li>
+          <li>Workspaces let you manage multiple environments (staging, production) from a single configuration with separate state files.</li>
+          <li>OpenTofu is a 100% compatible open-source fork of Terraform, managed by the Linux Foundation, created in response to HashiCorp's license change.</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="../part-3/chapter-11.html">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Ch 11 · Simple Platforms</span>
+        </a>
+        <a href="chapter-13.html" class="next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Ch 13 · Ansible</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">☰</button>
+<script src="../nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 19: Metrics &amp; Logs — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-6">Part 6 · Chapter 19</div>
+        <h1>Metrics &amp; Logs: Watching Your App's Heartbeat</h1>
+        <p class="chapter-intro">Prometheus, Grafana, Loki, and the ELK stack — see exactly what's happening inside your production system, before your users tell you something is wrong.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>What you'll learn in this chapter</h4>
+        <ul>
+          <li>The three pillars of observability and why each one matters</li>
+          <li>How Prometheus scrapes metrics and the four metric types: Counter, Gauge, Histogram, Summary</li>
+          <li>How to expose metrics from a Node.js application using <code>prom-client</code></li>
+          <li>PromQL — Prometheus's query language — for asking real production questions</li>
+          <li>How to set up alerting with Prometheus Alertmanager and route alerts to Slack or PagerDuty</li>
+          <li>Grafana dashboards: turning raw numbers into beautiful, actionable visualizations</li>
+          <li>Structured logging and why <code>console.log</code> strings are not enough in production</li>
+          <li>Grafana Loki for Kubernetes-native log aggregation and the PLG stack</li>
+          <li>The ELK stack (Elasticsearch, Logstash, Kibana) and when to choose it over Loki</li>
+        </ul>
+      </div>
+
+      <h2>The Hospital Monitoring Room Analogy</h2>
+      <p>
+        Imagine a patient in intensive care. Doctors don't wander past and guess whether the patient is
+        doing well. They don't wait for the patient to press a call button saying "something feels off."
+        Instead, there are monitors on the wall showing heart rate, blood pressure, oxygen saturation,
+        respiratory rate, and temperature — all in real time, all on a single screen. The moment any
+        measurement crosses a threshold, an alarm goes off. A nurse sees it and says: "Heart rate has
+        been elevated for 20 minutes. Let's investigate before this becomes a crisis."
+      </p>
+      <p>
+        <strong>Your production application is the patient. Observability tools are the monitoring room.</strong>
+        Without them, you're flying blind. You find out about problems when customers email you or when
+        the phone rings at 2 AM. With observability, you find out the moment something starts going wrong —
+        often before any user even notices — because the numbers tell the story.
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">🏥 The Three Pillars of Observability</div>
+        <p>
+          Modern observability rests on three complementary pillars. Each answers a different question
+          about your running system:
+        </p>
+        <ul>
+          <li><strong>Metrics</strong> — Numbers over time. CPU is at 72%. Response time is 230ms. Error rate is 0.1%. Memory is 4.2 GB of 8 GB. Metrics are cheap to store, fast to query, and perfect for alerting on thresholds. They tell you <em>that</em> something is wrong.</li>
+          <li><strong>Logs</strong> — Text records of events. "User alice@example.com logged in at 14:32:11." "ERROR: Database connection failed after 3 retries." "Payment processed for order #8823." Logs are richer than metrics and tell you <em>what happened</em>.</li>
+          <li><strong>Traces</strong> — The path a request takes through multiple services. A user taps "Buy Now" and the request bounces through six microservices before a response arrives. Which service was the bottleneck? Traces answer <em>why</em> something was slow. (We cover traces in depth in the next chapter.)</li>
+        </ul>
+        <p>
+          A mature observability setup uses all three. They complement each other like a medical
+          chart (metrics), a doctor's notes (logs), and an MRI scan (traces).
+        </p>
+      </div>
+
+      <h2>Prometheus — The Metrics Database</h2>
+      <p>
+        Prometheus is an open-source monitoring system that collects metrics by <strong>scraping</strong> —
+        it periodically visits your application at a <code>/metrics</code> HTTP endpoint and reads the
+        numbers. Instead of your application pushing data to a central server, Prometheus pulls the data
+        on a schedule. This inversion is intentional: it means Prometheus knows when an application
+        has stopped responding (it simply fails to scrape), and it keeps the application itself simple.
+      </p>
+      <p>
+        This pull model is like a supervisor who walks around the factory floor every 15 seconds
+        checking every machine, rather than machines constantly sending messages to the supervisor.
+        The supervisor sees a machine that has gone quiet and immediately knows something is wrong.
+      </p>
+
+      <div class="box key-term">
+        <div class="box-title">📖 The Four Prometheus Metric Types</div>
+        <ul>
+          <li><strong>Counter</strong> — A number that only ever goes up. It resets to zero when the process restarts. Perfect for: total HTTP requests served, total errors encountered, total bytes transferred. You never ask "what is the counter value?" — you ask "how fast is it increasing?" using <code>rate()</code>.</li>
+          <li><strong>Gauge</strong> — A number that can go up or down. Perfect for: current active connections, current memory usage, current queue depth, current number of running goroutines. A thermometer is a gauge.</li>
+          <li><strong>Histogram</strong> — Tracks distributions by putting observations into pre-defined buckets. Perfect for: request duration, response size. You define buckets like "less than 10ms", "less than 100ms", "less than 1 second". Histograms let you calculate percentiles (p95, p99) on the Prometheus server side.</li>
+          <li><strong>Summary</strong> — Similar to a histogram but calculates quantiles on the client side before sending to Prometheus. Less flexible than histograms for aggregation across instances but simpler to configure.</li>
+        </ul>
+      </div>
+
+      <h3>What Metrics Look Like at the /metrics Endpoint</h3>
+      <p>
+        Prometheus metrics are exposed as plain text at <code>/metrics</code>. Each metric has a
+        name, a type comment, a help comment, and one or more time-series with optional labels.
+        Labels are the key-value pairs in curly braces — they let you slice the same metric by
+        different dimensions (by HTTP method, by status code, by route, by region).
+      </p>
+      <pre><code><span class="cmt"># HELP http_requests_total The total number of HTTP requests.</span>
+<span class="cmt"># TYPE http_requests_total counter</span>
+<span class="fn">http_requests_total</span>{method=<span class="str">"GET"</span>,status=<span class="str">"200"</span>} 4823
+<span class="fn">http_requests_total</span>{method=<span class="str">"GET"</span>,status=<span class="str">"404"</span>} 12
+<span class="fn">http_requests_total</span>{method=<span class="str">"POST"</span>,status=<span class="str">"500"</span>} 3
+
+<span class="cmt"># HELP node_memory_MemFree_bytes Free memory in bytes</span>
+<span class="cmt"># TYPE node_memory_MemFree_bytes gauge</span>
+<span class="fn">node_memory_MemFree_bytes</span> 1.2e+09
+
+<span class="cmt"># HELP http_request_duration_seconds HTTP request duration in seconds</span>
+<span class="cmt"># TYPE http_request_duration_seconds histogram</span>
+<span class="fn">http_request_duration_seconds_bucket</span>{le=<span class="str">"0.01"</span>} 324
+<span class="fn">http_request_duration_seconds_bucket</span>{le=<span class="str">"0.1"</span>} 1204
+<span class="fn">http_request_duration_seconds_bucket</span>{le=<span class="str">"1.0"</span>} 1518
+<span class="fn">http_request_duration_seconds_bucket</span>{le=<span class="str">"+Inf"</span>} 1521
+<span class="fn">http_request_duration_seconds_sum</span> 87.32
+<span class="fn">http_request_duration_seconds_count</span> 1521</code></pre>
+
+      <h3>Exposing Metrics from Node.js with prom-client</h3>
+      <p>
+        The <code>prom-client</code> library makes it easy to add Prometheus metrics to any Node.js
+        application. It also provides <code>collectDefaultMetrics()</code> which automatically exposes
+        30+ metrics about the Node.js runtime: CPU usage, event loop lag, garbage collection, memory
+        heap, open file descriptors, and more — for free, with one function call.
+      </p>
+      <pre><code><span class="cmt">// metrics.ts — Prometheus metrics setup</span>
+<span class="kw">import</span> { Registry, Counter, Histogram, <span class="fn">collectDefaultMetrics</span> } <span class="kw">from</span> <span class="str">'prom-client'</span>;
+
+<span class="kw">export const</span> register = <span class="kw">new</span> <span class="fn">Registry</span>();
+
+<span class="cmt">// Automatically collect CPU, memory, event loop lag, GC stats, etc.</span>
+<span class="fn">collectDefaultMetrics</span>({ register });
+
+<span class="kw">export const</span> httpRequests = <span class="kw">new</span> <span class="fn">Counter</span>({
+  name: <span class="str">'http_requests_total'</span>,
+  help: <span class="str">'Total number of HTTP requests'</span>,
+  labelNames: [<span class="str">'method'</span>, <span class="str">'route'</span>, <span class="str">'status'</span>],
+  registers: [register],
+});
+
+<span class="kw">export const</span> requestDuration = <span class="kw">new</span> <span class="fn">Histogram</span>({
+  name: <span class="str">'http_request_duration_seconds'</span>,
+  help: <span class="str">'HTTP request duration in seconds'</span>,
+  labelNames: [<span class="str">'method'</span>, <span class="str">'route'</span>],
+  buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2, 5],
+  registers: [register],
+});
+
+<span class="kw">export const</span> activeConnections = <span class="kw">new</span> <span class="fn">Gauge</span>({
+  name: <span class="str">'http_active_connections'</span>,
+  help: <span class="str">'Number of active HTTP connections'</span>,
+  registers: [register],
+});</code></pre>
+
+      <pre><code><span class="cmt">// app.ts — wire up metrics middleware</span>
+<span class="kw">import</span> express <span class="kw">from</span> <span class="str">'express'</span>;
+<span class="kw">import</span> { register, httpRequests, requestDuration, activeConnections } <span class="kw">from</span> <span class="str">'./metrics'</span>;
+
+<span class="kw">const</span> app = <span class="fn">express</span>();
+
+<span class="cmt">// Middleware: record every request's duration and status</span>
+app.<span class="fn">use</span>((req, res, next) => {
+  <span class="kw">const</span> end = requestDuration.<span class="fn">startTimer</span>({
+    method: req.method,
+    route: req.path,
+  });
+  activeConnections.<span class="fn">inc</span>();
+
+  res.<span class="fn">on</span>(<span class="str">'finish'</span>, () => {
+    httpRequests.<span class="fn">inc</span>({
+      method: req.method,
+      route: req.path,
+      status: res.statusCode.toString(),
+    });
+    <span class="fn">end</span>();
+    activeConnections.<span class="fn">dec</span>();
+  });
+  <span class="fn">next</span>();
+});
+
+<span class="cmt">// Prometheus scrapes this endpoint every 15 seconds</span>
+app.<span class="fn">get</span>(<span class="str">'/metrics'</span>, <span class="kw">async</span> (req, res) => {
+  res.<span class="fn">set</span>(<span class="str">'Content-Type'</span>, register.contentType);
+  res.<span class="fn">end</span>(<span class="kw">await</span> register.<span class="fn">metrics</span>());
+});
+
+app.<span class="fn">listen</span>(3000);</code></pre>
+
+      <h3>Prometheus Configuration — prometheus.yml</h3>
+      <p>
+        Prometheus reads a YAML configuration file that tells it which targets to scrape and how often.
+        Each <code>job_name</code> is a logical grouping of targets. Prometheus ships with dozens of
+        <strong>exporters</strong> — standalone processes that expose metrics for things that can't
+        export their own: Linux system metrics (node-exporter), PostgreSQL, Redis, MySQL, Nginx, and more.
+      </p>
+      <pre><code><span class="cmt"># prometheus.yml</span>
+<span class="kw">global</span>:
+  <span class="fn">scrape_interval</span>: <span class="str">15s</span>        <span class="cmt"># How often to scrape each target</span>
+  <span class="fn">evaluation_interval</span>: <span class="str">15s</span>    <span class="cmt"># How often to evaluate alert rules</span>
+
+<span class="kw">scrape_configs</span>:
+  - <span class="fn">job_name</span>: <span class="str">'my-api'</span>
+    <span class="kw">static_configs</span>:
+      - <span class="fn">targets</span>: [<span class="str">'my-api:3000'</span>]  <span class="cmt"># service name in Docker / Kubernetes</span>
+
+  - <span class="fn">job_name</span>: <span class="str">'node-exporter'</span>    <span class="cmt"># CPU, disk, memory, network of each host</span>
+    <span class="kw">static_configs</span>:
+      - <span class="fn">targets</span>: [<span class="str">'node-exporter:9100'</span>]
+
+  - <span class="fn">job_name</span>: <span class="str">'postgres'</span>
+    <span class="kw">static_configs</span>:
+      - <span class="fn">targets</span>: [<span class="str">'postgres-exporter:9187'</span>]
+
+  - <span class="fn">job_name</span>: <span class="str">'redis'</span>
+    <span class="kw">static_configs</span>:
+      - <span class="fn">targets</span>: [<span class="str">'redis-exporter:9121'</span>]
+
+<span class="cmt"># Tell Prometheus where to find alerting rules</span>
+<span class="kw">rule_files</span>:
+  - <span class="str">'alerts/*.yml'</span></code></pre>
+
+      <h2>PromQL — Asking Questions About Your Metrics</h2>
+      <p>
+        PromQL (Prometheus Query Language) is how you query your metrics. It looks strange at first,
+        but it has a clear logic: every query starts with a metric name, optionally filtered by labels,
+        and then transformed by functions. The most important function is <code>rate()</code> — it
+        takes a counter (which only goes up) and calculates how fast it's increasing per second.
+      </p>
+      <pre><code><span class="cmt"># Requests per second over the last 1 minute</span>
+<span class="fn">rate</span>(http_requests_total[<span class="str">1m</span>])
+
+<span class="cmt"># Error rate: 5xx requests per second over the last 5 minutes</span>
+<span class="fn">rate</span>(http_requests_total{status=~<span class="str">"5.."</span>}[<span class="str">5m</span>])
+
+<span class="cmt"># Percentage of requests that are errors (last 5 minutes)</span>
+<span class="fn">rate</span>(http_requests_total{status=~<span class="str">"5.."</span>}[<span class="str">5m</span>])
+  /
+<span class="fn">rate</span>(http_requests_total[<span class="str">5m</span>]) * 100
+
+<span class="cmt"># 95th percentile response time over the last hour</span>
+<span class="fn">histogram_quantile</span>(0.95,
+  <span class="fn">sum</span>(<span class="fn">rate</span>(http_request_duration_seconds_bucket[<span class="str">1h</span>])) <span class="kw">by</span> (le)
+)
+
+<span class="cmt"># CPU usage percentage (inverting the "idle" metric)</span>
+100 - (<span class="fn">avg</span>(<span class="fn">rate</span>(node_cpu_seconds_total{mode=<span class="str">"idle"</span>}[<span class="str">5m</span>])) * 100)
+
+<span class="cmt"># Memory used (total minus free)</span>
+node_memory_MemTotal_bytes - node_memory_MemFree_bytes
+
+<span class="cmt"># Free disk space percentage</span>
+(<span class="fn">node_filesystem_avail_bytes</span>{mountpoint=<span class="str">"/"</span>} / node_filesystem_size_bytes{mountpoint=<span class="str">"/"</span>}) * 100</code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 The Golden Signals</div>
+        <p>
+          Google's Site Reliability Engineering book defines the "Four Golden Signals" — four metrics
+          that, if you instrument nothing else, tell you almost everything you need to know about
+          your service's health:
+        </p>
+        <ul>
+          <li><strong>Latency</strong> — How long does it take to serve a request? Track p50, p95, p99.</li>
+          <li><strong>Traffic</strong> — How many requests per second is the service handling?</li>
+          <li><strong>Errors</strong> — What percentage of requests are failing?</li>
+          <li><strong>Saturation</strong> — How full is the service? CPU at 95%, disk at 90%, connection pool exhausted?</li>
+        </ul>
+        <p>
+          Start with these four. Add more only when these don't answer your questions.
+        </p>
+      </div>
+
+      <h2>Alerting with Prometheus Alertmanager</h2>
+      <p>
+        Prometheus evaluates alert rules on a schedule. When a rule's condition is true for a
+        defined duration, it fires an alert. Alertmanager then routes that alert to the right
+        place: Slack for low-severity warnings, PagerDuty for critical incidents that wake someone up.
+      </p>
+      <p>
+        Alert rules live in YAML files. The <code>for</code> field is crucial — it means "only fire
+        if this condition is true for at least this long." Without it, a brief spike would page
+        an engineer unnecessarily.
+      </p>
+      <pre><code><span class="cmt"># alerts/my-app.yml</span>
+<span class="kw">groups</span>:
+  - <span class="fn">name</span>: <span class="str">my-app</span>
+    <span class="kw">rules</span>:
+      - <span class="fn">alert</span>: <span class="str">HighErrorRate</span>
+        <span class="fn">expr</span>: <span class="fn">rate</span>(http_requests_total{status=~<span class="str">"5.."</span>}[<span class="str">5m</span>]) / <span class="fn">rate</span>(http_requests_total[<span class="str">5m</span>]) > 0.05
+        <span class="fn">for</span>: <span class="str">2m</span>    <span class="cmt"># must be true for 2 minutes before firing</span>
+        <span class="kw">labels</span>:
+          <span class="fn">severity</span>: <span class="str">critical</span>
+        <span class="kw">annotations</span>:
+          <span class="fn">summary</span>: <span class="str">"High error rate detected on {{ $labels.job }}"</span>
+          <span class="fn">description</span>: <span class="str">"Error rate is {{ $value | humanizePercentage }} (threshold: 5%)"</span>
+
+      - <span class="fn">alert</span>: <span class="str">HighMemoryUsage</span>
+        <span class="fn">expr</span>: (node_memory_MemTotal_bytes - node_memory_MemFree_bytes) / node_memory_MemTotal_bytes > 0.9
+        <span class="fn">for</span>: <span class="str">5m</span>
+        <span class="kw">labels</span>:
+          <span class="fn">severity</span>: <span class="str">warning</span>
+        <span class="kw">annotations</span>:
+          <span class="fn">summary</span>: <span class="str">"Memory usage above 90% on {{ $labels.instance }}"</span>
+
+      - <span class="fn">alert</span>: <span class="str">SlowResponseTime</span>
+        <span class="fn">expr</span>: <span class="fn">histogram_quantile</span>(0.95, <span class="fn">rate</span>(http_request_duration_seconds_bucket[<span class="str">5m</span>])) > 1.0
+        <span class="fn">for</span>: <span class="str">3m</span>
+        <span class="kw">labels</span>:
+          <span class="fn">severity</span>: <span class="str">warning</span>
+        <span class="kw">annotations</span>:
+          <span class="fn">summary</span>: <span class="str">"p95 response time exceeds 1 second"</span>
+
+      - <span class="fn">alert</span>: <span class="str">DiskSpaceLow</span>
+        <span class="fn">expr</span>: (node_filesystem_avail_bytes{mountpoint=<span class="str">"/"</span>} / node_filesystem_size_bytes{mountpoint=<span class="str">"/"</span>}) * 100 &lt; 10
+        <span class="fn">for</span>: <span class="str">10m</span>
+        <span class="kw">labels</span>:
+          <span class="fn">severity</span>: <span class="str">critical</span>
+        <span class="kw">annotations</span>:
+          <span class="fn">summary</span>: <span class="str">"Disk space is below 10% on {{ $labels.instance }}"</span></code></pre>
+
+      <h2>Grafana — Beautiful Dashboards</h2>
+      <p>
+        Prometheus is the brain; Grafana is the eyes. Grafana connects to Prometheus (and dozens
+        of other data sources) and lets you build rich visual dashboards: time-series graphs,
+        single-stat panels showing current values, heatmaps, tables, and more. It's open source,
+        runs as a web app, and teams share dashboards using JSON files checked into Git.
+      </p>
+      <p>
+        The best place to start is <strong>Grafana's dashboard library</strong> at
+        <code>grafana.com/grafana/dashboards</code>. Need a PostgreSQL dashboard? Download ID 9628.
+        Need a Node.js dashboard? Download ID 11159. In five minutes you have professional
+        dashboards without writing a single PromQL query.
+      </p>
+
+      <div class="box key-term">
+        <div class="box-title">📖 Grafana Core Concepts</div>
+        <ul>
+          <li><strong>Data Source</strong> — a connection to a backend: Prometheus, Loki, CloudWatch, InfluxDB, PostgreSQL, Elasticsearch. One Grafana instance can connect to many data sources simultaneously.</li>
+          <li><strong>Dashboard</strong> — a collection of panels arranged on a grid. Saved as JSON, shareable, version-controllable.</li>
+          <li><strong>Panel</strong> — a single visualization: a time-series graph, a stat (big number), a gauge, a table, a heatmap, a log viewer.</li>
+          <li><strong>Variables</strong> — dropdown selectors at the top of a dashboard that filter all panels. A <code>$service</code> variable lets one dashboard cover all your microservices.</li>
+          <li><strong>Alerts</strong> — Grafana can also evaluate alert rules and notify Slack, PagerDuty, email, etc., without needing Alertmanager.</li>
+        </ul>
+      </div>
+
+      <h3>Docker Compose: Full Monitoring Stack</h3>
+      <p>
+        Here's a complete Docker Compose stack to run Prometheus, Grafana, and Node Exporter
+        locally. Bring it up with <code>docker compose up -d</code> and visit Grafana at
+        <code>http://localhost:3001</code> (login: admin / admin).
+      </p>
+      <pre><code><span class="cmt"># docker-compose.yml — Monitoring Stack</span>
+<span class="kw">services</span>:
+  <span class="fn">prometheus</span>:
+    image: <span class="str">prom/prometheus:latest</span>
+    ports:
+      - <span class="str">"9090:9090"</span>
+    volumes:
+      - <span class="str">./prometheus.yml:/etc/prometheus/prometheus.yml</span>
+      - <span class="str">./alerts:/etc/prometheus/alerts</span>
+      - <span class="str">prometheus_data:/prometheus</span>
+    command:
+      - <span class="str">'--config.file=/etc/prometheus/prometheus.yml'</span>
+      - <span class="str">'--storage.tsdb.retention.time=15d'</span>
+
+  <span class="fn">grafana</span>:
+    image: <span class="str">grafana/grafana:latest</span>
+    ports:
+      - <span class="str">"3001:3000"</span>
+    environment:
+      <span class="fn">GF_SECURITY_ADMIN_PASSWORD</span>: <span class="str">admin</span>
+      <span class="fn">GF_USERS_ALLOW_SIGN_UP</span>: <span class="str">"false"</span>
+    volumes:
+      - <span class="str">grafana_data:/var/lib/grafana</span>
+    depends_on:
+      - <span class="str">prometheus</span>
+
+  <span class="fn">node-exporter</span>:
+    image: <span class="str">prom/node-exporter:latest</span>
+    ports:
+      - <span class="str">"9100:9100"</span>
+    volumes:
+      - <span class="str">/proc:/host/proc:ro</span>
+      - <span class="str">/sys:/host/sys:ro</span>
+      - <span class="str">/:/rootfs:ro</span>
+    command:
+      - <span class="str">'--path.procfs=/host/proc'</span>
+      - <span class="str">'--path.sysfs=/host/sys'</span>
+      - <span class="str">'--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'</span>
+
+  <span class="fn">alertmanager</span>:
+    image: <span class="str">prom/alertmanager:latest</span>
+    ports:
+      - <span class="str">"9093:9093"</span>
+    volumes:
+      - <span class="str">./alertmanager.yml:/etc/alertmanager/alertmanager.yml</span>
+
+<span class="kw">volumes</span>:
+  <span class="fn">prometheus_data</span>: {}
+  <span class="fn">grafana_data</span>: {}</code></pre>
+
+      <h2>Logs — Your Application's Diary</h2>
+      <p>
+        Logs are the narrative of what happened. When a customer says "my payment failed around 3 PM
+        yesterday," logs are how you find out exactly what happened. But to be useful in production —
+        especially across dozens of containers and microservices — logs need to be
+        <strong>structured</strong>, not free-form strings.
+      </p>
+      <p>
+        A structured log is a JSON object. Every important value has a named key. This means log
+        analysis tools can filter by any field instantly, without trying to parse arbitrary text
+        with regular expressions.
+      </p>
+
+      <div class="diagram">
+        <strong>Unstructured vs Structured Logging</strong><br><br>
+        <strong>Bad (unstructured):</strong><br>
+        <code>console.log("User logged in: alice@example.com at 14:32:11 from 196.1.2.3")</code><br><br>
+        <strong>Good (structured JSON):</strong><br>
+        <code>{ "event": "user.login", "userId": "user_123", "email": "alice@example.com",<br>
+        &nbsp;&nbsp;"ipAddress": "196.1.2.3", "duration_ms": 45, "level": "info",<br>
+        &nbsp;&nbsp;"timestamp": "2026-05-06T14:32:11.234Z" }</code>
+      </div>
+
+      <p>
+        Popular structured logging libraries:
+        <strong>Pino</strong> (Node.js — extremely fast, JSON by default),
+        <strong>Winston</strong> (Node.js — flexible, many transports),
+        <strong>structlog</strong> (Python),
+        <strong>Loguru</strong> (Python),
+        <strong>Zap</strong> (Go).
+      </p>
+
+      <pre><code><span class="cmt">// Using Pino for structured logging in Node.js</span>
+<span class="kw">import</span> pino <span class="kw">from</span> <span class="str">'pino'</span>;
+
+<span class="kw">const</span> logger = <span class="fn">pino</span>({
+  level: process.env.LOG_LEVEL || <span class="str">'info'</span>,
+  <span class="cmt">// In production, output JSON; in development, pretty-print</span>
+  transport: process.env.NODE_ENV !== <span class="str">'production'</span>
+    ? { target: <span class="str">'pino-pretty'</span> }
+    : <span class="kw">undefined</span>,
+});
+
+<span class="cmt">// Child logger adds context fields to every log line</span>
+<span class="kw">export function</span> <span class="fn">createRequestLogger</span>(requestId: string, userId?: string) {
+  <span class="kw">return</span> logger.<span class="fn">child</span>({ requestId, userId });
+}
+
+<span class="cmt">// Usage in a service</span>
+<span class="kw">async function</span> <span class="fn">processOrder</span>(orderId: string, userId: string) {
+  <span class="kw">const</span> log = logger.<span class="fn">child</span>({ orderId, userId });
+  log.<span class="fn">info</span>({ event: <span class="str">'order.processing_started'</span> });
+
+  <span class="kw">try</span> {
+    <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">chargePayment</span>(orderId);
+    log.<span class="fn">info</span>({ event: <span class="str">'order.payment_success'</span>, amount: result.amount });
+  } <span class="kw">catch</span> (err) {
+    log.<span class="fn">error</span>({ event: <span class="str">'order.payment_failed'</span>, err }, <span class="str">'Payment failed'</span>);
+    <span class="kw">throw</span> err;
+  }
+}</code></pre>
+
+      <h2>Grafana Loki — Logs for the Kubernetes Generation</h2>
+      <p>
+        Grafana Loki is a log aggregation system inspired by Prometheus. Its core philosophy:
+        <em>index the labels, not the content</em>. Elasticsearch indexes every word in every log line
+        (powerful but expensive). Loki only indexes labels like <code>app="my-api"</code>,
+        <code>namespace="production"</code>, <code>pod="my-api-7d5f9c-k4j2p"</code>. Log content
+        is stored compressed and searched with grep-like scanning. This makes Loki drastically cheaper
+        to run while still being fast for most real-world queries.
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">📚 The Library Card Catalogue Analogy</div>
+        <p>
+          Elasticsearch is like a library where every single word in every book has been indexed —
+          finding any phrase is instant but building and maintaining that index is expensive and
+          takes lots of space.
+        </p>
+        <p>
+          Loki is like a library that only indexes the author, title, genre, and year. Finding books
+          by those fields is fast. Reading the actual content requires walking to the shelf and
+          scanning the pages — but for most questions ("show me all logs from the payment service
+          that mention 'error'") that scanning is plenty fast enough, and the library is far
+          cheaper to build and maintain.
+        </p>
+      </div>
+
+      <p>
+        The <strong>PLG stack</strong> (Prometheus + Loki + Grafana) is the modern Kubernetes-native
+        observability stack. All three tools are from Grafana Labs, they share the same label model,
+        and Grafana provides a unified query interface for both metrics and logs in the same dashboard.
+      </p>
+
+      <h3>Loki Architecture</h3>
+      <div class="diagram">
+        <strong>PLG Stack Data Flow</strong><br><br>
+        Application containers write logs to stdout<br>
+        &darr;<br>
+        <strong>Promtail</strong> (agent on every Kubernetes node) tails container log files<br>
+        &darr;<br>
+        <strong>Loki</strong> stores logs, indexed by labels<br>
+        &darr;<br>
+        <strong>Grafana</strong> queries Loki with LogQL, displays alongside Prometheus metrics
+      </div>
+
+      <h3>LogQL — Querying Logs</h3>
+      <pre><code><span class="cmt"># Get all logs from the my-api app in the last hour</span>
+{app=<span class="str">"my-api"</span>}
+
+<span class="cmt"># Filter to only error logs</span>
+{app=<span class="str">"my-api"</span>} |= <span class="str">"error"</span>
+
+<span class="cmt"># Parse JSON logs and filter by field values</span>
+{app=<span class="str">"my-api"</span>} | json | level=<span class="str">"error"</span>
+
+<span class="cmt"># Find slow requests (duration > 1000ms) using JSON parsing</span>
+{app=<span class="str">"my-api"</span>} | json | duration_ms > 1000
+
+<span class="cmt"># Count error log lines per minute over last hour</span>
+<span class="fn">count_over_time</span>({app=<span class="str">"my-api"</span>} | json | level=<span class="str">"error"</span> [<span class="str">1m</span>])
+
+<span class="cmt"># Filter by multiple labels (namespace + app)</span>
+{namespace=<span class="str">"production"</span>, app=<span class="str">"payment-service"</span>} |= <span class="str">"FAILED"</span>
+
+<span class="cmt"># Extract a field and filter (regex)</span>
+{app=<span class="str">"my-api"</span>} | json | event =~ <span class="str">"order\\..*"</span></code></pre>
+
+      <h2>The ELK Stack — The Traditional Choice</h2>
+      <p>
+        The ELK stack predates Loki by nearly a decade. It stands for
+        <strong>Elasticsearch + Logstash + Kibana</strong>. Elasticsearch is a powerful distributed
+        search engine built on Apache Lucene. Logstash collects logs from hundreds of sources
+        (files, syslog, HTTP, Kafka, database CDC streams), transforms them with filter plugins,
+        and ships them to Elasticsearch. Kibana is the visualization and query interface.
+      </p>
+      <p>
+        In practice, teams often replace Logstash with the much lighter
+        <strong>Filebeat</strong> or <strong>Fluentd</strong> (giving you the "EFK" stack), because
+        Logstash is resource-intensive. Since 2021, Amazon has also maintained
+        <strong>OpenSearch</strong> — a fully open-source fork of Elasticsearch, created when Elastic
+        changed its license.
+      </p>
+
+      <div class="box key-term">
+        <div class="box-title">📖 ELK vs Loki — When to Use Each</div>
+        <ul>
+          <li><strong>Choose Loki when</strong>: you're already using Prometheus and Grafana, you're running on Kubernetes, you want lower cost and simpler operations, your main use case is debugging and monitoring rather than full-text search.</li>
+          <li><strong>Choose ELK/OpenSearch when</strong>: you need full-text search across log content, you have compliance or audit log requirements, you ingest logs from many non-Kubernetes sources, you need sophisticated log parsing pipelines (Logstash filter plugins are extremely powerful).</li>
+          <li><strong>Both work well</strong> for most production use cases. The ecosystem matters more than raw feature comparison — pick the one your team already knows, or the one that integrates with your existing stack.</li>
+        </ul>
+      </div>
+
+      <div class="box fun-fact">
+        <div class="box-title">🌍 Real-World Scale</div>
+        <p>
+          Prometheus was created at SoundCloud in 2012 and donated to the CNCF in 2016.
+          It is now one of the most widely deployed pieces of infrastructure software in the world —
+          running at Netflix, Uber, DigitalOcean, GitLab, and thousands of other companies.
+          Grafana serves over 10 million active dashboards globally.
+          Elasticsearch powers the search on Wikipedia, GitHub, and Stack Overflow.
+        </p>
+      </div>
+
+      <div class="summary">
+        <h4>Chapter Summary</h4>
+        <ul>
+          <li>The three pillars of observability are <strong>Metrics</strong> (numbers over time), <strong>Logs</strong> (event text records), and <strong>Traces</strong> (request journeys across services).</li>
+          <li>Prometheus collects metrics by <strong>scraping</strong> a <code>/metrics</code> endpoint on each service every 15 seconds. It has four metric types: Counter, Gauge, Histogram, and Summary.</li>
+          <li>PromQL lets you query metrics with functions like <code>rate()</code> (for counters) and <code>histogram_quantile()</code> (for percentiles). Start with the four Golden Signals: Latency, Traffic, Errors, Saturation.</li>
+          <li>Alertmanager routes Prometheus alerts to Slack, PagerDuty, or email based on severity. The <code>for</code> field prevents false alarms from transient spikes.</li>
+          <li>Grafana is the visualization layer — it connects to Prometheus (and Loki, and many other sources) and turns raw metrics into dashboards. Use the Grafana dashboard library to get started fast.</li>
+          <li>Structured logging (JSON) is essential in production. Libraries like Pino (Node.js) or structlog (Python) make it easy to log key-value pairs that tools can filter and query.</li>
+          <li>Grafana Loki stores logs indexed by labels (not content), making it far cheaper than Elasticsearch. The PLG stack (Prometheus + Loki + Grafana) is the modern Kubernetes-native observability standard.</li>
+          <li>The ELK stack remains the best choice when you need full-text search, compliance audit logs, or sophisticated log transformation pipelines.</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="../part-5/chapter-18.html">
+          <span class="nav-label">&larr; Previous</span>
+          <span class="nav-title">Ch 18 · .NET Services</span>
+        </a>
+        <a href="chapter-20.html" class="next">
+          <span class="nav-label">Next &rarr;</span>
+          <span class="nav-title">Ch 20 · Distributed Tracing</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">&#9776;</button>
+<script src="../nav.js"></script>
+</body>
+</html>

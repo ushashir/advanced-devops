@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 15: Node.js &amp; PM2 — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-5">Part 5 · Chapter 15</div>
+        <h1>Node.js Deployment &amp; PM2</h1>
+        <p class="chapter-intro">From <code>npm start</code> to a production-grade Node.js process that never sleeps.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>What you'll learn in this chapter</h4>
+        <ul>
+          <li>Why running <code>node server.js</code> is never enough for production</li>
+          <li>How PM2 acts as your automated process guardian</li>
+          <li>Installing and managing multiple Node.js versions with nvm</li>
+          <li>Cluster mode — using every CPU core your server has</li>
+          <li>The <code>ecosystem.config.js</code> file for repeatable deployments</li>
+          <li>Zero-downtime deployments with <code>pm2 reload</code></li>
+          <li>Nginx as a reverse proxy with free SSL from Certbot</li>
+          <li>Dockerising a Node.js app with <code>pm2-runtime</code></li>
+          <li>The essential <code>/health</code> endpoint every production app must have</li>
+        </ul>
+      </div>
+
+      <h2>The Night Watchman Analogy</h2>
+      <p>
+        Picture a small hotel. At night, they hire a security guard to watch the lobby. The guard's
+        one job is to be present — if anything goes wrong, they handle it. Now imagine the hotel
+        owner saves money by just leaving a note on the door that says "the lobby is watched." There
+        is no actual guard. If a thief walks in, nothing happens.
+      </p>
+      <p>
+        Running <code>node server.js</code> in a terminal is exactly like that note. Your Node.js
+        process starts, it serves requests — and if it crashes, it is gone. Completely gone. No
+        automatic restart. No notification. Users start getting connection errors and you are asleep.
+        Worse: if the server reboots (for a kernel update, a power flicker, anything), your process
+        is never started again. The "lobby" is permanently unwatched.
+      </p>
+      <p>
+        <strong>PM2 (Process Manager 2)</strong> is your automated night watchman <em>service</em>.
+        Not a single guard, but an entire security company running on your server. PM2 starts your
+        Node.js app, watches it, and restarts it within milliseconds if it crashes. When the server
+        reboots, PM2 comes back up and starts all registered processes automatically. It also runs
+        multiple copies of your app in <em>cluster mode</em> — one process per CPU core — so a
+        16-core server is actually running 16 simultaneous Node.js instances all sharing the same
+        port through the operating system's load-balancer.
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">🌙 The Night Watchman Service</div>
+        <p>
+          <code>node server.js</code> = a sticky note on the lobby door. If anything goes wrong,
+          nothing happens.<br><br>
+          <code>pm2 start server.js</code> = a 24/7 professional security service. Crash? Restart
+          in 200ms. Server reboot? Back up in 30 seconds. CPU overloaded? Spread the load across
+          every core. Logs? All captured and rotating automatically.
+        </p>
+      </div>
+
+      <h2>The Node.js Production Stack</h2>
+      <p>
+        Before diving into commands, let us understand the full picture. A production Node.js
+        deployment is not just one process — it is a layered system where each layer has a specific
+        job:
+      </p>
+
+      <div class="diagram">
+<pre>Internet traffic
+       │
+       ▼
+  ┌─────────────────────────────────┐
+  │  Nginx (port 80 / 443)          │  ← SSL termination, static files,
+  │  Reverse Proxy                  │    rate limiting, compression
+  └───────────────┬─────────────────┘
+                  │ proxy_pass → localhost:3000
+                  ▼
+  ┌─────────────────────────────────┐
+  │  PM2 Cluster                    │  ← Process manager: restart on crash,
+  │  Worker 0  Worker 1  Worker 2   │    spread load across CPU cores
+  │  Worker 3  Worker 4  Worker 5   │
+  └───────────────┬─────────────────┘
+                  │
+                  ▼
+  ┌─────────────────────────────────┐
+  │  Node.js Runtime (v20 LTS)      │  ← Your application code
+  │  Your Express / Fastify / NestJS│
+  └─────────────────────────────────┘
+                  │
+                  ▼
+  ┌─────────────────────────────────┐
+  │  Environment Variables          │  ← Secrets, config (never hardcoded)
+  │  /etc/myapp.env                 │
+  └─────────────────────────────────┘</pre>
+      </div>
+
+      <p>Each layer has a clear responsibility:</p>
+      <ol>
+        <li><strong>Node.js runtime</strong> — the JavaScript engine (V8) that executes your code</li>
+        <li><strong>PM2</strong> — keeps the process alive, enables cluster mode, handles logs</li>
+        <li><strong>Nginx</strong> — faces the internet, handles SSL, forwards to PM2-managed processes</li>
+        <li><strong>Environment variables</strong> — configuration that changes per environment, never hardcoded</li>
+        <li><strong>Health check endpoint</strong> — <code>/health</code> for load balancers and monitoring tools</li>
+      </ol>
+
+      <h2>Setting Up Node.js on a Linux Server</h2>
+      <p>
+        The first decision is how to install Node.js. Most Linux package managers have Node.js, but
+        they are often several major versions behind. The correct approach for production servers is
+        <strong>nvm</strong> (Node Version Manager) — it lets you install any version, switch between
+        them, and pin a default. This is how professional teams manage Node.js versions across dozens
+        of servers and developers.
+      </p>
+
+      <pre><code><span class="cmt"># Install nvm (Node Version Manager)</span>
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+<span class="cmt"># Reload your shell profile so nvm is available</span>
+<span class="kw">source</span> ~/.bashrc
+
+<span class="cmt"># Install Node.js 20 (current LTS as of 2024)</span>
+nvm install 20
+nvm use 20
+
+<span class="cmt"># Set as the default version for new shells</span>
+nvm alias default 20
+
+<span class="cmt"># Verify installation</span>
+node --version   <span class="cmt"># v20.x.x</span>
+npm --version    <span class="cmt"># 10.x.x</span>
+
+<span class="cmt"># List all installed Node versions</span>
+nvm ls
+
+<span class="cmt"># Install a second version alongside the first</span>
+nvm install 18
+nvm use 18       <span class="cmt"># switch to v18 in this shell</span>
+nvm use default  <span class="cmt"># switch back to the default (v20)</span></code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 LTS vs Current</div>
+        <p>
+          Always use an <strong>LTS (Long-Term Support)</strong> version in production. LTS releases
+          receive security patches for 30 months. "Current" releases are for trying new features and
+          only receive support for 6 months. As of 2025, Node.js 20 and 22 are both LTS. Node.js 18
+          is in maintenance mode (still patched, but approaching end-of-life).
+        </p>
+      </div>
+
+      <h2>PM2 — Your Process Manager</h2>
+      <p>
+        PM2 is a production process manager for Node.js applications. It is a single npm package that
+        transforms a fragile <code>node server.js</code> command into a managed, self-healing,
+        multi-process service. Install it globally so it is available as a system-level command:
+      </p>
+
+      <pre><code><span class="cmt"># Install PM2 globally</span>
+npm install -g pm2
+
+<span class="cmt"># Start your app with a name (the name is used in all subsequent commands)</span>
+pm2 start server.js <span class="flag">--name</span> <span class="str">"my-api"</span>
+
+<span class="cmt"># Start with an explicit interpreter path (safest when using nvm)</span>
+pm2 start server.js <span class="flag">--name</span> <span class="str">"my-api"</span> <span class="flag">--interpreter</span> $(which node)
+
+<span class="cmt"># Cluster mode — use ALL available CPU cores (max = number of cores)</span>
+pm2 start server.js <span class="flag">--name</span> <span class="str">"my-api"</span> <span class="flag">-i</span> max
+
+<span class="cmt"># Or specify an exact number of workers</span>
+pm2 start server.js <span class="flag">--name</span> <span class="str">"my-api"</span> <span class="flag">-i</span> 4</code></pre>
+
+      <pre><code><span class="cmt">## VIEWING PROCESSES AND LOGS ──────────────────────────────────────</span>
+
+<span class="cmt"># List all running PM2 processes (shows PID, status, CPU, memory)</span>
+pm2 list
+
+<span class="cmt"># Stream live logs for a specific app</span>
+pm2 logs my-api
+
+<span class="cmt"># Show the last 200 lines then continue streaming</span>
+pm2 logs my-api <span class="flag">--lines</span> 200
+
+<span class="cmt"># Monitor CPU and memory usage in a real-time dashboard</span>
+pm2 monit
+
+<span class="cmt"># Get detailed information about a single process</span>
+pm2 show my-api</code></pre>
+
+      <pre><code><span class="cmt">## CONTROLLING PROCESSES ──────────────────────────────────────────</span>
+
+<span class="cmt"># Restart (kills the process and starts fresh — brief downtime)</span>
+pm2 restart my-api
+
+<span class="cmt"># Reload (graceful — zero downtime for cluster mode)</span>
+pm2 reload my-api
+
+<span class="cmt"># Stop (process stays in the PM2 list but does not run)</span>
+pm2 stop my-api
+
+<span class="cmt"># Remove from PM2's list entirely</span>
+pm2 delete my-api
+
+<span class="cmt"># Restart all processes at once</span>
+pm2 restart all</code></pre>
+
+      <pre><code><span class="cmt">## SURVIVING REBOOTS ──────────────────────────────────────────────</span>
+
+<span class="cmt"># Save current process list to disk</span>
+pm2 save
+
+<span class="cmt"># Generate and install a startup script for your OS</span>
+<span class="cmt"># (systemd on Ubuntu/Debian, launchd on macOS, etc.)</span>
+pm2 startup
+
+<span class="cmt"># PM2 will print a command — run exactly that command. Example:</span>
+sudo env PATH=$PATH:/home/ubuntu/.nvm/versions/node/v20.0.0/bin \
+  /home/ubuntu/.nvm/versions/node/v20.0.0/lib/node_modules/pm2/bin/pm2 \
+  startup systemd -u ubuntu --hp /home/ubuntu</code></pre>
+
+      <div class="box warning">
+        <div class="box-title">⚠️ Always run pm2 save after changes</div>
+        <p>
+          Every time you add, remove, or change a process, run <code>pm2 save</code> to update
+          the saved process list. Otherwise, a server reboot will restore the old list — not the
+          current one. Think of it like "ctrl+S" for your PM2 configuration.
+        </p>
+      </div>
+
+      <h2>The ecosystem.config.js — Your PM2 Configuration File</h2>
+      <p>
+        Typing long PM2 commands with many flags is error-prone and hard to version-control.
+        The professional solution is an <code>ecosystem.config.js</code> file committed to your
+        repository alongside your code. This file defines every app, its configuration, its
+        environment variables, and its logging setup — all in one place.
+      </p>
+
+      <pre><code><span class="cmt">// ecosystem.config.js</span>
+module.exports = {
+  apps: [
+    {
+      name: <span class="str">"my-api"</span>,
+      script: <span class="str">"dist/server.js"</span>,         <span class="cmt">// compiled TypeScript output</span>
+      instances: <span class="str">"max"</span>,               <span class="cmt">// one per CPU core</span>
+      exec_mode: <span class="str">"cluster"</span>,           <span class="cmt">// enable cluster mode</span>
+      watch: <span class="kw">false</span>,                    <span class="cmt">// never watch files in production</span>
+      max_memory_restart: <span class="str">"500M"</span>,    <span class="cmt">// restart if RAM exceeds 500MB</span>
+
+      env: {
+        NODE_ENV: <span class="str">"production"</span>,
+        PORT: 3000,
+      },
+
+      <span class="cmt">// Logging</span>
+      error_file: <span class="str">"/var/log/myapp/error.log"</span>,
+      out_file: <span class="str">"/var/log/myapp/out.log"</span>,
+      merge_logs: <span class="kw">true</span>,              <span class="cmt">// combine logs from all cluster workers</span>
+      log_date_format: <span class="str">"YYYY-MM-DD HH:mm:ss"</span>,
+
+      <span class="cmt">// Advanced</span>
+      wait_ready: <span class="kw">true</span>,             <span class="cmt">// wait for app to send 'ready' signal</span>
+      listen_timeout: 10000,         <span class="cmt">// ms to wait for ready signal</span>
+      kill_timeout: 5000,            <span class="cmt">// ms to wait before force-killing</span>
+    }
+  ]
+};</code></pre>
+
+      <p>Once you have an ecosystem file, all PM2 commands accept it instead of a process name:</p>
+
+      <pre><code><span class="cmt"># Start using the config file</span>
+pm2 start ecosystem.config.js
+
+<span class="cmt"># Restart using the config file (picks up any config changes)</span>
+pm2 restart ecosystem.config.js
+
+<span class="cmt"># Reload with zero downtime</span>
+pm2 reload ecosystem.config.js
+
+<span class="cmt"># Save and enable startup</span>
+pm2 save</code></pre>
+
+      <div class="box key-term">
+        <div class="box-title">📖 Cluster Mode vs Fork Mode</div>
+        <p>
+          PM2 has two execution modes. <strong>Fork mode</strong> (default) starts a single Node.js
+          process — one CPU core, simple, no shared state issues. <strong>Cluster mode</strong>
+          uses Node.js's built-in cluster module to spawn multiple worker processes, all listening
+          on the same port. The operating system distributes incoming connections across workers
+          using round-robin. A server with 8 CPU cores running cluster mode effectively has 8 times
+          the throughput capacity. Use cluster mode for HTTP servers; use fork mode for background
+          workers or scripts that shouldn't be load-balanced.
+        </p>
+      </div>
+
+      <h2>Zero-Downtime Deployments with PM2</h2>
+      <p>
+        One of the most powerful features of PM2 cluster mode is zero-downtime deployment. When you
+        run <code>pm2 reload</code>, PM2 restarts workers one at a time — spinning up a new worker
+        and only then killing the old one. While the new worker is starting, the old worker is still
+        serving traffic. Users never see a gap in service.
+      </p>
+      <p>
+        Here is a complete deployment script that you would run on your server (or trigger from a
+        CI/CD pipeline) to ship new code with no downtime:
+      </p>
+
+      <pre><code><span class="cmt">#!/bin/bash</span>
+<span class="cmt"># deploy.sh — pull, build, and reload with zero downtime</span>
+<span class="kw">set</span> -e   <span class="cmt"># exit immediately if any command fails</span>
+
+APP_DIR=<span class="str">"/var/www/my-api"</span>
+<span class="kw">cd</span> $APP_DIR
+
+<span class="cmt"># 1. Pull the latest code from Git</span>
+git pull origin main
+
+<span class="cmt"># 2. Install any new dependencies (ci = reproducible, uses package-lock.json)</span>
+npm ci <span class="flag">--only</span>=production
+
+<span class="cmt"># 3. Build TypeScript if applicable</span>
+npm run build
+
+<span class="cmt"># 4. Reload all workers gracefully — zero downtime</span>
+pm2 reload ecosystem.config.js
+
+<span class="cmt"># 5. Save updated process list</span>
+pm2 save
+
+echo <span class="str">"Deployment complete at $(date)"</span></code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 npm ci vs npm install</div>
+        <p>
+          In production deployments, always use <code>npm ci</code> instead of
+          <code>npm install</code>. The <code>ci</code> command installs exact versions from
+          <code>package-lock.json</code>, deletes and recreates <code>node_modules</code>, and
+          fails if the lockfile is out of sync. This gives you <em>reproducible builds</em> —
+          the same packages every time, no surprise version bumps.
+        </p>
+      </div>
+
+      <h2>Nginx as Reverse Proxy</h2>
+      <p>
+        A fundamental rule of production Node.js: never expose your Node.js process directly on
+        port 80 or 443. Always put Nginx (or another reverse proxy) in front. Why? Because Nginx
+        handles SSL termination (decrypts HTTPS), serves static files at full disk speed without
+        touching Node.js, applies rate limiting, manages keep-alive connections efficiently, and
+        can route traffic to multiple backend services.
+      </p>
+      <p>
+        Here is a complete Nginx configuration for a Node.js API, with HTTP-to-HTTPS redirect and
+        correct proxy headers:
+      </p>
+
+      <pre><code><span class="cmt"># /etc/nginx/sites-available/my-api.conf</span>
+
+<span class="cmt"># Redirect all HTTP to HTTPS</span>
+server {
+    listen 80;
+    server_name api.myapp.com;
+    <span class="kw">return</span> 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name api.myapp.com;
+
+    <span class="cmt"># SSL certificates (from Certbot / Let's Encrypt)</span>
+    ssl_certificate /etc/letsencrypt/live/api.myapp.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.myapp.com/privkey.pem;
+
+    <span class="cmt"># Security headers</span>
+    add_header Strict-Transport-Security <span class="str">"max-age=31536000"</span> always;
+    add_header X-Frame-Options SAMEORIGIN;
+    add_header X-Content-Type-Options nosniff;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+
+        <span class="cmt"># Required for WebSocket support</span>
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection <span class="str">'upgrade'</span>;
+
+        <span class="cmt"># Forward correct client information</span>
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}</code></pre>
+
+      <p>Enable the site and get a free SSL certificate with Certbot:</p>
+
+      <pre><code><span class="cmt"># Install Nginx and Certbot</span>
+sudo apt update
+sudo apt install nginx certbot python3-certbot-nginx
+
+<span class="cmt"># Enable your site config</span>
+sudo ln -s /etc/nginx/sites-available/my-api.conf /etc/nginx/sites-enabled/
+sudo nginx -t    <span class="cmt"># test config syntax</span>
+sudo systemctl reload nginx
+
+<span class="cmt"># Obtain and install a free Let's Encrypt SSL certificate</span>
+sudo certbot <span class="flag">--nginx</span> -d api.myapp.com
+
+<span class="cmt"># Enable auto-renewal (runs twice daily to renew before expiry)</span>
+sudo systemctl enable certbot.timer
+sudo systemctl start certbot.timer
+
+<span class="cmt"># Test that renewal works (dry run — no actual certificate changes)</span>
+sudo certbot renew <span class="flag">--dry-run</span></code></pre>
+
+      <h2>Environment Variables — Never Hardcode Secrets</h2>
+      <p>
+        One of the most common and dangerous mistakes junior developers make is committing database
+        passwords, API keys, and JWT secrets directly into code or config files in the repository.
+        These end up in Git history forever, even if you delete the file later. The correct approach
+        is environment variables — values that exist in the operating system environment and are
+        injected into your process at startup.
+      </p>
+
+      <pre><code><span class="cmt"># Create an environment file — outside the web root, restricted permissions</span>
+sudo mkdir -p /etc/myapp
+sudo nano /etc/myapp/app.env
+
+<span class="cmt"># Contents of /etc/myapp/app.env:</span>
+<span class="cmt"># NODE_ENV=production</span>
+<span class="cmt"># DATABASE_URL=postgresql://user:pass@localhost:5432/mydb</span>
+<span class="cmt"># REDIS_URL=redis://localhost:6379</span>
+<span class="cmt"># JWT_SECRET=a-very-long-random-secret-string-here</span>
+<span class="cmt"># PORT=3000</span>
+
+<span class="cmt"># Restrict permissions so only root can read it</span>
+sudo chmod 600 /etc/myapp/app.env
+sudo chown root:root /etc/myapp/app.env
+
+<span class="cmt"># In ecosystem.config.js, reference it:</span>
+<span class="cmt"># env_file: "/etc/myapp/app.env"</span></code></pre>
+
+      <p>
+        In your Node.js application, access environment variables through <code>process.env</code>:
+      </p>
+
+      <pre><code><span class="cmt">// config.js — centralise all env var access</span>
+<span class="kw">const</span> config = {
+  port: parseInt(process.env.PORT) || 3000,
+  databaseUrl: process.env.DATABASE_URL,
+  jwtSecret: process.env.JWT_SECRET,
+  nodeEnv: process.env.NODE_ENV || <span class="str">'development'</span>,
+  isProduction: process.env.NODE_ENV === <span class="str">'production'</span>,
+};
+
+<span class="cmt">// Validate required variables at startup</span>
+<span class="kw">const</span> required = [<span class="str">'DATABASE_URL'</span>, <span class="str">'JWT_SECRET'</span>];
+<span class="kw">for</span> (<span class="kw">const</span> key of required) {
+  <span class="kw">if</span> (!process.env[key]) {
+    console.error(<span class="str">`Missing required environment variable: ${key}`</span>);
+    process.exit(1);   <span class="cmt">// fail loudly at startup, not during a request</span>
+  }
+}
+
+module.exports = config;</code></pre>
+
+      <h2>Node.js in Docker with PM2-Runtime</h2>
+      <p>
+        Many teams run Node.js inside Docker containers — either on bare metal with Docker Compose,
+        or inside Kubernetes. PM2 is still useful here because it provides cluster mode and graceful
+        reloading inside the container. The key difference is that inside Docker, you must use
+        <code>pm2-runtime</code> instead of <code>pm2 start</code>. Regular <code>pm2 start</code>
+        daemonizes (goes to the background), which causes the container to exit immediately.
+        <code>pm2-runtime</code> stays in the foreground as PID 1, which is what Docker expects.
+      </p>
+
+      <pre><code><span class="cmt"># Dockerfile for a Node.js + PM2 production container</span>
+
+<span class="kw">FROM</span> node:20-alpine
+
+<span class="cmt"># Install PM2 globally</span>
+<span class="kw">RUN</span> npm install -g pm2
+
+<span class="kw">WORKDIR</span> /app
+
+<span class="cmt"># Install dependencies first (Docker layer caching — only re-runs if package files change)</span>
+<span class="kw">COPY</span> package*.json ./
+<span class="kw">RUN</span> npm ci <span class="flag">--only</span>=production
+
+<span class="cmt"># Copy compiled code</span>
+<span class="kw">COPY</span> dist/ ./dist/
+<span class="kw">COPY</span> ecosystem.config.js .
+
+<span class="kw">EXPOSE</span> 3000
+
+<span class="cmt"># pm2-runtime stays in the foreground (required for Docker PID 1)</span>
+<span class="kw">CMD</span> [<span class="str">"pm2-runtime"</span>, <span class="str">"ecosystem.config.js"</span>]</code></pre>
+
+      <div class="box fun-fact">
+        <div class="box-title">🎯 Alpine Images</div>
+        <p>
+          <code>node:20-alpine</code> is a Node.js image based on Alpine Linux, a minimal Linux
+          distribution designed for containers. A regular <code>node:20</code> image is around
+          1GB. The Alpine variant is around 130MB. For a production Docker image that gets built
+          and pushed dozens of times per day, this difference in size matters enormously — faster
+          pushes, faster pulls, less storage cost.
+        </p>
+      </div>
+
+      <h2>The Health Check Endpoint</h2>
+      <p>
+        Every production Node.js application should expose a <code>/health</code> endpoint. This
+        is a simple HTTP route that returns a JSON object with the application's status. Load
+        balancers use it to know whether to send traffic to a given instance. Kubernetes liveness
+        and readiness probes use it. Your monitoring system uses it to detect outages before users do.
+      </p>
+      <p>
+        A good health check does more than just return 200. It checks whether the database is
+        reachable, whether background queues are running, and reports key process metrics:
+      </p>
+
+      <pre><code><span class="cmt">// health.js — production-ready health check endpoint</span>
+<span class="kw">const</span> db = require(<span class="str">'./db'</span>);
+
+app.get(<span class="str">'/health'</span>, async (req, res) => {
+  <span class="kw">const</span> checks = {};
+  <span class="kw">let</span> healthy = <span class="kw">true</span>;
+
+  <span class="cmt">// Check database connectivity</span>
+  <span class="kw">try</span> {
+    await db.query(<span class="str">'SELECT 1'</span>);
+    checks.database = <span class="str">'ok'</span>;
+  } <span class="kw">catch</span> (err) {
+    checks.database = <span class="str">'error'</span>;
+    healthy = <span class="kw">false</span>;
+  }
+
+  <span class="kw">const</span> status = {
+    status: healthy ? <span class="str">'ok'</span> : <span class="str">'degraded'</span>,
+    uptime: process.uptime(),                        <span class="cmt">// seconds since process start</span>
+    timestamp: <span class="kw">new</span> Date().toISOString(),
+    version: process.env.npm_package_version,
+    memory: process.memoryUsage(),                   <span class="cmt">// heap usage stats</span>
+    checks,
+  };
+
+  res.status(healthy ? 200 : 503).json(status);
+});
+
+<span class="cmt">// Kubernetes readiness probe — only mark ready after DB is warm</span>
+app.get(<span class="str">'/ready'</span>, (req, res) => {
+  res.json({ ready: <span class="kw">true</span> });
+});</code></pre>
+
+      <h2>PM2 Log Management</h2>
+      <p>
+        Without log management, PM2 log files grow forever and eventually fill your disk. PM2 has
+        a module system that includes <code>pm2-logrotate</code> — it compresses and rotates log
+        files automatically:
+      </p>
+
+      <pre><code><span class="cmt"># Install the log rotation module</span>
+pm2 install pm2-logrotate
+
+<span class="cmt"># Configure rotation settings</span>
+pm2 set pm2-logrotate:max_size 100M   <span class="cmt"># rotate when file hits 100MB</span>
+pm2 set pm2-logrotate:retain 10       <span class="cmt"># keep 10 rotated files</span>
+pm2 set pm2-logrotate:compress true   <span class="cmt"># gzip rotated files</span>
+pm2 set pm2-logrotate:rotateInterval <span class="str">'0 0 * * *'</span>  <span class="cmt"># rotate daily at midnight</span>
+
+<span class="cmt"># Flush (clear) all current logs</span>
+pm2 flush
+
+<span class="cmt"># Show PM2 module status</span>
+pm2 list</code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 Centralised Logging</div>
+        <p>
+          For serious production deployments, don't just store logs on disk — ship them to a
+          centralised logging service. Tools like <strong>Datadog</strong>, <strong>Papertrail</strong>,
+          or an ELK stack (Elasticsearch + Logstash + Kibana) let you search across all your
+          server logs from a single dashboard, set up alerts, and retain logs for compliance.
+          Chapter 19 covers this in depth.
+        </p>
+      </div>
+
+      <h2>Complete PM2 Cheat Sheet</h2>
+
+      <div class="diagram">
+<pre>PM2 QUICK REFERENCE
+────────────────────────────────────────────────────────────────────
+STARTING & STOPPING
+  pm2 start server.js --name "api"     Start a process
+  pm2 start server.js -i max           Start in cluster mode
+  pm2 start ecosystem.config.js        Start from config file
+  pm2 stop api                         Stop (keep in list)
+  pm2 delete api                       Remove from PM2 list
+  pm2 stop all                         Stop everything
+
+RESTARTING (with / without downtime)
+  pm2 restart api                      Hard restart (brief downtime)
+  pm2 reload api                       Graceful reload (zero downtime, cluster only)
+  pm2 reload ecosystem.config.js       Graceful reload from config
+
+MONITORING
+  pm2 list                             Show all processes
+  pm2 show api                         Detailed info about one process
+  pm2 monit                            Live CPU/memory dashboard
+  pm2 logs api                         Stream logs
+  pm2 logs api --lines 200             Last 200 lines then stream
+
+PERSISTENCE
+  pm2 save                             Save current process list
+  pm2 startup                          Generate OS startup script
+  pm2 resurrect                        Restore saved process list
+
+UPDATES
+  npm install -g pm2@latest            Update PM2
+  pm2 update                           Reload PM2 daemon with new version
+────────────────────────────────────────────────────────────────────</pre>
+      </div>
+
+      <div class="summary">
+        <h4>Chapter Summary</h4>
+        <ul>
+          <li><code>node server.js</code> has no crash recovery, no auto-restart, no multi-core support — it is not suitable for production.</li>
+          <li><strong>PM2</strong> is the industry-standard process manager: it restarts crashed processes, survives server reboots, and runs multiple workers in cluster mode.</li>
+          <li>Use <strong>nvm</strong> to manage Node.js versions — it allows multiple versions to coexist and switch easily.</li>
+          <li>The <strong>ecosystem.config.js</strong> file is the production-grade way to configure PM2 — version-controllable and repeatable.</li>
+          <li><strong>Cluster mode</strong> spawns one worker per CPU core, multiplying your throughput without any code changes.</li>
+          <li><code>pm2 reload</code> performs a <strong>zero-downtime</strong> restart in cluster mode — workers are replaced one at a time.</li>
+          <li><strong>Nginx</strong> should always sit in front of Node.js to handle SSL, static files, and act as a buffer against direct exposure to the internet.</li>
+          <li>Use <strong>environment variables</strong> for all secrets and configuration — never hardcode them in source code.</li>
+          <li>A <strong><code>/health</code> endpoint</strong> is essential for load balancers, Kubernetes probes, and monitoring systems.</li>
+          <li>Use <code>pm2-runtime</code> (not <code>pm2 start</code>) inside Docker containers to keep the process in the foreground.</li>
+        </ul>
+      </div>
+
+      <div class="nav-links">
+        <a href="../part-4/chapter-14.html">&larr; Ch 14 &middot; Pulumi</a>
+        <a href="chapter-16.html">Ch 16 &middot; Python &amp; FastAPI &rarr;</a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">&#9776;</button>
+<script src="../nav.js"></script>
+</body>
+</html>

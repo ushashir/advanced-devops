@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 3: The Internet's Invisible Roads — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-1">Part 1 · Chapter 3</div>
+        <h1>The Internet's Invisible Roads</h1>
+        <p class="chapter-intro">How TCP/IP, DNS, and HTTP actually work — the plumbing behind every web request.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>What you'll learn in this chapter</h4>
+        <ul>
+          <li>How data travels across the internet using IP addresses and routing</li>
+          <li>What DNS is and how your browser translates google.com into a connection</li>
+          <li>The difference between TCP and UDP — and when each is used</li>
+          <li>How HTTP and HTTPS work, including the anatomy of a request and response</li>
+          <li>Ports: what they are and which ones every DevOps engineer must know by heart</li>
+          <li>Firewalls and security groups — the gatekeepers of your servers</li>
+        </ul>
+      </div>
+
+      <h2>The City Postal Service Analogy</h2>
+      <p>
+        Before we talk about packets and protocols, let us build an analogy that will make
+        everything else click.
+      </p>
+      <p>
+        Imagine a massive city — bigger than Lagos, bigger than Cairo, bigger than any city that
+        exists. This city has millions of buildings. Every single building has a unique address.
+        Inside each building, there are dozens of departments, each handling a specific type
+        of business.
+      </p>
+      <p>
+        Now imagine you want to send a letter from your office to the accounts department of a
+        building across the city. Here is what happens:
+      </p>
+      <ul>
+        <li>You write the letter (the <em>data</em>).</li>
+        <li>You put it in an envelope with the recipient's building address (the <em>IP address</em>) and the department number (the <em>port</em>).</li>
+        <li>The postal service takes your envelope and routes it through various sorting offices (<em>routers</em>).</li>
+        <li>The letter arrives at the right building. The security guard at the front door checks the department number and only lets it through if that department is open and accepting mail (a <em>firewall</em>).</li>
+        <li>The correct department receives it and sends a reply.</li>
+      </ul>
+      <p>
+        That entire process — end to end — is how data travels across the internet. The letter
+        is a packet. The envelope address is the IP address. The department number is the port.
+        The sorting offices are routers. The security guard is a firewall.
+      </p>
+
+      <h2>IP Addresses — The Unique Addresses of the Internet</h2>
+      <p>
+        Every device connected to the internet has an IP address — a unique numerical identifier,
+        like a postal address for the digital world. There are two versions of IP in use today.
+      </p>
+      <p>
+        <strong>IPv4</strong> addresses look like four numbers separated by dots, each between 0
+        and 255: <code>192.168.1.1</code> or <code>203.0.113.45</code>. IPv4 can represent about
+        4.3 billion unique addresses — which seemed like plenty when it was designed in 1981.
+        It was not. The internet grew far beyond what anyone imagined, and we ran out.
+      </p>
+      <p>
+        <strong>IPv6</strong> was created to solve this problem. IPv6 addresses look like this:
+        <code>2001:0db8:85a3:0000:0000:8a2e:0370:7334</code>. IPv6 supports a number so large
+        it is practically infinite — roughly 340 undecillion addresses. Your city postal service
+        analogy now works for every atom in the observable universe.
+      </p>
+
+      <h3>Public vs. Private IP Addresses</h3>
+      <p>
+        Not all IP addresses are visible on the public internet. There are ranges reserved for
+        private use — only accessible within a local network:
+      </p>
+      <ul>
+        <li><code>10.0.0.0 – 10.255.255.255</code> — Large private networks (common in AWS VPCs)</li>
+        <li><code>172.16.0.0 – 172.31.255.255</code> — Medium private networks</li>
+        <li><code>192.168.0.0 – 192.168.255.255</code> — Small private networks (your home router uses this)</li>
+      </ul>
+      <p>
+        Your home router gets one public IP address from your ISP. It then assigns private IP
+        addresses to your phone, laptop, and smart TV. When any of those devices sends a request
+        to the internet, the router translates the private address to its public one — this
+        process is called <strong>NAT (Network Address Translation)</strong>.
+      </p>
+      <p>
+        One address you will see constantly in DevOps work: <code>127.0.0.1</code> — called
+        <strong>localhost</strong>. This always refers to the machine itself. When you run a
+        server locally and visit <code>http://localhost:3000</code>, you are connecting to your
+        own machine using the loopback address.
+      </p>
+
+      <div class="box key-term">
+        <div class="box-title">📚 Key Terms</div>
+        <p><strong>IP Address:</strong> A unique numerical identifier for a device on a network.</p>
+        <p><strong>Public IP:</strong> An address reachable from anywhere on the internet.</p>
+        <p><strong>Private IP:</strong> An address only reachable within a local network.</p>
+        <p><strong>Localhost (127.0.0.1):</strong> Always refers to the current machine. Used to access services running on the same computer.</p>
+      </div>
+
+      <h2>DNS — The Phone Book of the Internet</h2>
+      <p>
+        Humans are bad at remembering numbers. We are good at remembering names. <code>google.com</code>
+        is easy to remember. <code>142.250.80.46</code> is not. The Domain Name System (DNS) is
+        the service that bridges the gap — it translates human-readable domain names into
+        machine-readable IP addresses.
+      </p>
+      <p>
+        Think of DNS as a phone book. You know someone's name (the domain). The phone book gives
+        you their number (the IP address). Your device then dials that number to make the connection.
+      </p>
+      <p>
+        When you type <code>google.com</code> in your browser, a surprisingly sophisticated chain
+        of lookups happens in fractions of a second:
+      </p>
+
+      <div class="diagram">
+<pre>You type: google.com in your browser
+         │
+         ▼
+Browser cache? → Not found
+         │
+         ▼
+Operating System cache? → Not found
+         │
+         ▼
+Local DNS Resolver (your ISP, or 8.8.8.8 for Google DNS)
+         │
+         ▼
+Root Nameserver (.) → "Ask the .com TLD server"
+         │
+         ▼
+.com TLD Nameserver → "Ask Google's nameserver"
+         │
+         ▼
+Google's Authoritative DNS Server
+         │
+         ▼
+Answer: 142.250.80.46
+         │
+         ▼
+Browser connects to 142.250.80.46 on port 443 (HTTPS)</pre>
+      </div>
+
+      <p>
+        The whole process usually takes under 100 milliseconds — and most of it is cached, so
+        repeat visits skip straight to the answer.
+      </p>
+
+      <h3>DNS Record Types</h3>
+      <p>
+        DNS is not just one thing. There are different types of DNS records, each serving a
+        different purpose. As a DevOps engineer, you will configure these when you set up domains
+        for your applications:
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Record Type</th>
+            <th>What It Does</th>
+            <th>Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>A</strong></td>
+            <td>Maps a domain name to an IPv4 address</td>
+            <td><code>myapp.com → 203.0.113.10</code></td>
+          </tr>
+          <tr>
+            <td><strong>AAAA</strong></td>
+            <td>Maps a domain name to an IPv6 address</td>
+            <td><code>myapp.com → 2001:db8::1</code></td>
+          </tr>
+          <tr>
+            <td><strong>CNAME</strong></td>
+            <td>Creates an alias pointing to another domain</td>
+            <td><code>www.myapp.com → myapp.com</code></td>
+          </tr>
+          <tr>
+            <td><strong>MX</strong></td>
+            <td>Specifies the mail server for a domain</td>
+            <td><code>myapp.com → mail.myapp.com</code></td>
+          </tr>
+          <tr>
+            <td><strong>TXT</strong></td>
+            <td>Stores text — used for domain verification, SPF, DKIM</td>
+            <td><code>v=spf1 include:sendgrid.net ~all</code></td>
+          </tr>
+          <tr>
+            <td><strong>NS</strong></td>
+            <td>Delegates DNS authority to specific nameservers</td>
+            <td><code>ns1.cloudflare.com</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>DNS Commands</h3>
+      <pre><code><span class="cmt"># Look up the IP address for a domain</span>
+<span class="fn">dig</span> google.com
+
+<span class="cmt"># Look up a specific record type</span>
+<span class="fn">dig</span> <span class="flag">MX</span> gmail.com
+
+<span class="cmt"># Simple lookup (older tool, still works)</span>
+<span class="fn">nslookup</span> google.com
+
+<span class="cmt"># Verbose HTTP request showing DNS, connection, and response details</span>
+<span class="fn">curl</span> <span class="flag">-v</span> https://google.com
+
+<span class="cmt"># Trace the full DNS resolution chain</span>
+<span class="fn">dig</span> <span class="flag">+trace</span> google.com</code></pre>
+
+      <h2>TCP vs. UDP — Reliable vs. Fast</h2>
+      <p>
+        Data travels across the internet in small chunks called <strong>packets</strong>. A single
+        web page request might be broken into dozens of packets, each finding its own route to the
+        destination and reassembled in order when they arrive. There are two main protocols that
+        govern how these packets are sent.
+      </p>
+
+      <h3>TCP — The Reliable Protocol</h3>
+      <p>
+        TCP (Transmission Control Protocol) is like certified mail. Before any data is sent,
+        TCP performs a handshake to establish a connection. During transmission, it verifies that
+        every packet arrived and in the right order. If a packet is lost, it is retransmitted.
+        Nothing arrives out of order. Nothing gets lost.
+      </p>
+
+      <div class="diagram">
+<pre>TCP Three-Way Handshake:
+
+Client                              Server
+  │                                    │
+  │──── SYN ("I want to talk") ───────►│
+  │                                    │
+  │◄─── SYN-ACK ("OK, I'm listening") ─│
+  │                                    │
+  │──── ACK ("Great, let's go") ──────►│
+  │                                    │
+  │   [Connection established]         │
+  │   [Data exchange begins]           │</pre>
+      </div>
+
+      <p>
+        This reliability comes at a cost: all that confirmation overhead takes time. TCP is used
+        for HTTP, HTTPS, SSH, email (SMTP, IMAP), and databases — anywhere you need guaranteed,
+        ordered delivery and cannot afford to lose data.
+      </p>
+
+      <h3>UDP — The Fast Protocol</h3>
+      <p>
+        UDP (User Datagram Protocol) is like sending a postcard. You write it, drop it in the
+        mailbox, and move on. You have no idea if it arrived. You have no idea if it arrived in
+        order. You do not care — you have already sent the next postcard.
+      </p>
+      <p>
+        UDP is used when speed matters more than reliability: video streaming (if one frame is
+        lost, the next one comes immediately anyway), online games (a slightly stale position is
+        better than waiting), DNS (the overhead of TCP for a tiny lookup would be wasteful), and
+        VoIP calls. The applications using UDP handle loss tolerance in their own logic.
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">📬 TCP vs UDP in Plain Language</div>
+        <p>
+          TCP: "Here is packet 1. Did you get it? Great. Here is packet 2. Did you get it?
+          Great. Here is packet 3. Wait — you didn't get packet 3? Let me resend it. OK, got it?
+          Continuing with packet 4..." Slow but guaranteed.
+        </p>
+        <p>
+          UDP: "Packet 1! Packet 2! Packet 3! Packet 4! Packet 5! Done." Fast but some may be lost.
+        </p>
+      </div>
+
+      <h2>HTTP and HTTPS — The Language of the Web</h2>
+      <p>
+        HTTP (HyperText Transfer Protocol) is the language that browsers and web servers speak to
+        each other. Every time you load a webpage, fetch data from an API, or submit a form, an
+        HTTP transaction is happening underneath.
+      </p>
+
+      <h3>The Anatomy of an HTTP Request</h3>
+      <p>An HTTP request has three parts: a <em>method</em>, a <em>URL</em>, and optionally a <em>body</em>.</p>
+      <p>The <strong>method</strong> says what you want to do:</p>
+      <ul>
+        <li><strong>GET</strong> — fetch a resource (read)</li>
+        <li><strong>POST</strong> — create a new resource (send data to the server)</li>
+        <li><strong>PUT</strong> — replace a resource completely (update)</li>
+        <li><strong>PATCH</strong> — partially update a resource</li>
+        <li><strong>DELETE</strong> — remove a resource</li>
+      </ul>
+
+      <pre><code><span class="cmt">HTTP Request:</span>
+GET /api/users HTTP/1.1
+Host: api.example.com
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Accept: application/json
+Content-Type: application/json
+
+<span class="cmt">HTTP Response:</span>
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 234
+X-Request-ID: abc-123
+
+{
+  "users": [
+    { "id": 1, "name": "Ushahemba", "role": "admin" },
+    { "id": 2, "name": "Amaka", "role": "user" }
+  ]
+}</code></pre>
+
+      <h3>HTTP Status Codes</h3>
+      <p>
+        Every HTTP response includes a <strong>status code</strong> — a three-digit number that
+        tells you whether the request succeeded or failed, and why. You will see these constantly
+        in logs, API responses, and monitoring dashboards.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Meaning</th>
+            <th>When You See It</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>200 OK</strong></td><td>Success</td><td>Everything worked</td></tr>
+          <tr><td><strong>201 Created</strong></td><td>Resource created</td><td>POST created a new record</td></tr>
+          <tr><td><strong>204 No Content</strong></td><td>Success, nothing to return</td><td>DELETE succeeded</td></tr>
+          <tr><td><strong>301 Moved Permanently</strong></td><td>URL has changed forever</td><td>http:// redirected to https://</td></tr>
+          <tr><td><strong>304 Not Modified</strong></td><td>Cached version is still fresh</td><td>Browser uses its cache</td></tr>
+          <tr><td><strong>400 Bad Request</strong></td><td>Client sent invalid data</td><td>Missing required field in JSON</td></tr>
+          <tr><td><strong>401 Unauthorized</strong></td><td>Not authenticated</td><td>No token or expired token</td></tr>
+          <tr><td><strong>403 Forbidden</strong></td><td>Authenticated but not allowed</td><td>Correct token, wrong permissions</td></tr>
+          <tr><td><strong>404 Not Found</strong></td><td>Resource doesn't exist</td><td>Wrong URL or deleted resource</td></tr>
+          <tr><td><strong>429 Too Many Requests</strong></td><td>Rate limited</td><td>Sending requests too fast</td></tr>
+          <tr><td><strong>500 Internal Server Error</strong></td><td>Server crashed</td><td>Unhandled exception in your code</td></tr>
+          <tr><td><strong>502 Bad Gateway</strong></td><td>Upstream server failed</td><td>Your app behind Nginx is down</td></tr>
+          <tr><td><strong>503 Service Unavailable</strong></td><td>Server overloaded or down</td><td>Deployment in progress, or server crashed</td></tr>
+        </tbody>
+      </table>
+
+      <h3>HTTPS — Adding Encryption to HTTP</h3>
+      <p>
+        HTTPS is HTTP with a security layer called <strong>TLS (Transport Layer Security)</strong>.
+        The padlock you see in your browser's address bar means TLS is active. Without it, anyone
+        on the same network as you can read every HTTP request and response — your credentials,
+        your data, everything.
+      </p>
+      <p>
+        TLS works through a clever two-phase process:
+      </p>
+      <ol>
+        <li>
+          <strong>Asymmetric encryption (handshake):</strong> The server has a public key (shared freely)
+          and a private key (secret). The browser uses the server's public key to encrypt a message.
+          Only the server's private key can decrypt it. This lets them exchange a shared secret key
+          securely.
+        </li>
+        <li>
+          <strong>Symmetric encryption (data transfer):</strong> Once both sides have the shared
+          secret, all subsequent data is encrypted using that symmetric key. Symmetric encryption
+          is much faster than asymmetric, so the heavy lifting is done efficiently.
+        </li>
+      </ol>
+      <p>
+        TLS certificates are issued by Certificate Authorities (CAs) who vouch that the server
+        is who it claims to be. In production, you will typically use
+        <strong>Let's Encrypt</strong> (free, automated) or a commercial CA.
+      </p>
+
+      <pre><code><span class="cmt"># Test an HTTPS connection and see the certificate chain</span>
+<span class="fn">curl</span> <span class="flag">-v</span> https://example.com 2>&amp;1 | grep -A5 <span class="str">"SSL"</span>
+
+<span class="cmt"># Check when an SSL certificate expires</span>
+<span class="fn">echo</span> | openssl s_client <span class="flag">-servername</span> example.com <span class="flag">-connect</span> example.com:443 2>/dev/null | openssl x509 <span class="flag">-noout</span> <span class="flag">-dates</span>
+
+<span class="cmt"># Make a simple API GET request</span>
+<span class="fn">curl</span> https://api.example.com/health
+
+<span class="cmt"># POST JSON data to an API</span>
+<span class="fn">curl</span> <span class="flag">-X POST</span> https://api.example.com/users \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-H</span> <span class="str">"Authorization: Bearer YOUR_TOKEN"</span> \
+  <span class="flag">-d</span> <span class="str">'{"name": "Ushahemba", "email": "u@example.com"}'</span></code></pre>
+
+      <h2>Ports — The Doors on the Building</h2>
+      <p>
+        An IP address gets you to the right building (the server). A port number gets you to
+        the right department inside that building. Ports are numbers from 0 to 65535, and
+        certain port numbers have been standardized for specific services.
+      </p>
+      <p>
+        As a DevOps engineer, you will need to know these by heart — because they come up in
+        firewall rules, security group configurations, Docker port mappings, and debugging
+        sessions constantly.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Port</th>
+            <th>Protocol / Service</th>
+            <th>When You Encounter It</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>22</strong></td><td>SSH</td><td>Connecting to Linux servers</td></tr>
+          <tr><td><strong>80</strong></td><td>HTTP</td><td>Unencrypted web traffic</td></tr>
+          <tr><td><strong>443</strong></td><td>HTTPS</td><td>Encrypted web traffic — most web apps</td></tr>
+          <tr><td><strong>3000</strong></td><td>Node.js (dev)</td><td>Your local Next.js, Express app</td></tr>
+          <tr><td><strong>5432</strong></td><td>PostgreSQL</td><td>Database connections</td></tr>
+          <tr><td><strong>3306</strong></td><td>MySQL / MariaDB</td><td>Database connections</td></tr>
+          <tr><td><strong>6379</strong></td><td>Redis</td><td>Cache and message queue</td></tr>
+          <tr><td><strong>27017</strong></td><td>MongoDB</td><td>Document database</td></tr>
+          <tr><td><strong>5672</strong></td><td>RabbitMQ</td><td>Message broker</td></tr>
+          <tr><td><strong>8080</strong></td><td>HTTP (alternate)</td><td>Common for dev servers, Jenkins</td></tr>
+          <tr><td><strong>9090</strong></td><td>Prometheus</td><td>Metrics collection</td></tr>
+          <tr><td><strong>3100</strong></td><td>Grafana Loki</td><td>Log aggregation</td></tr>
+        </tbody>
+      </table>
+
+      <pre><code><span class="cmt"># Check which ports are open and listening on your machine</span>
+<span class="fn">ss</span> <span class="flag">-tlnp</span>
+
+<span class="cmt"># Check if a specific port is reachable on a remote server</span>
+<span class="fn">telnet</span> 192.168.1.100 5432
+
+<span class="cmt"># Use nc (netcat) to test port connectivity</span>
+<span class="fn">nc</span> <span class="flag">-zv</span> 192.168.1.100 5432
+
+<span class="cmt"># See what process is using a specific port</span>
+<span class="fn">lsof</span> <span class="flag">-i</span> :3000</code></pre>
+
+      <h2>Firewalls and Security Groups — The Gatekeepers</h2>
+      <p>
+        A firewall is a security guard at the door of your server. It examines every incoming
+        and outgoing network connection and decides whether to allow or block it, based on rules
+        you define.
+      </p>
+      <p>
+        Without a firewall, every port on your server is potentially accessible from anywhere
+        on the internet. That means anyone who knows your IP address could attempt to connect
+        to your database, your Redis cache, your admin panel, or any other service that happens
+        to be listening. This is how servers get compromised.
+      </p>
+      <p>
+        The principle of least privilege applies here: <strong>only open ports that need to be open.</strong>
+        A web application typically needs port 80 and 443 open. Port 22 (SSH) should only be
+        open to your IP address or VPN. Your database port (5432) should only be accessible
+        from the application servers that need it — not from the public internet.
+      </p>
+
+      <h3>UFW — The Linux Firewall Tool</h3>
+      <pre><code><span class="cmt"># Check firewall status</span>
+<span class="fn">sudo</span> ufw status
+
+<span class="cmt"># Allow SSH (important: do this BEFORE enabling the firewall)</span>
+<span class="fn">sudo</span> ufw allow 22
+
+<span class="cmt"># Allow HTTP and HTTPS</span>
+<span class="fn">sudo</span> ufw allow 80
+<span class="fn">sudo</span> ufw allow 443
+
+<span class="cmt"># Allow a specific IP to access a port</span>
+<span class="fn">sudo</span> ufw allow from 203.0.113.5 to any port 5432
+
+<span class="cmt"># Enable the firewall</span>
+<span class="fn">sudo</span> ufw enable
+
+<span class="cmt"># Deny everything not explicitly allowed</span>
+<span class="fn">sudo</span> ufw default deny incoming</code></pre>
+
+      <h3>AWS Security Groups</h3>
+      <p>
+        In cloud environments like AWS, firewalls are called <strong>Security Groups</strong>.
+        They work the same way — you define inbound and outbound rules — but they are configured
+        through the AWS console or Terraform rather than command-line tools. A typical production
+        security group looks like this:
+      </p>
+
+      <div class="diagram">
+<pre>Web Server Security Group:
+
+Inbound Rules:
+  Port 443  (HTTPS)  ← from 0.0.0.0/0  (the entire internet)
+  Port 80   (HTTP)   ← from 0.0.0.0/0  (redirects to HTTPS)
+  Port 22   (SSH)    ← from 10.0.0.0/8 (only from our VPN)
+
+Outbound Rules:
+  All traffic → 0.0.0.0/0  (servers can talk to the internet)
+
+Database Security Group:
+  Port 5432 (PostgreSQL) ← from Web Server Security Group only
+  (The database is NEVER directly reachable from the internet)</pre>
+      </div>
+
+      <div class="box warning">
+        <div class="box-title">⚠️ Never Expose Databases to the Public Internet</div>
+        <p>
+          One of the most common security mistakes in DevOps is accidentally leaving a database
+          port (5432, 3306, 27017) open to <code>0.0.0.0/0</code> (the entire internet).
+          Automated scanners constantly probe the internet for open database ports and attempt
+          default credentials. Always restrict database access to your application servers only,
+          using private IP ranges or security group references.
+        </p>
+      </div>
+
+      <div class="box fun-fact">
+        <div class="box-title">📡 Fun Fact: How Fast is the Internet?</div>
+        <p>
+          Light travels through a fiber optic cable at about 200,000 km per second. The distance
+          between Lagos and London is about 5,000 km. That means the theoretical minimum
+          round-trip time (latency) for a request from Lagos to a London server is about 50ms —
+          just from the physics of light. In practice, with routing overhead, typical latency
+          is 80-120ms. This is why "edge computing" (putting servers closer to users) matters
+          so much for performance.
+        </p>
+      </div>
+
+      <div class="summary">
+        <h4>Chapter Summary</h4>
+        <ul>
+          <li>The internet works like a postal service: data is addressed with IP addresses and port numbers, routed through networks, and checked by firewalls at the destination.</li>
+          <li>IP addresses identify devices on a network. IPv4 uses four-number notation; IPv6 is longer. <code>127.0.0.1</code> always means the local machine.</li>
+          <li>DNS translates domain names (google.com) to IP addresses through a chain of lookups. A records point to IPv4 addresses; CNAMEs are aliases; MX records are for email.</li>
+          <li>TCP provides reliable, ordered delivery with a handshake. UDP provides fast, best-effort delivery. Most web services use TCP; streaming and games often use UDP.</li>
+          <li>HTTP is the language of the web. Requests have methods (GET, POST, PUT, DELETE) and responses have status codes (200, 404, 500). HTTPS adds TLS encryption.</li>
+          <li>Ports are the numbered "departments" on a server. Know the common ones: 22 (SSH), 80 (HTTP), 443 (HTTPS), 5432 (PostgreSQL), 6379 (Redis).</li>
+          <li>Firewalls (and AWS Security Groups) enforce the principle of least privilege — only open the ports that need to be open, to the sources that need access.</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="chapter-2.html">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Ch 2 · Linux: Your Magic Workshop</span>
+        </a>
+        <a href="chapter-4.html" class="next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Ch 4 · Git, Bash &amp; Python</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">☰</button>
+<script src="../nav.js"></script>
+</body>
+</html>

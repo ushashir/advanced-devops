@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Part 3 Exercises — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-3">Part 3 · Exercises</div>
+        <h1>Part 3 Exercises: Cloud Platforms</h1>
+        <p class="chapter-intro">Test your understanding of AWS, GCP, Azure, and simpler deployment platforms.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>How to use these exercises</h4>
+        <p>
+          Read each question carefully. Try to answer it in your own words before revealing the
+          answer. If you can explain a concept out loud — to a friend, to your rubber duck, to
+          the wall — you understand it. If you stumble, re-read the relevant section in the
+          chapter. There are no shortcuts: genuine understanding beats memorized answers every time.
+        </p>
+      </div>
+
+      <!-- Exercise 1 -->
+      <div class="box key-term">
+        <div class="box-title">📝 Exercise 1 — Cloud Run Equivalents</div>
+        <p>
+          <strong>Question:</strong> What is the AWS equivalent of Google Cloud's Cloud Run?
+          Describe what Cloud Run does, and explain why there might be more than one AWS service
+          that partially matches it.
+        </p>
+      </div>
+
+      <h3>Answer: Exercise 1</h3>
+      <p>
+        Cloud Run runs Docker containers in a <strong>serverless, fully managed</strong> environment
+        — you give it an image, it deploys it with a public HTTPS URL, scales to zero when there's
+        no traffic, and scales up automatically under load. You pay per request, not per idle server.
+      </p>
+      <p>
+        The closest AWS equivalent is <strong>AWS Fargate</strong> — specifically Fargate running
+        on ECS (Elastic Container Service) or EKS. Like Cloud Run, Fargate runs Docker containers
+        without you managing the underlying EC2 instances. However, it does not scale to zero by
+        default — you need additional configuration for that.
+      </p>
+      <p>
+        <strong>AWS Lambda</strong> is the serverless scale-to-zero service, but it runs code
+        functions, not arbitrary Docker containers (though Lambda does support container images up
+        to 10GB as of 2020). Lambda has a 15-minute execution time limit; Cloud Run supports
+        requests up to 60 minutes.
+      </p>
+      <p>
+        <strong>AWS App Runner</strong> (launched 2021) is the closest conceptual match: give it
+        a container image, and it deploys it with automatic scaling, HTTPS, and minimal configuration
+        — virtually identical to the Cloud Run developer experience.
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">🗺️ Summary Map</div>
+        <p>
+          Cloud Run ≈ AWS App Runner (closest match)<br>
+          Cloud Run ≈ AWS Fargate on ECS (no scale-to-zero by default)<br>
+          Cloud Run ≈ AWS Lambda Container Images (for function-style workloads)
+        </p>
+      </div>
+
+      <!-- Exercise 2 -->
+      <div class="box key-term">
+        <div class="box-title">📝 Exercise 2 — Profile Photo Storage</div>
+        <p>
+          <strong>Question:</strong> Your app needs to store 10,000 profile photos uploaded by users.
+          Each photo is between 50KB and 2MB. Which AWS service do you use, and why? What would
+          a typical file path look like?
+        </p>
+      </div>
+
+      <h3>Answer: Exercise 2</h3>
+      <p>
+        Use <strong>Amazon S3</strong> (Simple Storage Service).
+      </p>
+      <p>
+        S3 is purpose-built for exactly this use case — storing large numbers of user-uploaded
+        files (objects). Here is why it is the right choice:
+      </p>
+      <ul>
+        <li><strong>Scale</strong>: S3 has no limit on the number of objects. 10,000 photos today, 10 million photos in two years — no migration required.</li>
+        <li><strong>Durability</strong>: 99.999999999% (eleven nines). Your photos are automatically replicated across multiple data centers in the region.</li>
+        <li><strong>Cost</strong>: approximately $0.023/GB/month. 10,000 photos averaging 500KB each = ~5GB = ~$0.12/month.</li>
+        <li><strong>Direct upload</strong>: users can upload directly to S3 via pre-signed URLs, bypassing your server entirely (reduces bandwidth costs on your API).</li>
+        <li><strong>CDN integration</strong>: attach CloudFront to serve photos from edge locations near each user — fast load times globally.</li>
+      </ul>
+
+      <p>A typical S3 object structure for profile photos:</p>
+
+      <pre><code>s3://my-app-uploads/
+  └── users/
+      ├── u_1234/
+      │   └── profile/
+      │       ├── original.jpg      ← full-size original
+      │       ├── thumb_200x200.jpg ← resized thumbnail
+      │       └── thumb_50x50.jpg   ← tiny avatar
+      ├── u_5678/
+      │   └── profile/
+      │       ├── original.png
+      │       └── thumb_200x200.jpg
+      └── ...</code></pre>
+
+      <p>
+        Use the user's unique ID (not username — usernames can change) as the folder name.
+        Store the S3 key (path) in your database, not the full URL — the URL structure can change
+        if you move buckets or add CloudFront.
+      </p>
+
+      <!-- Exercise 3 -->
+      <div class="box key-term">
+        <div class="box-title">📝 Exercise 3 — IAM Explained</div>
+        <p>
+          <strong>Question:</strong> Explain what IAM is and why it is important. Describe the
+          difference between an IAM <em>user</em>, an IAM <em>role</em>, and an IAM <em>policy</em>,
+          using a non-technical analogy.
+        </p>
+      </div>
+
+      <h3>Answer: Exercise 3</h3>
+      <p>
+        IAM (Identity and Access Management) is AWS's system for controlling who can do what to
+        which resources. Before any AWS API call succeeds — whether it comes from your CLI, your
+        application code, a Lambda function, or an EC2 instance — IAM checks: "Is this entity
+        authorized to perform this action on this resource?"
+      </p>
+      <p>
+        IAM is critically important because without it, anyone with your AWS credentials could
+        access everything — read your database, delete your S3 files, create thousands of EC2
+        instances and run up a huge bill. IAM lets you grant only the minimum permissions needed
+        for each user or service. This is called the <strong>principle of least privilege</strong>.
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">🏢 The Office Building Analogy</div>
+        <p>
+          Imagine a large office building (your AWS account).<br><br>
+          <strong>IAM Policy</strong>: a written rulebook that says "people with this badge can
+          enter floors 1–3 and the server room, but not the CEO's office or the finance floor."<br><br>
+          <strong>IAM User</strong>: an individual employee with a physical badge (credentials —
+          an access key and secret). Alice the developer has her own badge with her own access
+          level.<br><br>
+          <strong>IAM Role</strong>: a temporary visitor badge given to a contractor or a
+          delivery person. The EC2 server (the delivery person) picks up a role badge when it
+          needs to access the storage room (S3). The badge has an expiry and rotates automatically.
+          Unlike a user's badge, no one carries it around permanently — it's picked up and
+          returned.
+        </p>
+      </div>
+
+      <p>
+        Key practical rules:
+      </p>
+      <ul>
+        <li>Never use root credentials for daily work — lock them away, enable MFA.</li>
+        <li>Use roles (not hardcoded credentials) for EC2 instances, Lambda functions, and ECS tasks. Roles rotate automatically; hardcoded credentials get leaked.</li>
+        <li>Grant only the permissions actually needed. An app that only reads from one S3 bucket should have a policy that only allows <code>s3:GetObject</code> on that one bucket.</li>
+      </ul>
+
+      <!-- Exercise 4 -->
+      <div class="box key-term">
+        <div class="box-title">📝 Exercise 4 — Serverless Across Clouds</div>
+        <p>
+          <strong>Question:</strong> What does "serverless" mean in the context of cloud computing?
+          Name the serverless function service on each of the three major clouds. What are the
+          advantages and disadvantages of serverless?
+        </p>
+      </div>
+
+      <h3>Answer: Exercise 4</h3>
+      <p>
+        "Serverless" does not mean there are no servers — it means <em>you</em> don't manage any
+        servers. The cloud provider handles provisioning, scaling, patching, and availability
+        entirely. From your perspective, you write a function, deploy it, and it runs. You pay
+        per invocation and per millisecond of execution, not per hour of idle server.
+      </p>
+
+      <div class="diagram">
+<pre>Serverless Functions on Each Cloud
+──────────────────────────────────────────────────────────
+Cloud     Service            Trigger types
+──────────────────────────────────────────────────────────
+AWS       Lambda             HTTP (API Gateway), S3,
+                             DynamoDB, SQS, EventBridge,
+                             scheduled (cron), Kinesis
+
+GCP       Cloud Functions    HTTP, Pub/Sub, Cloud Storage,
+                             Firestore, scheduled (cron)
+
+Azure     Azure Functions    HTTP, Blob Storage, Queue,
+                             CosmosDB, Event Grid,
+                             Service Bus, Timer (cron)
+──────────────────────────────────────────────────────────</pre>
+      </div>
+
+      <p><strong>Advantages of serverless:</strong></p>
+      <ul>
+        <li><strong>Zero idle cost</strong>: if no one calls your function, you pay nothing. Perfect for infrequent tasks.</li>
+        <li><strong>Automatic scaling</strong>: from 0 to 10,000 concurrent executions in seconds, no manual configuration.</li>
+        <li><strong>No infrastructure management</strong>: no OS patching, no capacity planning, no load balancer configuration.</li>
+        <li><strong>Event-driven architecture</strong>: naturally models workflows where code should run in response to things happening (file uploaded, record changed, message queued).</li>
+      </ul>
+
+      <p><strong>Disadvantages of serverless:</strong></p>
+      <ul>
+        <li><strong>Cold starts</strong>: if the function hasn't run recently, the first invocation takes 100–500ms extra while the container spins up. Bad for latency-sensitive endpoints.</li>
+        <li><strong>Execution time limits</strong>: Lambda has a 15-minute maximum. Long-running jobs need a different solution.</li>
+        <li><strong>Debugging is harder</strong>: you can't SSH into the server; you have to rely on logs and traces.</li>
+        <li><strong>Vendor lock-in</strong>: serverless code is often tightly coupled to the cloud provider's event model.</li>
+        <li><strong>Cost at high volume</strong>: for continuously high traffic, a permanently running server may actually be cheaper than paying per invocation.</li>
+      </ul>
+
+      <!-- Exercise 5 -->
+      <div class="box key-term">
+        <div class="box-title">📝 Exercise 5 — Deploying a Next.js App</div>
+        <p>
+          <strong>Question:</strong> You have just built a Next.js application. It has a few API
+          routes that connect to a PostgreSQL database. Which deployment platform would you start
+          with, and why? At what point would you consider migrating to something more complex?
+        </p>
+      </div>
+
+      <h3>Answer: Exercise 5</h3>
+      <p>
+        Start with <strong>Vercel</strong> for the Next.js app and <strong>Supabase</strong> or
+        <strong>Render</strong> for the PostgreSQL database.
+      </p>
+      <p>
+        <strong>Why Vercel:</strong> Vercel was built by the creators of Next.js. It auto-detects
+        the framework, sets correct build settings automatically, handles server components and
+        edge functions natively, and deploys to a global CDN with SSL in seconds. There is zero
+        infrastructure configuration. Every pull request gets a preview URL. Rollbacks are
+        instant. The free tier covers most early-stage projects.
+      </p>
+      <p>
+        <strong>Why not AWS immediately:</strong> For a Next.js app, running it on AWS ECS or
+        EC2 means configuring an Application Load Balancer, ECR for the container image, ECS
+        task definitions, VPC networking, security groups, and IAM roles — hours of work that
+        adds no value to your product at this stage.
+      </p>
+
+      <div class="diagram">
+<pre>Early-Stage Architecture (Zero cost, 15 minutes to set up)
+──────────────────────────────────────────────────────────
+Vercel (free)          → Next.js frontend + API routes
+Supabase free tier     → PostgreSQL database (500MB)
+Vercel Blob / Cloudinary → File uploads (photos, etc.)
+
+When to migrate:
+──────────────────────────────────────────────────────────
+10,000+ daily users    → Consider Render or Railway for API
+DB > 500MB             → Upgrade Supabase or move to Render DB
+Custom networking req. → Move to AWS/GCP
+Compliance requirements → Move to managed cloud with audit logs
+WebSocket connections  → Move backend to Render or Railway</pre>
+      </div>
+
+      <!-- Exercise 6 -->
+      <div class="box key-term">
+        <div class="box-title">📝 Exercise 6 — EC2 vs Lambda</div>
+        <p>
+          <strong>Question:</strong> Explain the difference between EC2 and Lambda. Give a concrete
+          example of a workload that is best suited to EC2, and a different workload that is best
+          suited to Lambda.
+        </p>
+      </div>
+
+      <h3>Answer: Exercise 6</h3>
+
+      <div class="diagram">
+<pre>EC2 vs Lambda — Core Differences
+──────────────────────────────────────────────────────────────────
+                EC2                         Lambda
+──────────────────────────────────────────────────────────────────
+What is it?    Virtual machine             Event-driven function
+Management     You manage OS, updates      Fully managed by AWS
+Billing        Per hour (or second)        Per invocation + duration
+State          Persistent (files stay)     Ephemeral (no disk state)
+Runtime        Anything you install        Node.js, Python, Java,
+                                           Go, Ruby, .NET, custom
+Max runtime    Unlimited                   15 minutes
+Cold start     None (always running)       100–500ms first invoke
+Concurrency    You scale manually          Automatic (up to 1000s)
+Networking     Full VPC control            Limited (configurable)
+SSH access     Yes                         No
+Cost when idle Full price                  $0
+──────────────────────────────────────────────────────────────────</pre>
+      </div>
+
+      <p><strong>Best for EC2:</strong> A long-running Node.js API server that handles persistent
+      WebSocket connections from thousands of concurrent users. WebSocket connections are
+      stateful and long-lived — they don't fit the request/response Lambda model. You need
+      a persistent process running on a real server.</p>
+
+      <p><strong>Best for Lambda:</strong> An image resizing function that triggers whenever a
+      user uploads a photo to S3. The function needs to run for a few seconds, resize the
+      image to three thumbnail sizes, and store the results back in S3. It might run 100
+      times per day or 10,000 times per day. With Lambda, you pay for 10,000 invocations
+      at a fraction of a cent each; with EC2, you pay 24/7 for an idle server waiting for
+      uploads.</p>
+
+      <!-- Exercise 7 -->
+      <div class="box key-term">
+        <div class="box-title">📝 Exercise 7 — Cloud for Microsoft Stack</div>
+        <p>
+          <strong>Question:</strong> Your company runs Windows Server 2022, Active Directory for
+          employee authentication, SQL Server for databases, and everyone uses Microsoft 365
+          (Teams, Outlook, SharePoint). Which cloud platform is the natural choice for your
+          cloud migration? List three specific Azure services that directly benefit from this
+          existing Microsoft investment.
+        </p>
+      </div>
+
+      <h3>Answer: Exercise 7</h3>
+      <p>
+        <strong>Azure</strong> is the natural choice, and by a significant margin.
+      </p>
+      <p>
+        Three Azure services that directly leverage the existing Microsoft investment:
+      </p>
+      <ol>
+        <li>
+          <strong>Microsoft Entra ID (formerly Azure Active Directory)</strong>: your existing
+          Active Directory can be synced to Entra ID via Azure AD Connect. Employees use their
+          existing corporate credentials to log into cloud resources, SaaS apps, and Azure
+          services — single sign-on across everything. This would require significant additional
+          work to replicate on AWS (AWS Directory Service exists but is not native AD).
+        </li>
+        <li>
+          <strong>Azure SQL Database</strong>: a fully managed version of SQL Server in the
+          cloud. Migrate your on-premises SQL Server databases to Azure SQL with the Database
+          Migration Service — minimal code changes. The SQL Server dialect, stored procedures,
+          and T-SQL features you already use work natively. On AWS, you'd be moving to RDS SQL
+          Server (more expensive) or rewriting queries for PostgreSQL/MySQL.
+        </li>
+        <li>
+          <strong>Azure DevOps</strong>: integrates directly with the Microsoft 365 identity
+          system (same login as Teams and Outlook). Connect pull request reviews to Teams
+          channels. Link code commits to Azure Boards work items that appear in SharePoint
+          dashboards. The entire development workflow lives in the same Microsoft ecosystem
+          employees already use daily.
+        </li>
+      </ol>
+
+      <div class="box tip">
+        <div class="box-title">💡 Bonus: The Enterprise Agreement Advantage</div>
+        <p>
+          Many large companies have Enterprise Agreements with Microsoft for Office 365 and
+          Windows Server licenses. These agreements often include Azure credits or significant
+          discounts that make Azure substantially cheaper than equivalent AWS or GCP usage
+          for companies already in the Microsoft ecosystem.
+        </p>
+      </div>
+
+      <!-- Exercise 8 -->
+      <div class="box key-term">
+        <div class="box-title">📝 Exercise 8 — What Does a VPC Give You?</div>
+        <p>
+          <strong>Question:</strong> What does a custom VPC provide that you don't get with
+          a default AWS setup? Explain the purpose of a public subnet and a private subnet,
+          and describe why a production database should always be in a private subnet.
+        </p>
+      </div>
+
+      <h3>Answer: Exercise 8</h3>
+      <p>
+        AWS does create a default VPC in every region so you can launch resources immediately,
+        but the default VPC is configured for convenience, not security. Everything launched in
+        the default VPC gets a public IP address by default and is reachable from the internet
+        (subject to security groups). This is fine for experimentation, dangerous for production.
+      </p>
+      <p>
+        A custom VPC gives you:
+      </p>
+      <ul>
+        <li><strong>Full IP address range control</strong>: you define your private network (e.g., <code>10.0.0.0/16</code>) and divide it into subnets however you want.</li>
+        <li><strong>Network segmentation</strong>: isolate databases, application servers, and load balancers into separate subnets with different access rules.</li>
+        <li><strong>Defense in depth</strong>: an attacker who compromises your web server can't directly reach your database if the database is in a private subnet with no route from the internet.</li>
+        <li><strong>Custom routing</strong>: precise control over which traffic goes where — through NAT Gateways, VPN connections, Direct Connect links, VPC peering.</li>
+      </ul>
+
+      <div class="diagram">
+<pre>Public vs Private Subnets
+──────────────────────────────────────────────────────────
+PUBLIC SUBNET:
+  - Has a route to the Internet Gateway
+  - Resources CAN have public IPs
+  - Direct internet traffic in and out
+  - Used for: Load Balancers, Bastion Hosts, NAT Gateways
+
+PRIVATE SUBNET:
+  - NO route to the Internet Gateway
+  - Resources get only private IPs (10.x.x.x range)
+  - No direct inbound traffic from internet possible
+  - Outbound internet via NAT Gateway (one-way)
+  - Used for: App servers, Databases, Worker nodes
+──────────────────────────────────────────────────────────</pre>
+      </div>
+
+      <p>
+        <strong>Why the database should always be in a private subnet:</strong> Your PostgreSQL
+        database contains your most valuable and sensitive data — user records, financial
+        transactions, business data. If it were in a public subnet with a public IP, it would
+        be reachable from the entire internet. Even with strong password requirements, an exposed
+        database is a target for brute force attacks, vulnerability exploits, and data exfiltration.
+        In a private subnet, the database is not reachable from the internet at all — the only
+        way to connect is from within the same VPC (your application servers). The attack surface
+        is dramatically reduced.
+      </p>
+
+      <!-- Exercise 9 -->
+      <div class="box key-term">
+        <div class="box-title">📝 Exercise 9 — Vercel vs cPanel</div>
+        <p>
+          <strong>Question:</strong> Describe the fundamental difference between Vercel and cPanel
+          in terms of the type of projects each serves, the kind of developer who uses each one,
+          and the limitations you would hit if you tried to use each for the wrong project type.
+        </p>
+      </div>
+
+      <h3>Answer: Exercise 9</h3>
+
+      <div class="diagram">
+<pre>Vercel vs cPanel — A Complete Comparison
+──────────────────────────────────────────────────────────────────
+                    Vercel                    cPanel
+──────────────────────────────────────────────────────────────────
+Technology era       Modern (2015+)            Traditional (1996+)
+Target user          JavaScript devs           PHP/WordPress devs
+                     Frontend engineers        Small business owners
+                     JAMstack practitioners    Designers/bloggers
+
+Primary use case     Next.js, React, Vue       WordPress, PHP, Joomla
+                     Static sites, SPAs        Classic HTML/PHP sites
+                     API routes (Node.js)      Shared hosting plans
+
+Deployment method    Git push (GitHub/GitLab)  FTP / File Manager
+                     CLI: vercel --prod         Softaculous one-click
+
+Infrastructure       Managed, serverless        Shared Linux server
+                     Edge network, global CDN   Single data center
+
+Docker support       No                        No
+Custom ports         No                        No (only 80/443)
+Database             External (Supabase/PlanetScale)  MySQL via phpMyAdmin
+Node.js              Yes (API routes, SSR)     Limited (Passenger-based)
+
+Scaling              Auto, to millions         Manual, shared CPU
+                     Zero-config               Contact hosting provider
+──────────────────────────────────────────────────────────────────</pre>
+      </div>
+
+      <p><strong>Wrong-fit limitations:</strong></p>
+      <ul>
+        <li>
+          <strong>Using Vercel for a WordPress site:</strong> Vercel doesn't run PHP. WordPress
+          requires a PHP runtime and a MySQL database accessible to the server. You'd need to
+          decouple WordPress into a "headless" setup (WordPress as a CMS, Vercel rendering the
+          frontend) — a significant architectural change for no practical benefit at small scale.
+        </li>
+        <li>
+          <strong>Using cPanel for a modern Node.js microservices app:</strong> cPanel's Node.js
+          support is limited — it uses Passenger to proxy Node apps but doesn't support Docker,
+          WebSockets reliably, or custom port exposure. Running multiple services, managing
+          environment variables securely, or doing zero-downtime deployments is not practical.
+          You'd hit these limits almost immediately.
+        </li>
+      </ul>
+
+      <!-- Exercise 10 -->
+      <div class="box key-term">
+        <div class="box-title">📝 Exercise 10 — Why Multi-Cloud?</div>
+        <p>
+          <strong>Question:</strong> Large companies like Spotify, Netflix, and major banks
+          typically use multiple cloud providers simultaneously rather than committing 100%
+          to one. Describe at least four distinct reasons why a company might run workloads
+          across AWS, GCP, and Azure rather than going "all in" on one provider.
+        </p>
+      </div>
+
+      <h3>Answer: Exercise 10</h3>
+      <p>
+        There are several distinct, legitimate reasons why large companies end up — or choose
+        to be — on multiple clouds:
+      </p>
+
+      <ol>
+        <li>
+          <strong>Mergers and Acquisitions:</strong> Company A has been on AWS for five years.
+          It acquires Company B, which has been on GCP. Migrating either company's entire
+          infrastructure to the other cloud would take years and risk major outages. The faster,
+          safer path is to leave each company's workloads where they are and build integration
+          layers between the two environments. Many enterprise multi-cloud situations are born
+          this way.
+        </li>
+        <li>
+          <strong>Best-of-breed services:</strong> Google's BigQuery is genuinely better for
+          large-scale analytical queries than AWS Athena or Azure Synapse for many workloads.
+          Companies that primarily live on AWS still use BigQuery for their analytics warehouse.
+          Similarly, Azure Entra ID is the best enterprise identity platform — a company on
+          GCP might use Azure solely for SSO.
+        </li>
+        <li>
+          <strong>Negotiating leverage:</strong> Cloud pricing is not fixed. Enterprise
+          agreements with reserved instance commitments can be negotiated, especially for
+          eight-figure annual spend. A company that has all its eggs in one cloud basket has
+          no leverage. A company that can credibly say "we're evaluating moving our analytics
+          workloads to BigQuery" has negotiating power with AWS. Even a small migration threat
+          can result in meaningful pricing concessions.
+        </li>
+        <li>
+          <strong>Resilience and disaster recovery:</strong> AWS us-east-1 has had notable
+          outages that took down significant portions of the internet. For truly
+          mission-critical systems — financial platforms, healthcare infrastructure, emergency
+          services — a multi-cloud strategy ensures that a single cloud provider's failure
+          cannot take the entire system offline.
+        </li>
+        <li>
+          <strong>Regulatory and data residency requirements:</strong> Some countries require
+          certain data to remain within their borders. If Cloud Provider A has a data center
+          in a required jurisdiction and Cloud Provider B does not, a company might use both.
+        </li>
+        <li>
+          <strong>Team preferences and skills:</strong> Different engineering teams within
+          a large company may have different expertise. A team that has used Azure for years
+          will be more productive there than being forced onto GCP. Large companies often
+          give teams autonomy to use the cloud that best serves their needs.
+        </li>
+      </ol>
+
+      <div class="box warning">
+        <div class="box-title">⚠️ Multi-Cloud Complexity Cost</div>
+        <p>
+          Multi-cloud is not free. You pay in operational complexity — your team needs to know
+          multiple CLIs, multiple IAM models, multiple networking concepts. Data transfer
+          between cloud providers (egress) costs money. Tooling like Terraform and Kubernetes
+          help abstract provider differences, but they are not magic. For most startups and
+          small companies, committing to one cloud and learning it deeply is a far better
+          strategy than spreading across three.
+        </p>
+      </div>
+
+      <div class="summary">
+        <h4>Part 3 Exercise Summary</h4>
+        <p>
+          These exercises covered the core concepts from all three chapters in Part 3:
+        </p>
+        <ul>
+          <li><strong>Exercise 1</strong>: Cloud Run maps to AWS App Runner most closely; Fargate and Lambda also partially overlap.</li>
+          <li><strong>Exercise 2</strong>: S3 is the right service for user-uploaded file storage — scalable, durable, and integrates with CloudFront.</li>
+          <li><strong>Exercise 3</strong>: IAM controls all access in AWS. Users are for humans, roles are for machines, policies define what's allowed.</li>
+          <li><strong>Exercise 4</strong>: Serverless means no server management; AWS Lambda / GCP Cloud Functions / Azure Functions. Advantages include zero idle cost and auto-scaling; disadvantages include cold starts and vendor lock-in.</li>
+          <li><strong>Exercise 5</strong>: Start Next.js on Vercel — zero config, free tier, optimal for the framework. Migrate when you hit genuine scale or infrastructure requirements.</li>
+          <li><strong>Exercise 6</strong>: EC2 is for persistent processes (WebSocket servers, long-running services); Lambda is for event-driven, short-lived functions.</li>
+          <li><strong>Exercise 7</strong>: Azure wins for Microsoft stacks — Entra ID, Azure SQL, and Azure DevOps all leverage existing Microsoft investments.</li>
+          <li><strong>Exercise 8</strong>: Custom VPCs give network segmentation and security. Databases go in private subnets — no public IP, not reachable from the internet.</li>
+          <li><strong>Exercise 9</strong>: Vercel is for modern JavaScript apps (auto-deploys from Git, global CDN); cPanel is for PHP/WordPress on traditional shared hosting.</li>
+          <li><strong>Exercise 10</strong>: Multi-cloud happens due to M&amp;A, best-of-breed services, negotiating leverage, resilience requirements, and team preferences — with real complexity costs.</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="chapter-11.html">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Ch 11 · Simple Platforms</span>
+        </a>
+        <a href="../part-4/chapter-12.html" class="next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Ch 12 · Terraform: LEGO for Servers</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">☰</button>
+<script src="../nav.js"></script>
+</body>
+</html>

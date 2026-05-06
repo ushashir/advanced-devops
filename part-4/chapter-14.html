@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 14: Pulumi: IaC in Real Code — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-4">Part 4 · Chapter 14</div>
+        <h1>Pulumi: Infrastructure as Real Code</h1>
+        <p class="chapter-intro">Write your infrastructure in TypeScript, Python, or Go — not a custom DSL.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>What you'll learn in this chapter</h4>
+        <ul>
+          <li>Why Pulumi exists and what problem it solves that Terraform doesn't</li>
+          <li>The critical difference between a DSL and a general-purpose programming language for infrastructure</li>
+          <li>Pulumi's core concepts: stacks, projects, resources, outputs, and config</li>
+          <li>A complete AWS infrastructure deployment written in TypeScript</li>
+          <li>The same infrastructure written in Python</li>
+          <li>How to write unit tests for your infrastructure code</li>
+          <li>The Pulumi CLI workflow and daily commands</li>
+          <li>When to choose Pulumi over Terraform, and when to stick with Terraform</li>
+        </ul>
+      </div>
+
+      <h2>The Programming Language Superpower</h2>
+      <p>
+        In the previous chapter we built infrastructure with Terraform's HCL — a domain-specific language
+        designed specifically for describing infrastructure. HCL is clean and readable for simple cases.
+        But spend a few months with it on a complex project and the cracks begin to show.
+      </p>
+      <p>
+        Imagine trying to write a recipe book, but the format requires you to list every ingredient and every
+        step in a rigid, bureaucratic template. You can't write a helper function. You can't say "if this
+        ingredient is unavailable, substitute that one." You can't write a loop that says "repeat this
+        step for each of the ten wedding cakes." You have to write each cake out individually, ten times.
+        You can't write unit tests to check that your recipe is correct. And when something goes wrong,
+        the error messages read like they were written by a committee in 1987.
+      </p>
+      <p>
+        That's the experience many engineers have with Terraform HCL at scale.
+      </p>
+      <p>
+        <strong>Pulumi takes a completely different approach: write infrastructure in the programming
+        language you already know.</strong> TypeScript. Python. Go. Java. C#. Real loops, real conditionals,
+        real functions, real classes. Real IDE autocomplete and type checking. Real unit tests. If you know
+        how to write TypeScript, you can write Pulumi infrastructure code on day one, without learning a
+        new language.
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">📝 The Recipe Analogy</div>
+        <p>
+          Terraform HCL is like writing recipes in a very rigid cookbook format — every recipe must follow
+          the same template, there are no shortcuts, no abbreviations, no "see page 42 for the base sauce."
+          It works, and for simple recipes it's fine.
+        </p>
+        <p>
+          Pulumi is like writing those recipes in Python. You can write a <code>make_sauce()</code> function
+          that ten recipes call. You can write a loop that generates 10 similar recipes. You can write a
+          test that verifies the recipe is healthy before you cook it. You can import libraries from PyPI
+          to help you. All the power of a real programming language, applied to infrastructure.
+        </p>
+      </div>
+
+      <h2>Pulumi vs Terraform — Choosing Your Weapon</h2>
+      <p>
+        This isn't a battle — both tools are excellent. Understanding their strengths helps you choose
+        the right one for your project:
+      </p>
+
+      <div class="box key-term">
+        <div class="box-title">📖 Terraform vs Pulumi vs OpenTofu</div>
+        <ul>
+          <li>
+            <strong>Terraform</strong>: Custom HCL syntax, declarative, the most widely used IaC tool in
+            the world. Massive community, thousands of Registry modules, excellent documentation, battle-tested
+            at enormous scale. Best choice for most teams starting with IaC, teams that prefer simplicity,
+            and when strong community support is valued.
+          </li>
+          <li>
+            <strong>Pulumi</strong>: Real programming languages (TypeScript, Python, Go, Java, C#),
+            imperative with declarative intent, same underlying providers as Terraform (uses the Terraform
+            provider bridge), excellent testability, better for complex conditional logic and dynamic resource
+            generation. Best choice for teams frustrated by HCL's limitations, teams that want to test
+            infrastructure code, and when the infrastructure is genuinely complex.
+          </li>
+          <li>
+            <strong>OpenTofu</strong>: 100% Terraform-compatible open-source fork, fully MPL-licensed. Use
+            it if you're concerned about HashiCorp's BSL license, or if you're building tooling on top of
+            Terraform's internals.
+          </li>
+        </ul>
+        <p><strong>Key insight:</strong> Pulumi uses Terraform's provider ecosystem under the hood. Almost
+        every AWS, GCP, and Azure resource available in Terraform is also available in Pulumi. You're not
+        giving up ecosystem breadth when you choose Pulumi.</p>
+      </div>
+
+      <h2>When to Choose Pulumi Over Terraform</h2>
+      <p>
+        There are specific scenarios where Pulumi's general-purpose language support genuinely shines over
+        Terraform HCL. Here are the most common ones you'll encounter:
+      </p>
+      <ul>
+        <li><strong>Dynamic resource creation</strong>: When the number or names of resources are determined at runtime — e.g., "create one subnet per availability zone" or "create one worker node group per environment tier." In HCL this requires awkward <code>count</code> and <code>for_each</code> workarounds. In Pulumi it's a for loop.</li>
+        <li><strong>Complex conditional logic</strong>: "If this environment is production and the region is us-east-1 and it's Monday, provision this. Otherwise provision that." HCL's conditionals are limited ternary operators. TypeScript is TypeScript.</li>
+        <li><strong>Infrastructure unit tests</strong>: Pulumi programs are regular code. You can mock the providers and write proper unit tests that verify your security group rules, naming conventions, or tagging policies before deploying.</li>
+        <li><strong>Generating infrastructure from data</strong>: Reading a YAML config file and creating infrastructure based on its contents. In Pulumi: read the file with Node.js's <code>fs</code>, parse it, loop over the entries, create resources. In HCL: significant pain.</li>
+        <li><strong>TypeScript/Python teams</strong>: Engineers who write TypeScript or Python daily can be productive in Pulumi on day one. There is zero new syntax to learn.</li>
+      </ul>
+
+      <h2>Pulumi Core Concepts</h2>
+      <p>
+        Pulumi's vocabulary maps closely to Terraform's with a few name changes:
+      </p>
+
+      <div class="box key-term">
+        <div class="box-title">📖 Pulumi Vocabulary</div>
+        <ul>
+          <li><strong>Project</strong>: the directory containing your Pulumi program (your code). Defined by a <code>Pulumi.yaml</code> file. Like a Terraform root module.</li>
+          <li><strong>Stack</strong>: an isolated instance of your infrastructure. Production, staging, and development are separate stacks with separate state. Like a Terraform workspace. Each stack has its own configuration and outputs.</li>
+          <li><strong>Resource</strong>: a cloud resource — same concept as Terraform. <code>new aws.ec2.Instance(...)</code></li>
+          <li><strong>Config</strong>: stack-specific configuration values. Like environment variables, but for your Pulumi stack. Set with <code>pulumi config set key value</code>. Secrets are encrypted with <code>--secret</code>.</li>
+          <li><strong>Output</strong>: a value exported from your stack — the IP of a server, the URL of a load balancer. Other stacks can reference these.</li>
+          <li><strong>Provider</strong>: same as Terraform — the plugin that communicates with a cloud platform.</li>
+        </ul>
+      </div>
+
+      <h2>Setting Up Pulumi</h2>
+      <pre><code><span class="cmt"># Install the Pulumi CLI</span>
+<span class="fn">curl</span> <span class="flag">-fsSL</span> https://get.pulumi.com | sh
+
+<span class="cmt"># Create a new TypeScript project for AWS</span>
+<span class="fn">pulumi</span> new aws-typescript
+
+<span class="cmt"># Create a new Python project for AWS</span>
+<span class="fn">pulumi</span> new aws-python
+
+<span class="cmt"># Log into Pulumi's free state backend</span>
+<span class="fn">pulumi</span> login
+
+<span class="cmt"># Or use a local state file (no account needed)</span>
+<span class="fn">pulumi</span> login <span class="flag">--local</span></code></pre>
+
+      <h2>Pulumi in TypeScript — A Complete AWS Example</h2>
+      <p>
+        Let's build the same AWS infrastructure we built in Chapter 12 — VPC, subnets, security group,
+        EC2 instances — but this time in TypeScript. Notice how natural it feels, and how the dynamic
+        subnet creation across multiple availability zones is trivial with a regular <code>.map()</code> call:
+      </p>
+
+      <pre><code><span class="cmt">// index.ts — Pulumi TypeScript program</span>
+<span class="kw">import</span> * <span class="kw">as</span> aws <span class="kw">from</span> <span class="str">"@pulumi/aws"</span>;
+<span class="kw">import</span> * <span class="kw">as</span> pulumi <span class="kw">from</span> <span class="str">"@pulumi/pulumi"</span>;
+
+<span class="cmt">// Read configuration for this stack</span>
+<span class="kw">const</span> config = <span class="kw">new</span> <span class="fn">pulumi.Config</span>();
+<span class="kw">const</span> environment = config.<span class="fn">require</span>(<span class="str">"environment"</span>);
+<span class="kw">const</span> instanceCount = config.<span class="fn">getNumber</span>(<span class="str">"instanceCount"</span>) || 2;
+
+<span class="cmt">// VPC — our private network</span>
+<span class="kw">const</span> vpc = <span class="kw">new</span> aws.ec2.<span class="fn">Vpc</span>(<span class="str">"main-vpc"</span>, {
+    cidrBlock: <span class="str">"10.0.0.0/16"</span>,
+    enableDnsHostnames: <span class="kw">true</span>,
+    tags: {
+        Name: <span class="str">`${environment}-vpc`</span>,
+        Environment: environment,
+    },
+});
+
+<span class="cmt">// Internet Gateway</span>
+<span class="kw">const</span> igw = <span class="kw">new</span> aws.ec2.<span class="fn">InternetGateway</span>(<span class="str">"main-igw"</span>, {
+    vpcId: vpc.id,
+    tags: { Name: <span class="str">`${environment}-igw`</span> },
+});
+
+<span class="cmt">// Create subnets dynamically across availability zones — real loop!</span>
+<span class="kw">const</span> azs = [<span class="str">"us-east-1a"</span>, <span class="str">"us-east-1b"</span>, <span class="str">"us-east-1c"</span>];
+<span class="kw">const</span> subnets = azs.<span class="fn">map</span>((az, index) =>
+    <span class="kw">new</span> aws.ec2.<span class="fn">Subnet</span>(<span class="str">`public-subnet-${index}`</span>, {
+        vpcId: vpc.id,
+        cidrBlock: <span class="str">`10.0.${index + 1}.0/24`</span>,
+        availabilityZone: az,
+        mapPublicIpOnLaunch: <span class="kw">true</span>,
+        tags: { Name: <span class="str">`${environment}-public-${az}`</span> },
+    })
+);
+
+<span class="cmt">// Security Group — allow web traffic</span>
+<span class="kw">const</span> sg = <span class="kw">new</span> aws.ec2.<span class="fn">SecurityGroup</span>(<span class="str">"web-sg"</span>, {
+    vpcId: vpc.id,
+    ingress: [
+        { fromPort: 80,  toPort: 80,  protocol: <span class="str">"tcp"</span>, cidrBlocks: [<span class="str">"0.0.0.0/0"</span>] },
+        { fromPort: 443, toPort: 443, protocol: <span class="str">"tcp"</span>, cidrBlocks: [<span class="str">"0.0.0.0/0"</span>] },
+        { fromPort: 22,  toPort: 22,  protocol: <span class="str">"tcp"</span>, cidrBlocks: [<span class="str">"YOUR_IP/32"</span>] },
+    ],
+    egress: [
+        { fromPort: 0, toPort: 0, protocol: <span class="str">"-1"</span>, cidrBlocks: [<span class="str">"0.0.0.0/0"</span>] },
+    ],
+    tags: { Environment: environment },
+});
+
+<span class="cmt">// Get latest Ubuntu 22.04 AMI</span>
+<span class="kw">const</span> ami = pulumi.output(aws.ec2.<span class="fn">getAmi</span>({
+    mostRecent: <span class="kw">true</span>,
+    owners: [<span class="str">"099720109477"</span>],
+    filters: [{ name: <span class="str">"name"</span>, values: [<span class="str">"ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"</span>] }],
+}));
+
+<span class="cmt">// Launch EC2 instances — a real loop, not Terraform's count workaround</span>
+<span class="kw">const</span> instances = Array.<span class="fn">from</span>({ length: instanceCount }, (_, i) =>
+    <span class="kw">new</span> aws.ec2.<span class="fn">Instance</span>(<span class="str">`web-server-${i}`</span>, {
+        ami: ami.id,
+        instanceType: environment === <span class="str">"production"</span> ? <span class="str">"t3.medium"</span> : <span class="str">"t3.micro"</span>,
+        subnetId: subnets[i % subnets.length].id,
+        vpcSecurityGroupIds: [sg.id],
+        tags: {
+            Name: <span class="str">`${environment}-web-${i}`</span>,
+            Environment: environment,
+        },
+    })
+);
+
+<span class="cmt">// Export useful values as stack outputs</span>
+<span class="kw">export const</span> vpcId      = vpc.id;
+<span class="kw">export const</span> subnetIds  = subnets.<span class="fn">map</span>(s => s.id);
+<span class="kw">export const</span> instanceIds = instances.<span class="fn">map</span>(i => i.id);
+<span class="kw">export const</span> publicIps   = instances.<span class="fn">map</span>(i => i.publicIp);</code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 Real Language, Real Power</div>
+        <p>
+          Look at the instance type line: <code>environment === "production" ? "t3.medium" : "t3.micro"</code>
+          — a native TypeScript ternary. In Terraform you'd write
+          <code>instance_type = var.environment == "production" ? "t3.medium" : "t3.micro"</code>
+          which looks similar in this case, but try doing something more complex — multiple conditions,
+          a lookup table, a function call — and the gap widens quickly. In TypeScript you have the entire
+          language at your disposal.
+        </p>
+      </div>
+
+      <h2>Pulumi in Python — Same Infrastructure, Different Language</h2>
+      <p>
+        If your team writes Python, you don't have to learn TypeScript. The exact same infrastructure,
+        expressed in Python:
+      </p>
+
+      <pre><code><span class="cmt"># __main__.py — Pulumi Python program</span>
+<span class="kw">import</span> pulumi
+<span class="kw">import</span> pulumi_aws <span class="kw">as</span> aws
+
+config = pulumi.<span class="fn">Config</span>()
+environment = config.<span class="fn">require</span>(<span class="str">"environment"</span>)
+instance_count = config.<span class="fn">get_int</span>(<span class="str">"instanceCount"</span>) <span class="kw">or</span> 2
+
+<span class="cmt"># VPC</span>
+vpc = aws.ec2.<span class="fn">Vpc</span>(<span class="str">"main-vpc"</span>,
+    cidr_block=<span class="str">"10.0.0.0/16"</span>,
+    enable_dns_hostnames=<span class="kw">True</span>,
+    tags={<span class="str">"Name"</span>: <span class="fn">f</span><span class="str">"{environment}-vpc"</span>, <span class="str">"Environment"</span>: environment}
+)
+
+<span class="cmt"># Create subnets dynamically — Python list comprehension</span>
+azs = [<span class="str">"us-east-1a"</span>, <span class="str">"us-east-1b"</span>, <span class="str">"us-east-1c"</span>]
+subnets = [
+    aws.ec2.<span class="fn">Subnet</span>(<span class="fn">f</span><span class="str">"public-subnet-{i}"</span>,
+        vpc_id=vpc.id,
+        cidr_block=<span class="fn">f</span><span class="str">"10.0.{i+1}.0/24"</span>,
+        availability_zone=az,
+        map_public_ip_on_launch=<span class="kw">True</span>,
+        tags={<span class="str">"Name"</span>: <span class="fn">f</span><span class="str">"{environment}-subnet-{az}"</span>}
+    )
+    <span class="kw">for</span> i, az <span class="kw">in</span> <span class="fn">enumerate</span>(azs)
+]
+
+<span class="cmt"># Security Group</span>
+sg = aws.ec2.<span class="fn">SecurityGroup</span>(<span class="str">"web-sg"</span>,
+    vpc_id=vpc.id,
+    ingress=[
+        aws.ec2.SecurityGroupIngressArgs(from_port=80,  to_port=80,  protocol=<span class="str">"tcp"</span>, cidr_blocks=[<span class="str">"0.0.0.0/0"</span>]),
+        aws.ec2.SecurityGroupIngressArgs(from_port=443, to_port=443, protocol=<span class="str">"tcp"</span>, cidr_blocks=[<span class="str">"0.0.0.0/0"</span>]),
+    ],
+    egress=[
+        aws.ec2.SecurityGroupEgressArgs(from_port=0, to_port=0, protocol=<span class="str">"-1"</span>, cidr_blocks=[<span class="str">"0.0.0.0/0"</span>]),
+    ]
+)
+
+<span class="cmt"># Launch multiple instances — a real Python loop</span>
+instance_type = <span class="str">"t3.medium"</span> <span class="kw">if</span> environment == <span class="str">"production"</span> <span class="kw">else</span> <span class="str">"t3.micro"</span>
+instances = [
+    aws.ec2.<span class="fn">Instance</span>(<span class="fn">f</span><span class="str">"web-server-{i}"</span>,
+        instance_type=instance_type,
+        subnet_id=subnets[i % <span class="fn">len</span>(subnets)].id,
+        vpc_security_group_ids=[sg.id],
+        tags={<span class="str">"Name"</span>: <span class="fn">f</span><span class="str">"{environment}-web-{i}"</span>}
+    )
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(instance_count)
+]
+
+<span class="cmt"># Export outputs</span>
+pulumi.<span class="fn">export</span>(<span class="str">"vpc_id"</span>, vpc.id)
+pulumi.<span class="fn">export</span>(<span class="str">"subnet_ids"</span>, [s.id <span class="kw">for</span> s <span class="kw">in</span> subnets])
+pulumi.<span class="fn">export</span>(<span class="str">"instance_ids"</span>, [i.id <span class="kw">for</span> i <span class="kw">in</span> instances])
+pulumi.<span class="fn">export</span>(<span class="str">"public_ips"</span>, [i.public_ip <span class="kw">for</span> i <span class="kw">in</span> instances])</code></pre>
+
+      <h2>The Pulumi CLI Workflow</h2>
+      <p>
+        Pulumi's command structure mirrors Terraform's. If you know Terraform, you already know Pulumi's
+        CLI. The main difference is that "workspaces" are called "stacks."
+      </p>
+
+      <pre><code><span class="cmt"># Install Pulumi CLI</span>
+<span class="fn">curl</span> <span class="flag">-fsSL</span> https://get.pulumi.com | sh
+
+<span class="cmt"># Create a new TypeScript project in the current directory</span>
+<span class="fn">pulumi</span> new aws-typescript
+
+<span class="cmt"># Configure the current stack</span>
+<span class="fn">pulumi</span> config set environment production
+<span class="fn">pulumi</span> config set instanceCount 3
+<span class="fn">pulumi</span> config set <span class="flag">--secret</span> DB_PASSWORD my-secret-password
+
+<span class="cmt"># Preview what will change (like terraform plan)</span>
+<span class="fn">pulumi</span> preview
+
+<span class="cmt"># Deploy (like terraform apply — prompts for confirmation)</span>
+<span class="fn">pulumi</span> up
+
+<span class="cmt"># View exported stack outputs</span>
+<span class="fn">pulumi</span> stack output
+<span class="fn">pulumi</span> stack output vpcId        <span class="cmt"># specific output</span>
+
+<span class="cmt"># Destroy all infrastructure in this stack</span>
+<span class="fn">pulumi</span> destroy
+
+<span class="cmt"># List all stacks in this project</span>
+<span class="fn">pulumi</span> stack ls
+
+<span class="cmt"># Create a new stack (e.g., for staging)</span>
+<span class="fn">pulumi</span> stack init staging
+
+<span class="cmt"># Switch to a different stack</span>
+<span class="fn">pulumi</span> stack select staging</code></pre>
+
+      <h2>Stacks — Managing Multiple Environments</h2>
+      <p>
+        Each environment (production, staging, development) is a separate Pulumi <em>stack</em>. Same code,
+        different configuration. This maps directly to a real workflow:
+      </p>
+
+      <pre><code><span class="cmt"># Set up the production stack</span>
+<span class="fn">pulumi</span> stack init production
+<span class="fn">pulumi</span> config set environment production
+<span class="fn">pulumi</span> config set instanceCount 5
+<span class="fn">pulumi</span> config set aws:region us-east-1
+
+<span class="cmt"># Set up the staging stack</span>
+<span class="fn">pulumi</span> stack init staging
+<span class="fn">pulumi</span> config set environment staging
+<span class="fn">pulumi</span> config set instanceCount 1
+<span class="fn">pulumi</span> config set aws:region us-east-1
+
+<span class="cmt"># Deploy staging</span>
+<span class="fn">pulumi</span> stack select staging
+<span class="fn">pulumi</span> up
+
+<span class="cmt"># Deploy production (separate state, separate resources)</span>
+<span class="fn">pulumi</span> stack select production
+<span class="fn">pulumi</span> up</code></pre>
+
+      <p>
+        Each stack's configuration lives in a file like <code>Pulumi.production.yaml</code> and
+        <code>Pulumi.staging.yaml</code>, which are safe to commit to Git (secrets are encrypted).
+      </p>
+
+      <h2>Testing Infrastructure Code — Pulumi's Killer Feature</h2>
+      <p>
+        This is where Pulumi genuinely changes the game. With Terraform, you can run <code>terraform validate</code>
+        for basic syntax checks, and tools like <code>checkov</code> or <code>tfsec</code> for security
+        linting. But you cannot write unit tests for Terraform logic the way you'd write unit tests for
+        application code.
+      </p>
+      <p>
+        With Pulumi, your infrastructure <em>is</em> application code. You can use Mocha, Jest, Pytest,
+        or Go's testing package to write real unit tests that verify your infrastructure before deploying it.
+        Pulumi's testing SDK lets you mock cloud providers so tests run instantly without touching AWS.
+      </p>
+
+      <pre><code><span class="cmt">// infra.test.ts — Pulumi unit tests with Mocha</span>
+<span class="kw">import</span> * <span class="kw">as</span> pulumi <span class="kw">from</span> <span class="str">"@pulumi/pulumi"</span>;
+<span class="kw">import</span> { describe, it, before } <span class="kw">from</span> <span class="str">"mocha"</span>;
+<span class="kw">import</span> * <span class="kw">as</span> assert <span class="kw">from</span> <span class="str">"assert"</span>;
+
+<span class="cmt">// Mock the cloud provider — tests run instantly, no real AWS calls</span>
+pulumi.runtime.<span class="fn">setMocks</span>({
+    newResource: (args) => ({
+        id: <span class="str">`${args.name}-id`</span>,
+        state: args.inputs,
+    }),
+    call: (args) => ({ outputs: {} }),
+});
+
+describe(<span class="str">"Infrastructure security tests"</span>, () => {
+    <span class="kw">let</span> infra: <span class="kw">typeof</span> <span class="fn">import</span>(<span class="str">"./index"</span>);
+
+    before(<span class="kw">async</span> () => {
+        infra = <span class="kw">await import</span>(<span class="str">"./index"</span>);
+    });
+
+    it(<span class="str">"instances should use correct type for production"</span>, <span class="kw">async</span> () => {
+        <span class="cmt">// Verify production uses t3.medium, not t3.micro</span>
+        <span class="kw">const</span> type = <span class="kw">await new</span> <span class="fn">Promise</span&gt;(resolve =>
+            infra.instances[0].instanceType.<span class="fn">apply</span>(resolve)
+        );
+        assert.<span class="fn">strictEqual</span>(type, <span class="str">"t3.medium"</span>);
+    });
+
+    it(<span class="str">"security group should not allow unrestricted SSH"</span>, <span class="kw">async</span> () => {
+        <span class="cmt">// Verify SSH is not open to the world (0.0.0.0/0)</span>
+        <span class="kw">const</span> ingress = <span class="kw">await new</span> <span class="fn">Promise</span>((resolve) =>
+            infra.sg.ingress.<span class="fn">apply</span>(resolve)
+        );
+        <span class="kw">const</span> sshRule = ingress.<span class="fn">find</span>((r: <span class="kw">any</span>) => r.fromPort === 22);
+        assert.<span class="fn">ok</span>(sshRule, <span class="str">"SSH rule should exist"</span>);
+        assert.<span class="fn">notStrictEqual</span>(
+            sshRule.cidrBlocks[0], <span class="str">"0.0.0.0/0"</span>,
+            <span class="str">"SSH must not be open to the world"</span>
+        );
+    });
+
+    it(<span class="str">"all resources should have an Environment tag"</span>, <span class="kw">async</span> () => {
+        <span class="kw">const</span> tags = <span class="kw">await new</span> <span class="fn">Promise</span>((resolve) =>
+            infra.vpc.tags.<span class="fn">apply</span>(resolve)
+        );
+        assert.<span class="fn">ok</span>(tags &amp;&amp; tags[<span class="str">"Environment"</span>], <span class="str">"VPC must have Environment tag"</span>);
+    });
+});
+
+<span class="cmt">// Run tests: npx mocha --require ts-node/register infra.test.ts</span></code></pre>
+
+      <div class="box analogy">
+        <div class="box-title">🧪 Why Infrastructure Tests Matter</div>
+        <p>
+          Imagine a junior engineer accidentally removes the CIDR restriction on the SSH security group
+          rule — now port 22 is open to the entire internet. With Terraform, this passes validation and
+          applies without warning. With Pulumi, the unit test catches this in CI before it ever touches
+          a real environment. Infrastructure tests are your last line of defense against security
+          misconfigurations and naming convention violations.
+        </p>
+      </div>
+
+      <h2>Pulumi Secrets — Built-In Encryption</h2>
+      <p>
+        Pulumi handles secrets better than Terraform out of the box. Any config value marked with
+        <code>--secret</code> is encrypted in the state file and in your <code>Pulumi.stack.yaml</code> file.
+        Pulumi uses its own encryption service or a key you provide (AWS KMS, Azure Key Vault, etc.).
+      </p>
+
+      <pre><code><span class="cmt"># Store a secret — encrypted in state and config file</span>
+<span class="fn">pulumi</span> config set <span class="flag">--secret</span> DB_PASSWORD my-database-password
+<span class="fn">pulumi</span> config set <span class="flag">--secret</span> API_KEY my-api-key
+
+<span class="cmt"># In your code, read secrets just like regular config</span>
+<span class="cmt">// TypeScript</span>
+<span class="kw">const</span> config = <span class="kw">new</span> <span class="fn">pulumi.Config</span>();
+<span class="kw">const</span> dbPassword = config.<span class="fn">requireSecret</span>(<span class="str">"DB_PASSWORD"</span>);
+<span class="cmt">// dbPassword is a pulumi.Output&lt;string&gt; — never logged, never exposed</span></code></pre>
+
+      <h2>Cross-Stack References</h2>
+      <p>
+        In large projects, it's common to split infrastructure into multiple stacks — a "network" stack
+        that creates the VPC, a "database" stack that creates RDS, an "app" stack that deploys the application.
+        Pulumi lets stacks reference each other's outputs:
+      </p>
+
+      <pre><code><span class="cmt">// In the app stack, reference outputs from the network stack</span>
+<span class="kw">const</span> networkStack = <span class="kw">new</span> pulumi.<span class="fn">StackReference</span>(<span class="str">"myorg/network/production"</span>);
+<span class="kw">const</span> vpcId = networkStack.<span class="fn">getOutput</span>(<span class="str">"vpcId"</span>);
+<span class="kw">const</span> subnetIds = networkStack.<span class="fn">getOutput</span>(<span class="str">"subnetIds"</span>);
+
+<span class="cmt">// Now use those values to deploy into the existing VPC</span>
+<span class="kw">const</span> sg = <span class="kw">new</span> aws.ec2.<span class="fn">SecurityGroup</span>(<span class="str">"app-sg"</span>, {
+    vpcId: vpcId,   <span class="cmt">// comes from the network stack</span>
+    <span class="cmt">// ...</span>
+});</code></pre>
+
+      <h2>Pulumi in a CI/CD Pipeline</h2>
+      <p>
+        Like Terraform, Pulumi runs best inside a CI/CD pipeline for team environments. Pull requests
+        run <code>pulumi preview</code> and post the diff as a comment. Merges to <code>main</code>
+        trigger <code>pulumi up</code> automatically.
+      </p>
+
+      <pre><code><span class="cmt"># .github/workflows/pulumi.yml</span>
+<span class="kw">name</span>: Pulumi Preview and Deploy
+
+<span class="kw">on</span>:
+  <span class="fn">pull_request</span>:
+    branches: [main]
+
+<span class="kw">jobs</span>:
+  <span class="fn">preview</span>:
+    runs-on: ubuntu-latest
+    steps:
+      <span class="flag">- uses</span>: actions/checkout@v4
+
+      <span class="flag">- uses</span>: actions/setup-node@v4
+        <span class="fn">with</span>:
+          node-version: <span class="str">"20"</span>
+
+      <span class="flag">- name</span>: Install dependencies
+        <span class="fn">run</span>: npm install
+
+      <span class="flag">- name</span>: Run infrastructure unit tests
+        <span class="fn">run</span>: npm test
+
+      <span class="flag">- name</span>: Pulumi Preview
+        <span class="fn">uses</span>: pulumi/actions@v5
+        <span class="kw">with</span>:
+          command: preview
+          stack-name: production
+        <span class="kw">env</span>:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}</code></pre>
+
+      <div class="box warning">
+        <div class="box-title">⚠️ Pulumi State — Same Caution as Terraform</div>
+        <p>
+          Pulumi also maintains state. By default it's stored in Pulumi's cloud service (free tier available).
+          You can also self-host state in S3, GCS, or Azure Blob Storage with
+          <code>pulumi login s3://my-state-bucket</code>. The same rules apply: treat state as sacred,
+          don't delete it, don't corrupt it, and for team projects always use a shared remote backend.
+        </p>
+      </div>
+
+      <div class="summary">
+        <h4>Chapter Summary</h4>
+        <ul>
+          <li>Pulumi lets you write infrastructure in TypeScript, Python, Go, Java, or C# — real programming languages with full IDE support, loops, conditionals, functions, and unit tests.</li>
+          <li>Pulumi uses the same cloud provider ecosystem as Terraform, via the Pulumi Terraform bridge. Almost every resource available in Terraform is available in Pulumi.</li>
+          <li>The core concepts are: Project (your code directory), Stack (isolated environment instance), Resource (a cloud resource), Config (stack-specific settings), and Output (exported values).</li>
+          <li>The CLI workflow mirrors Terraform: <code>pulumi preview</code> (plan), <code>pulumi up</code> (apply), <code>pulumi destroy</code> (destroy), <code>pulumi stack select</code> (switch environments).</li>
+          <li>Pulumi's biggest differentiator is testability — write real unit tests against mocked providers that run in milliseconds, catching security misconfigurations before they reach any real environment.</li>
+          <li>Secrets are first-class in Pulumi — marked with <code>--secret</code>, encrypted in both state and config files.</li>
+          <li>Choose Pulumi when your infrastructure has complex logic, dynamic resource counts, or when your team wants to unit-test infrastructure. Use Terraform for teams that prefer simplicity and maximum community resources.</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="chapter-13.html">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Ch 13 · Ansible</span>
+        </a>
+        <a href="exercises.html" class="next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Part 4 Exercises</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">☰</button>
+<script src="../nav.js"></script>
+</body>
+</html>

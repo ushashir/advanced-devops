@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 11: Simple Platforms — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-3">Part 3 · Chapter 11</div>
+        <h1>Simple Platforms: Vercel, Netlify &amp; cPanel</h1>
+        <p class="chapter-intro">When AWS feels like overkill — simpler deployment for most projects.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>What you'll learn in this chapter</h4>
+        <ul>
+          <li>The deployment complexity spectrum — from "click and go" to "build everything yourself"</li>
+          <li>Vercel — the fastest path from Next.js code to live production URL</li>
+          <li>Netlify — static sites, Jamstack, and serverless functions made effortless</li>
+          <li>cPanel — the traditional web hosting control panel for PHP and WordPress</li>
+          <li>Render — the modern middle ground between Vercel and AWS</li>
+          <li>How to choose the right platform based on your project's actual needs</li>
+          <li>When to graduate from simple platforms to full cloud infrastructure</li>
+        </ul>
+      </div>
+
+      <h2>The Furnished Apartment vs. Buying Land</h2>
+      <p>
+        Imagine you need somewhere to live. You have a spectrum of choices.
+      </p>
+      <p>
+        At one end: a fully furnished apartment. You sign the lease, you get the keys, you move in
+        tonight. The furniture is already there. The internet is connected. The heating works. You
+        don't care what's behind the walls. You just live there and pay rent.
+      </p>
+      <p>
+        At the other end: a plot of empty land. Total control. You design the house, hire the
+        architect, hire the builders, choose every tile, wire every socket, plant every tree in
+        the garden. It's exactly what you want, but it takes months and requires expertise you
+        probably don't have yet.
+      </p>
+      <p>
+        Vercel and Netlify are the furnished apartments of the software deployment world. You push
+        code to GitHub and your app is live in seconds. AWS EC2 with Kubernetes is the empty land.
+        Total control, enormous power, but you're responsible for everything.
+      </p>
+      <p>
+        Neither end of the spectrum is wrong. The mistake is using the wrong tool for your stage.
+        Using Kubernetes for a portfolio website is using a sledgehammer to hang a picture frame.
+        Using Vercel for a high-traffic API with complex networking requirements is trying to live
+        in a furnished apartment with 20 roommates you've never met.
+      </p>
+
+      <div class="diagram">
+<pre>The Deployment Complexity Spectrum
+────────────────────────────────────────────────────────────────────────
+Simple ←─────────────────────────────────────────────────────→ Complex
+
+  Vercel     Netlify     Render      Heroku      ECS/EKS    Kubernetes
+    │            │          │           │            │           │
+  "push to    "push to   "push to   "git push   "write      "manage
+  GitHub,      GitHub,    GitHub,    heroku"      YAML,        nodes,
+  done"        done"      done"                  ECR, VPC"    CNI, etc"
+
+Cost:
+  Free        Free      Free/cheap  Free→$$$    Per resource  Per node
+  (hobby)    (hobby)   (hobby/pro)  (outgrows)   (scales)     (scales)
+
+Best for:
+  Next.js    Static    Full-stack   Prototypes  Production   Large-scale
+  React      Jamstack  apps, APIs   demos       workloads    platforms</pre>
+      </div>
+
+      <div class="box analogy">
+        <div class="box-title">🏠 The Housing Analogy</div>
+        <p>
+          <strong>Vercel / Netlify</strong>: fully furnished apartment — move in today, everything
+          is set up, pay monthly rent, limited customization.<br><br>
+          <strong>Render / Railway</strong>: unfurnished apartment — you bring your own things,
+          but the plumbing and electricity are done for you.<br><br>
+          <strong>AWS / GCP / Azure</strong>: buy land and build your own house — total control,
+          total responsibility, maximum power, maximum effort.
+        </p>
+      </div>
+
+      <h2>Vercel — The Frontend Deployment King</h2>
+      <p>
+        Vercel was founded by Guillermo Rauch, the creator of Next.js. The company exists to make
+        deploying JavaScript frontend applications as frictionless as possible. They succeed
+        spectacularly. A fresh Next.js project can go from laptop to live production URL in under
+        five minutes — and that includes connecting a custom domain with automatic SSL.
+      </p>
+      <p>
+        When you push code to your GitHub repository, Vercel detects the framework (Next.js, Nuxt,
+        SvelteKit, Astro, Remix, and dozens more), builds it automatically with the right settings,
+        and deploys it across 100+ edge locations worldwide. Every pull request gets its own
+        preview deployment URL so you can share a link to test before merging. Every deployment
+        is immutable — if something goes wrong, instant rollback to any previous version.
+      </p>
+
+      <h3>Key Vercel Features</h3>
+      <ul>
+        <li><strong>Preview Deployments</strong>: every pull request automatically gets a unique URL like <code>myapp-feature-login-a3b4c.vercel.app</code>. Share it with your team for review before merging.</li>
+        <li><strong>Edge Network</strong>: Vercel's CDN has nodes in 100+ cities. Your static assets and edge functions serve from the location closest to the user — typically under 50ms globally.</li>
+        <li><strong>Serverless Functions</strong>: any file in <code>/api</code> directory becomes a serverless function. Node.js, Python, Go, Ruby supported. No Lambda configuration required.</li>
+        <li><strong>Edge Functions</strong>: even faster than regular serverless — runs JavaScript at the CDN edge node, not a central data center. Use for auth, redirects, A/B testing, personalization.</li>
+        <li><strong>Analytics</strong>: built-in web vitals and performance analytics with no extra setup.</li>
+        <li><strong>Automatic SSL</strong>: every deployment, including custom domains, gets a free Let's Encrypt certificate automatically renewed.</li>
+      </ul>
+
+      <h3>vercel.json — Configuration File</h3>
+      <p>
+        Most Vercel projects need no configuration file at all — Vercel auto-detects the framework.
+        When you do need customization, <code>vercel.json</code> in the project root controls it:
+      </p>
+
+      <pre><code><span class="cmt">// vercel.json — project configuration</span>
+{
+  <span class="str">"buildCommand"</span>: <span class="str">"npm run build"</span>,
+  <span class="str">"outputDirectory"</span>: <span class="str">".next"</span>,
+  <span class="str">"framework"</span>: <span class="str">"nextjs"</span>,
+  <span class="str">"regions"</span>: [<span class="str">"iad1"</span>, <span class="str">"lhr1"</span>],
+  <span class="str">"env"</span>: {
+    <span class="str">"DATABASE_URL"</span>: <span class="str">"@database-url"</span>,
+    <span class="str">"NEXT_PUBLIC_API_URL"</span>: <span class="str">"@api-url"</span>
+  },
+  <span class="str">"headers"</span>: [
+    {
+      <span class="str">"source"</span>: <span class="str">"/(.*)"</span>,
+      <span class="str">"headers"</span>: [
+        {
+          <span class="str">"key"</span>: <span class="str">"X-Frame-Options"</span>,
+          <span class="str">"value"</span>: <span class="str">"DENY"</span>
+        },
+        {
+          <span class="str">"key"</span>: <span class="str">"Strict-Transport-Security"</span>,
+          <span class="str">"value"</span>: <span class="str">"max-age=31536000; includeSubDomains"</span>
+        }
+      ]
+    }
+  ],
+  <span class="str">"redirects"</span>: [
+    {
+      <span class="str">"source"</span>: <span class="str">"/blog"</span>,
+      <span class="str">"destination"</span>: <span class="str">"/articles"</span>,
+      <span class="str">"permanent"</span>: <span class="kw">true</span>
+    }
+  ]
+}</code></pre>
+
+      <h3>Vercel CLI</h3>
+
+      <pre><code><span class="cmt"># Install globally</span>
+npm i -g vercel
+
+<span class="cmt"># Login to your Vercel account</span>
+vercel login
+
+<span class="cmt"># Deploy current directory (interactive first run)</span>
+vercel
+
+<span class="cmt"># Deploy to production</span>
+vercel --prod
+
+<span class="cmt"># Link current directory to an existing Vercel project</span>
+vercel link
+
+<span class="cmt"># Set an environment variable</span>
+vercel env add DATABASE_URL production
+vercel env add DATABASE_URL preview
+vercel env add DATABASE_URL development
+
+<span class="cmt"># List environment variables</span>
+vercel env ls
+
+<span class="cmt"># View deployment logs</span>
+vercel logs
+
+<span class="cmt"># List all deployments</span>
+vercel ls
+
+<span class="cmt"># Roll back to a previous deployment</span>
+vercel rollback
+
+<span class="cmt"># Promote a preview deployment to production</span>
+vercel alias set myapp-abc123.vercel.app myapp.com</code></pre>
+
+      <h3>Serverless API Routes on Vercel</h3>
+      <p>
+        Create a file at <code>api/hello.js</code> (or inside <code>app/api/</code> for Next.js
+        App Router) and it becomes a serverless endpoint automatically. No API Gateway
+        configuration, no Lambda setup, no IAM roles.
+      </p>
+
+      <pre><code><span class="cmt">// api/hello.js — becomes https://myapp.vercel.app/api/hello</span>
+<span class="kw">export default function</span> <span class="fn">handler</span>(req, res) {
+  <span class="kw">const</span> { name = <span class="str">'World'</span> } = req.query;
+
+  res.<span class="fn">status</span>(200).<span class="fn">json</span>({
+    message: <span class="str">`Hello, ${name}!`</span>,
+    method: req.method,
+    timestamp: <span class="kw">new</span> <span class="fn">Date</span>().toISOString()
+  });
+}</code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 Tip: Vercel's Hobby Tier is Genuinely Good</div>
+        <p>
+          Vercel's free Hobby tier supports unlimited personal projects, 100GB bandwidth,
+          serverless function invocations, and unlimited preview deployments. It's not a
+          crippled trial — it's fully functional for personal projects and small production
+          apps. The Pro tier ($20/month) adds team collaboration and higher limits.
+        </p>
+      </div>
+
+      <h2>Netlify — Static Sites and Jamstack</h2>
+      <p>
+        Netlify pioneered the concept of "Jamstack" — building web apps from JavaScript,
+        APIs, and pre-rendered Markup rather than dynamically rendering HTML on a server
+        for every request. The result: static HTML files served from a CDN, infinitely
+        scalable, impossible to DDoS, blazing fast, and essentially free to host.
+      </p>
+      <p>
+        Netlify is excellent for sites built with Gatsby, Hugo, Jekyll, Eleventy, Astro,
+        and any static site generator. It also works great for single-page apps (React,
+        Vue, Svelte) that call external APIs. Where Vercel is optimized specifically for
+        Next.js and server-side rendering, Netlify's strength is the pure static site and
+        Jamstack world.
+      </p>
+
+      <h3>Key Netlify Features</h3>
+      <ul>
+        <li><strong>Netlify Functions</strong>: serverless functions (AWS Lambda under the hood) that deploy automatically alongside your static site. Create files in <code>netlify/functions/</code>.</li>
+        <li><strong>Netlify Identity</strong>: drop-in user authentication with JWT tokens. Add a signup/login flow to your static site without any backend code.</li>
+        <li><strong>Netlify Forms</strong>: add <code>netlify</code> attribute to any HTML form and Netlify captures submissions — no backend server needed. View submissions in the dashboard.</li>
+        <li><strong>Deploy Previews</strong>: like Vercel, every pull request gets a preview URL for review.</li>
+        <li><strong>Branch Deploys</strong>: you can configure specific branches to deploy to specific subdomains (e.g., <code>staging</code> branch → <code>staging.myapp.com</code>).</li>
+        <li><strong>Split Testing</strong>: serve different versions of your site to different percentages of visitors for A/B testing — no code required.</li>
+      </ul>
+
+      <h3>netlify.toml — Configuration File</h3>
+      <p>
+        Netlify uses a <code>netlify.toml</code> file at the project root. It controls build
+        settings, redirects, headers, and function configuration:
+      </p>
+
+      <pre><code><span class="cmt"># netlify.toml</span>
+
+[build]
+  command = <span class="str">"npm run build"</span>
+  publish = <span class="str">"dist"</span>
+  functions = <span class="str">"netlify/functions"</span>
+
+[build.environment]
+  NODE_VERSION = <span class="str">"20"</span>
+  NPM_FLAGS = <span class="str">"--legacy-peer-deps"</span>
+
+<span class="cmt"># Redirect /api/* to serverless functions</span>
+[[redirects]]
+  from = <span class="str">"/api/*"</span>
+  to = <span class="str">"/.netlify/functions/:splat"</span>
+  status = 200
+
+<span class="cmt"># SPA: redirect all routes to index.html (for React Router)</span>
+[[redirects]]
+  from = <span class="str">"/*"</span>
+  to = <span class="str">"/index.html"</span>
+  status = 200
+
+<span class="cmt"># Security headers on all responses</span>
+[[headers]]
+  for = <span class="str">"/*"</span>
+  [headers.values]
+    X-Frame-Options = <span class="str">"DENY"</span>
+    X-Content-Type-Options = <span class="str">"nosniff"</span>
+    X-XSS-Protection = <span class="str">"1; mode=block"</span>
+    Referrer-Policy = <span class="str">"strict-origin-when-cross-origin"</span>
+    Content-Security-Policy = <span class="str">"default-src 'self'; script-src 'self' 'unsafe-inline'"</span>
+
+<span class="cmt"># Long cache for hashed assets</span>
+[[headers]]
+  for = <span class="str">"/assets/*"</span>
+  [headers.values]
+    Cache-Control = <span class="str">"public, max-age=31536000, immutable"</span>
+
+<span class="cmt"># Context-specific builds</span>
+[context.production.environment]
+  REACT_APP_ENV = <span class="str">"production"</span>
+
+[context.staging.environment]
+  REACT_APP_ENV = <span class="str">"staging"</span></code></pre>
+
+      <h3>Netlify Functions</h3>
+      <pre><code><span class="cmt">// netlify/functions/send-email.js</span>
+<span class="cmt">// Deployed as: /.netlify/functions/send-email</span>
+<span class="kw">import</span> sgMail <span class="kw">from</span> <span class="str">'@sendgrid/mail'</span>;
+
+sgMail.<span class="fn">setApiKey</span>(process.env.SENDGRID_API_KEY);
+
+<span class="kw">export const</span> handler = <span class="kw">async</span> (event) => {
+  <span class="kw">if</span> (event.httpMethod !== <span class="str">'POST'</span>) {
+    <span class="kw">return</span> { statusCode: 405, body: <span class="str">'Method Not Allowed'</span> };
+  }
+
+  <span class="kw">const</span> { to, subject, text } = JSON.<span class="fn">parse</span>(event.body);
+
+  <span class="kw">await</span> sgMail.<span class="fn">send</span>({ to, from: <span class="str">'noreply@myapp.com'</span>, subject, text });
+
+  <span class="kw">return</span> {
+    statusCode: 200,
+    body: JSON.<span class="fn">stringify</span>({ success: <span class="kw">true</span> })
+  };
+};</code></pre>
+
+      <h3>Netlify CLI</h3>
+
+      <pre><code><span class="cmt"># Install globally</span>
+npm i -g netlify-cli
+
+<span class="cmt"># Login to Netlify</span>
+netlify login
+
+<span class="cmt"># Link current directory to a Netlify site</span>
+netlify link
+
+<span class="cmt"># Start local dev server (runs functions too)</span>
+netlify dev
+
+<span class="cmt"># Deploy a draft (preview URL)</span>
+netlify deploy
+
+<span class="cmt"># Deploy to production</span>
+netlify deploy --prod
+
+<span class="cmt"># Open the site in a browser</span>
+netlify open
+
+<span class="cmt"># View function logs</span>
+netlify functions:invoke send-email --payload <span class="str">'{"to":"test@test.com"}'</span>
+
+<span class="cmt"># Set an environment variable</span>
+netlify env:set DATABASE_URL <span class="str">"postgresql://..."</span>
+
+<span class="cmt"># List environment variables</span>
+netlify env:list</code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 Tip: Netlify vs Vercel for Static Sites</div>
+        <p>
+          Both Netlify and Vercel are excellent for static sites. The practical difference:
+          use <strong>Vercel</strong> if you're building with Next.js (Vercel created it and
+          is optimized for it). Use <strong>Netlify</strong> if you want Forms, Identity,
+          or Split Testing without writing any backend code. For plain static sites, either
+          works — pick the one whose dashboard you prefer.
+        </p>
+      </div>
+
+      <h2>cPanel — The Traditional Web Hosting Control Panel</h2>
+      <p>
+        cPanel has been around since 1996. It is the graphical control panel that powers most
+        shared web hosting plans — the kind you find at Namecheap, HostGator, SiteGround,
+        GoDaddy, and Bluehost. If you've ever bought a web hosting plan and seen a panel with
+        colorful icons for "File Manager," "phpMyAdmin," and "Email Accounts," you've met cPanel.
+      </p>
+      <p>
+        Think of shared cPanel hosting like renting a room in a house with many other tenants.
+        The landlord (the hosting company) owns the server. You get your own space within it —
+        a directory on the disk, a MySQL database, and an email address. The landlord handles
+        the server's hardware, operating system, and security patches. You manage everything
+        inside your space through the cPanel graphical interface.
+      </p>
+
+      <h3>What cPanel Gives You</h3>
+      <ul>
+        <li><strong>File Manager</strong>: a browser-based file browser to upload, edit, and manage PHP/HTML files without needing FTP software.</li>
+        <li><strong>phpMyAdmin</strong>: a web-based MySQL/MariaDB database administrator. Create tables, run queries, import/export databases.</li>
+        <li><strong>Email Accounts</strong>: create custom email addresses for your domain (<code>you@yourdomain.com</code>). Configure webmail, email forwarding, autoresponders.</li>
+        <li><strong>SSL/TLS Manager</strong>: install free Let's Encrypt certificates with one click.</li>
+        <li><strong>Cron Jobs</strong>: schedule recurring tasks — clear caches, send reports, run database maintenance.</li>
+        <li><strong>Softaculous</strong>: one-click installer for WordPress, Joomla, Drupal, Magento, Moodle, and 400+ other applications.</li>
+        <li><strong>Subdomain Manager</strong>: create <code>blog.yourdomain.com</code>, <code>shop.yourdomain.com</code>, etc.</li>
+        <li><strong>.htaccess</strong>: configure Apache-level redirects, password protection, URL rewriting.</li>
+      </ul>
+
+      <h3>Uploading Files via SFTP</h3>
+      <p>
+        The cPanel File Manager is convenient for quick edits, but SFTP (Secure FTP) is the
+        right way to upload whole projects. Use FileZilla, Cyberduck, or the command line:
+      </p>
+
+      <pre><code><span class="cmt"># Connect to your hosting server via SFTP</span>
+sftp username@yourdomain.com
+
+<span class="cmt"># Inside sftp interactive mode:</span>
+<span class="cmt"># Navigate to public_html (the web root)</span>
+cd public_html
+
+<span class="cmt"># Upload a single file</span>
+put localfile.php
+
+<span class="cmt"># Upload an entire directory (-r = recursive)</span>
+put -r ./myapp/ myapp/
+
+<span class="cmt"># Download a file</span>
+get backup.sql ./
+
+<span class="cmt"># Exit</span>
+bye
+
+<span class="cmt"># Or use rsync for efficient directory sync (only changed files)</span>
+rsync -avz --progress ./dist/ username@yourdomain.com:public_html/myapp/</code></pre>
+
+      <h3>WordPress on cPanel</h3>
+      <p>
+        The most common cPanel use case. A full WordPress deployment through Softaculous:
+      </p>
+      <ol>
+        <li>Login to cPanel → scroll to Softaculous Apps Installer → click WordPress</li>
+        <li>Click "Install" — fill in domain, folder, admin username, and email</li>
+        <li>Click "Install" again — Softaculous creates the database, downloads WordPress, configures <code>wp-config.php</code>, and gives you a live site</li>
+        <li>Visit <code>yourdomain.com/wp-admin</code> to login and start customizing</li>
+      </ol>
+
+      <h3>Node.js Apps on cPanel</h3>
+      <p>
+        Modern cPanel installations (version 82+) support Node.js through the "Setup Node.js App"
+        feature. This is not as capable as a dedicated VPS, but it works for small apps:
+      </p>
+
+      <pre><code><span class="cmt"># On cPanel, the Node.js App wizard creates this structure:</span>
+<span class="cmt"># /home/username/myapp/          ← application root</span>
+<span class="cmt"># /home/username/myapp/app.js    ← startup file</span>
+<span class="cmt"># /home/username/myapp/package.json</span>
+
+<span class="cmt"># After creating via cPanel GUI, SSH in to install dependencies:</span>
+ssh username@yourdomain.com
+
+<span class="cmt"># Activate the virtual environment created by cPanel</span>
+source /home/username/nodevenv/myapp/20/bin/activate
+
+<span class="cmt"># Install dependencies</span>
+cd ~/myapp
+npm install
+
+<span class="cmt"># The cPanel GUI "Restart" button starts the app via Passenger</span>
+<span class="cmt"># Passenger handles process management and proxies port 80/443</span></code></pre>
+
+      <div class="box warning">
+        <div class="box-title">⚠️ cPanel Limitations You Must Know</div>
+        <p>
+          <strong>Shared resources</strong>: your site shares CPU, RAM, and disk I/O with
+          dozens or hundreds of other users on the same server. If a neighbor runs a poorly
+          optimized WordPress plugin, your site slows down.<br><br>
+          <strong>No Docker</strong>: you cannot run Docker containers on shared hosting.
+          If your app requires Docker, you need a VPS or cloud server.<br><br>
+          <strong>No custom ports</strong>: you can't run services on custom ports accessible
+          from the internet — only port 80/443 through the web server.<br><br>
+          <strong>Outgrow it fast</strong>: cPanel shared hosting is excellent for WordPress,
+          PHP sites, and small static sites. The moment you need custom infrastructure,
+          Docker, microservices, or high traffic, move to a VPS or cloud.
+        </p>
+      </div>
+
+      <h2>Render — The Modern Middle Ground</h2>
+      <p>
+        Render launched in 2019 as a direct alternative to Heroku (which was free-tier killed in
+        2022). It occupies the perfect middle ground: simpler than AWS but more powerful than
+        Vercel for backend services. It natively supports Docker containers, static sites, backend
+        services, PostgreSQL databases, Redis, cron jobs, and background workers — all from a
+        single platform with a clean UI.
+      </p>
+
+      <h3>render.yaml — Infrastructure as Code</h3>
+      <p>
+        Render's killer feature is <code>render.yaml</code>: define your entire application
+        stack in code, commit it to GitHub, and Render deploys everything — services, databases,
+        environment variable wiring — automatically on every push.
+      </p>
+
+      <pre><code><span class="cmt"># render.yaml — define the whole stack in code</span>
+services:
+  <span class="cmt"># Web API service</span>
+  - type: web
+    name: my-api
+    env: node
+    plan: free
+    buildCommand: npm install &amp;&amp; npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: my-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: my-cache
+          property: connectionString
+
+  <span class="cmt"># Background worker (same code, different start command)</span>
+  - type: worker
+    name: my-worker
+    env: node
+    buildCommand: npm install &amp;&amp; npm run build
+    startCommand: npm run worker
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: my-db
+          property: connectionString
+
+  <span class="cmt"># Cron job (runs on a schedule)</span>
+  - type: cron
+    name: daily-cleanup
+    env: node
+    schedule: <span class="str">"0 2 * * *"</span>
+    buildCommand: npm install
+    startCommand: node scripts/cleanup.js
+
+  <span class="cmt"># Static site (React/Vue/etc.)</span>
+  - type: web
+    name: my-frontend
+    env: static
+    buildCommand: npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: <span class="str">/*</span>
+        destination: /index.html
+
+databases:
+  - name: my-db
+    databaseName: mydb
+    user: myuser
+    plan: free
+
+  - name: my-cache
+    type: redis
+    plan: free</code></pre>
+
+      <div class="box fun-fact">
+        <div class="box-title">🤯 Fun Fact: Heroku's Fall and Render's Rise</div>
+        <p>
+          Heroku was the original "push to deploy" platform and made PaaS mainstream in the
+          2010s. In 2022, Salesforce (which acquired Heroku) eliminated the free tier entirely.
+          Overnight, thousands of developers needed an alternative. Render absorbed a huge
+          portion of that audience. Railway is another Heroku alternative worth knowing.
+          Both have generous free tiers and similar developer experience.
+        </p>
+      </div>
+
+      <h2>Choosing the Right Platform</h2>
+      <p>
+        Here is the complete decision table. Be honest about what you're building — choose the
+        platform that fits today, knowing you can always migrate as you grow:
+      </p>
+
+      <div class="diagram">
+<pre>Platform Decision Table
+──────────────────────────────────────────────────────────────────────────
+Platform     Best For                           Not Great For
+──────────────────────────────────────────────────────────────────────────
+Vercel       Next.js, React/Vue/Svelte          Long-running backends
+             Frontend + API routes              Custom networking
+             Preview per PR, edge functions     WebSockets (limited)
+
+Netlify      Static sites, Gatsby/Hugo/Eleventy Node.js servers
+             Jamstack, Forms, Identity          Stateful services
+             SPA with external APIs             High-traffic databases
+
+cPanel       WordPress, PHP sites               Docker containers
+             Shared hosting, small budgets      Modern Node.js apps
+             Simple domains & email             Microservices
+             Non-technical users
+
+Render       Full-stack Node/Python/Ruby apps   Very high traffic
+             REST APIs with databases           Custom Kubernetes setups
+             Cron jobs, background workers      Complex networking
+             Replacing Heroku
+
+Heroku       Quick prototypes, demos            Production at scale
+             Learning platforms                 Budget-conscious deploys
+             Simple apps                        (expensive at scale)
+
+Railway      Same as Render                     Enterprise compliance
+             GitHub-connected full-stack        Legacy enterprise stacks
+
+AWS          Production at any scale            Quick prototyping
+GCP          Everything Kubernetes, ML/AI       Zero infrastructure skill
+Azure        .NET, Microsoft/enterprise stack   Simplicity seekers
+──────────────────────────────────────────────────────────────────────────
+
+Rule of thumb:
+  Day 1 → Vercel / Netlify / Render
+  1,000 daily users → Render / Railway with managed DB
+  10,000 daily users → Consider ECS, App Service, or Cloud Run
+  100,000+ daily users → Full cloud: EKS, GKE, or AKS</pre>
+      </div>
+
+      <h2>A Real Migration Path</h2>
+      <p>
+        Here is how a typical project evolves over time:
+      </p>
+      <ol>
+        <li><strong>Day 1 — Prototype</strong>: Deploy frontend to Vercel, API to Render, database to Render's managed PostgreSQL. Total cost: $0. Time to deploy: 15 minutes. Focus entirely on building product.</li>
+        <li><strong>Month 3 — Growing</strong>: Traffic increases. Render's free tier has limitations. Upgrade to Render Pro ($7/month per service). Still no infrastructure management.</li>
+        <li><strong>Month 12 — Scaling</strong>: 50,000 users, complex requirements. Migrate to AWS ECS or GCP Cloud Run for containerized services, RDS for the database, S3 for file storage. Use Terraform to manage it all.</li>
+        <li><strong>Year 3 — Platform</strong>: Multiple teams, multiple services. Move to Kubernetes (EKS or GKE). Implement ArgoCD for GitOps. Build an internal developer platform.</li>
+      </ol>
+      <p>
+        Each step is motivated by a real need, not by wanting to use impressive technology.
+        Start simple. Move to complexity only when simplicity genuinely can't serve you anymore.
+      </p>
+
+      <div class="box tip">
+        <div class="box-title">💡 Tip: Don't Over-Engineer Early</div>
+        <p>
+          Many developers deploy Kubernetes clusters for apps with 10 users. This is a classic
+          mistake. The infrastructure complexity costs you time that should go toward building
+          features and finding users. Vercel + Render + Supabase can handle tens of thousands
+          of users. Add complexity only when you have evidence you need it — not because it
+          seems more professional.
+        </p>
+      </div>
+
+      <div class="summary">
+        <h4>Chapter Summary</h4>
+        <ul>
+          <li>There is a spectrum from "click and deploy" (Vercel) to "manage everything yourself" (Kubernetes). Choose based on your actual needs, not the most impressive technology.</li>
+          <li>Vercel is the optimal platform for Next.js and React apps — push to GitHub, get a production URL with SSL and a global CDN in seconds.</li>
+          <li>Netlify excels at static sites and Jamstack, with built-in forms, identity, and split testing requiring zero backend code.</li>
+          <li>cPanel is the traditional shared hosting control panel — ideal for WordPress, PHP sites, and non-technical users; limited for modern containerized apps.</li>
+          <li>Render is the best Heroku replacement — full-stack apps, PostgreSQL, Redis, cron jobs, and background workers, all defined in <code>render.yaml</code>.</li>
+          <li>Start with simple platforms on day one; migrate to cloud infrastructure when you have a genuine need for the added complexity.</li>
+          <li>The migration path is: Vercel/Netlify → Render → Cloud Run/ECS → Kubernetes. Each step should be driven by real scale requirements.</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="chapter-10.html">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Ch 10 · GCP &amp; Azure</span>
+        </a>
+        <a href="exercises.html" class="next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Part 3 Exercises</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">☰</button>
+<script src="../nav.js"></script>
+</body>
+</html>

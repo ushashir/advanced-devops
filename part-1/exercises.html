@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Part 1 Exercises — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-1">Part 1 · Exercises</div>
+        <h1>Part 1 Exercises</h1>
+        <p class="chapter-intro">Prove to yourself that you've got it.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>How to use these exercises</h4>
+        <ul>
+          <li>Do these in your own terminal — a Linux machine, a Mac, WSL on Windows, or any cloud server.</li>
+          <li>Some are tasks to run. Some are questions to answer in writing. Some are scripts to write from scratch.</li>
+          <li>The goal is not to find the answer online and paste it — the goal is to do it, get stuck, figure it out, and remember it forever.</li>
+          <li>There is no automated grader here. Your terminal is your grader.</li>
+        </ul>
+      </div>
+
+      <div class="exercises">
+        <h3>Chapter 1 — What is DevOps?</h3>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 1.1 — In Your Own Words</div>
+          <p>
+            Without looking at the chapter, explain DevOps in two or three sentences as if you
+            were telling a non-technical friend what you are studying. Then compare your explanation
+            to the key-term definition in the chapter. What did you miss? What did you capture?
+          </p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 1.2 — The Wall</div>
+          <p>
+            Think of a real-world situation — from any domain, not necessarily software — where
+            two groups had opposite incentives that caused conflict. How was that conflict resolved
+            (or how could it be)? Write a short paragraph comparing it to the Dev vs. Ops conflict
+            described in Chapter 1.
+          </p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 1.3 — The Infinity Loop</div>
+          <p>
+            Draw the DevOps infinity loop from memory on a piece of paper. Label each phase.
+            For each phase, write one sentence describing what happens there.
+            Do not look at the chapter until you are done. Check your answers afterward.
+          </p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 1.4 — Research</div>
+          <p>
+            Look up the DORA (DevOps Research and Assessment) State of DevOps report for the
+            most recent year available. Find the four key metrics DORA uses to measure DevOps
+            performance (they are called the "Four Keys"). What are they? What does a
+            "high-performing" team score on each metric?
+          </p>
+        </div>
+
+        <h3>Chapter 2 — Linux</h3>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 2.1 — Navigation</div>
+          <p>Open a terminal and complete the following tasks in order:</p>
+          <ol>
+            <li>Print your current working directory.</li>
+            <li>Navigate to your home directory using the <code>~</code> shortcut.</li>
+            <li>List all files and folders, including hidden ones, with full details (<code>ls -la</code>).</li>
+            <li>Find the hidden <code>.bashrc</code> or <code>.zshrc</code> file. What is its size and last modified date?</li>
+            <li>Navigate to <code>/var/log</code> and list the files there. What are the largest log files?</li>
+          </ol>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 2.2 — Build a Project Structure</div>
+          <p>
+            Using only the command line (no file manager, no IDE), create the following
+            directory structure in your home directory:
+          </p>
+          <pre><code>~/my-devops-project/
+├── src/
+│   └── app.js
+├── config/
+│   ├── production.env
+│   └── development.env
+├── scripts/
+│   └── deploy.sh
+└── README.md</code></pre>
+          <p>
+            Create the directories with <code>mkdir -p</code> and the files with <code>touch</code>.
+            When done, verify your structure with <code>find ~/my-devops-project</code>.
+          </p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 2.3 — Decode the Permissions String</div>
+          <p>
+            For each of the following permission strings, answer: who can do what?
+            Identify the file type, owner permissions, group permissions, and other permissions.
+          </p>
+          <ul>
+            <li><code>-rw-r--r--</code></li>
+            <li><code>drwxr-xr-x</code></li>
+            <li><code>-rwx------</code></li>
+            <li><code>-rw-------</code></li>
+          </ul>
+          <p>
+            Then run <code>ls -la /etc/passwd</code> on your system. What are the permissions
+            on that file? Why do you think they are set that way?
+          </p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 2.4 — Working with Logs</div>
+          <p>
+            Create a fake log file with this command:
+          </p>
+          <pre><code>for i in {1..100}; do
+  if [ $((i % 7)) -eq 0 ]; then
+    echo "$(date) [ERROR] Database connection failed on attempt $i"
+  else
+    echo "$(date) [INFO] Request $i processed successfully"
+  fi
+done > /tmp/app.log</code></pre>
+          <p>Then answer these questions using only command-line tools:</p>
+          <ol>
+            <li>How many total lines does the file have?</li>
+            <li>How many ERROR lines are there?</li>
+            <li>Show only the ERROR lines.</li>
+            <li>Show the last 5 lines of the file.</li>
+          </ol>
+          <p>
+            Hint: <code>wc -l</code>, <code>grep</code>, <code>tail</code>.
+          </p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 2.5 — SSH Key Generation</div>
+          <p>
+            Generate a new SSH key pair on your machine:
+          </p>
+          <pre><code>ssh-keygen -t ed25519 -C "devops-practice-key"</code></pre>
+          <p>Save it as <code>~/.ssh/id_devops_practice</code> (a different filename than your default key).</p>
+          <p>Then:</p>
+          <ol>
+            <li>View your public key: <code>cat ~/.ssh/id_devops_practice.pub</code></li>
+            <li>Check the permissions: <code>ls -la ~/.ssh/</code></li>
+            <li>Why must the private key be mode <code>600</code> (not <code>644</code>)? What would SSH do if the permissions were too open?</li>
+          </ol>
+        </div>
+
+        <h3>Chapter 3 — Networking</h3>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 3.1 — DNS Investigation</div>
+          <p>
+            Use <code>dig</code> to investigate a domain of your choice. Run these commands
+            and answer the questions:
+          </p>
+          <pre><code>dig google.com
+dig MX gmail.com
+dig +trace github.com</code></pre>
+          <ol>
+            <li>What IP address did <code>dig google.com</code> return? Is it always the same?</li>
+            <li>What mail servers handle email for gmail.com? What does the number in the MX record mean?</li>
+            <li>Describe in your own words what happened at each step of the <code>+trace</code> output for github.com.</li>
+          </ol>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 3.2 — HTTP in Action</div>
+          <p>
+            Use <code>curl</code> to make real HTTP requests. Run each command and read the output carefully:
+          </p>
+          <pre><code><span class="cmt"># Basic GET request</span>
+curl https://httpbin.org/get
+
+<span class="cmt"># POST with JSON body</span>
+curl -X POST https://httpbin.org/post \
+  -H "Content-Type: application/json" \
+  -d '{"name": "DevOps Student", "chapter": 3}'
+
+<span class="cmt"># See the full HTTP response headers</span>
+curl -I https://github.com
+
+<span class="cmt"># Follow redirects and show what happens</span>
+curl -L -v http://github.com 2>&amp;1 | grep -E "^[*<>]"</code></pre>
+          <p>
+            After running these, answer: what status code does <code>http://github.com</code> (HTTP, not HTTPS) return, and where does it redirect to?
+          </p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 3.3 — Ports and Processes</div>
+          <p>
+            Find out what is listening on your machine right now:
+          </p>
+          <pre><code>ss -tlnp</code></pre>
+          <p>
+            List at least three services that are listening and identify what each one is. If you
+            have a web server installed (nginx, apache), what port is it on? What about your database?
+          </p>
+          <p>
+            Then explain: if you wanted to allow a colleague to connect to your PostgreSQL database
+            on port 5432 but block everyone else, how would you configure UFW to do that? Write out
+            the commands, even if you don't run them.
+          </p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 3.4 — TCP vs. UDP Reflection</div>
+          <p>
+            Answer in your own words:
+          </p>
+          <ol>
+            <li>You are building a live video streaming service where a dropped frame is no big deal but latency matters. Should your video data travel over TCP or UDP? Why?</li>
+            <li>You are building a banking application where every transaction must be recorded and confirmed. Should it use TCP or UDP? Why?</li>
+            <li>What protocol does DNS primarily use? Why does that make sense for short lookups?</li>
+          </ol>
+        </div>
+
+        <h3>Chapter 4 — Git, Bash &amp; Python</h3>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 4.1 — Git From Scratch</div>
+          <p>Complete this full Git workflow in your terminal, step by step:</p>
+          <ol>
+            <li>Create a new directory called <code>git-practice</code> and initialize a Git repo.</li>
+            <li>Create a file called <code>hello.txt</code> with the text "Hello, DevOps!"</li>
+            <li>Stage and commit the file with a meaningful message.</li>
+            <li>Create a new branch called <code>feature/goodbye</code>.</li>
+            <li>On that branch, create a file <code>goodbye.txt</code> with the text "See you in production."</li>
+            <li>Commit the new file.</li>
+            <li>Switch back to <code>main</code> and merge your feature branch.</li>
+            <li>Run <code>git log --oneline --graph --all</code> to see the history.</li>
+          </ol>
+          <p>Copy the output of <code>git log --oneline --graph --all</code> into your notes.</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 4.2 — Write a Bash Script</div>
+          <p>
+            Write a Bash script called <code>greet.sh</code> that:
+          </p>
+          <ol>
+            <li>Accepts a name as the first argument (<code>$1</code>).</li>
+            <li>If no argument is provided, prints "Usage: greet.sh &lt;name&gt;" and exits with code 1.</li>
+            <li>Otherwise, prints "Hello, [name]! Welcome to DevOps." where [name] is replaced with the argument.</li>
+          </ol>
+          <p>
+            Make the script executable with <code>chmod +x greet.sh</code> and test it with:
+            <code>./greet.sh Ushahemba</code> and <code>./greet.sh</code> (no argument).
+          </p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 4.3 — Automate with Bash</div>
+          <p>
+            Write a Bash script called <code>backup.sh</code> that:
+          </p>
+          <ol>
+            <li>Takes a source directory as <code>$1</code> and a backup destination as <code>$2</code>.</li>
+            <li>Creates the destination directory if it does not exist.</li>
+            <li>Copies all files from source to destination.</li>
+            <li>Prints a log line like: <code>[2026-05-06 09:14:22] Backed up /source to /dest</code></li>
+            <li>Uses <code>set -e</code> so the script exits immediately if any command fails.</li>
+          </ol>
+          <p>Test it by backing up <code>~/my-devops-project</code> to <code>/tmp/backup-test</code>.</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 4.4 — Python Line Counter</div>
+          <p>
+            Write a Python script called <code>count_lines.py</code> that:
+          </p>
+          <ol>
+            <li>Accepts a filename as a command-line argument (<code>sys.argv[1]</code>).</li>
+            <li>Opens the file and counts the total number of lines.</li>
+            <li>Also counts how many non-empty lines there are.</li>
+            <li>Prints both counts in a readable format.</li>
+            <li>If the file does not exist, prints a helpful error message and exits with code 1.</li>
+          </ol>
+          <p>
+            Test it on the <code>/tmp/app.log</code> file you created in Exercise 2.4.
+          </p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 4.5 — Putting It All Together</div>
+          <p>
+            This is a larger challenge that ties together multiple concepts from Part 1.
+            Build a mini "deployment simulation":
+          </p>
+          <ol>
+            <li>
+              Create a Git repository called <code>my-web-app</code>.
+              Add a file called <code>index.html</code> with any HTML content you like.
+              Commit it with a message "Initial commit".
+            </li>
+            <li>
+              Create a branch called <code>feature/about-page</code>.
+              Add a file <code>about.html</code> with a short "About Me" page.
+              Commit it. Merge it back into main.
+            </li>
+            <li>
+              Write a Bash script called <code>deploy-sim.sh</code> that simulates a deployment:
+              <ul>
+                <li>Prints "Starting deployment..."</li>
+                <li>Runs <code>git log --oneline -5</code> to show recent commits</li>
+                <li>Counts the HTML files and prints "Deploying X HTML files"</li>
+                <li>Prints "Deployment complete!"</li>
+              </ul>
+            </li>
+            <li>
+              Write a Python script called <code>check-deploy.py</code> that reads the directory,
+              lists all <code>.html</code> files, and prints their names and sizes.
+            </li>
+          </ol>
+          <p>
+            When you can run <code>./deploy-sim.sh</code> and <code>python3 check-deploy.py</code>
+            from the same directory and see sensible output, you have completed Part 1.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="box tip">
+        <div class="box-title">💡 After You Finish</div>
+        <p>
+          If you completed all five exercises in the Chapter 4 section, you have practiced the core
+          skills that will appear in every subsequent chapter: navigating Linux, reading and writing
+          files, using Git for version control, writing Bash automation, and using Python for
+          scripting. These are not just exercises — they are the daily reality of DevOps engineering.
+          Repeat them until the commands feel natural.
+        </p>
+      </div>
+
+      <div class="summary">
+        <h4>Part 1 Complete</h4>
+        <ul>
+          <li>You understand what DevOps is, where it came from, and why it matters — both culturally and economically.</li>
+          <li>You can navigate a Linux file system, manage files and permissions, and control services with systemctl.</li>
+          <li>You know how data travels across the internet: IP addresses, DNS resolution, TCP/UDP, HTTP requests and responses, and port numbers.</li>
+          <li>You can use Git to version-control your work, create branches, merge changes, and view history.</li>
+          <li>You can write Bash scripts that automate deployment tasks with proper error handling.</li>
+          <li>You can write Python scripts to check application health, parse files, and interact with APIs.</li>
+          <li>You are ready for Part 2: CI/CD and Containers.</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="chapter-4.html">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Ch 4 · Git, Bash &amp; Python</span>
+        </a>
+        <a href="../part-2/chapter-5.html" class="next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Ch 5 · Docker: Lunchboxes for Apps</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">☰</button>
+<script src="../nav.js"></script>
+</body>
+</html>

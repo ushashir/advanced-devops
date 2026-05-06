@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 2: Linux: Your Magic Workshop — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-1">Part 1 · Chapter 2</div>
+        <h1>Linux: Your Magic Workshop</h1>
+        <p class="chapter-intro">The operating system that runs 96% of the world's servers.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>What you'll learn in this chapter</h4>
+        <ul>
+          <li>Why Linux is the foundation of nearly all modern infrastructure</li>
+          <li>How the Linux file system is organized — and why "everything is a file"</li>
+          <li>The 20 essential commands every DevOps engineer uses daily</li>
+          <li>File permissions: reading, writing, executing, and who is allowed to do what</li>
+          <li>Managing services with systemctl</li>
+          <li>Installing software with package managers</li>
+          <li>Connecting to remote machines securely with SSH</li>
+        </ul>
+      </div>
+
+      <h2>The Workshop Analogy</h2>
+      <p>
+        Imagine a master craftsman's workshop. Every tool has its place. The chisels are on the
+        left wall, the saws on the right, the measuring tape always hanging by the door. The floor
+        is swept clean every evening. The workbench has space for the project at hand, and nothing
+        else. When you walk into that workshop, you feel the accumulated order of years of deliberate
+        practice. You could build almost anything in there — furniture, musical instruments, a boat —
+        as long as you know where the tools are and how to use them.
+      </p>
+      <p>
+        Linux is that workshop.
+      </p>
+      <p>
+        Windows is a shopping mall: beautiful, bright, designed to guide customers through the
+        experience without them needing to think. It is excellent for consumers. Linux is designed
+        for builders. It does not hold your hand. It does not ask you if you're sure. But it gives
+        you total control, complete transparency, and tools of extraordinary power — once you know
+        where they are.
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">🔧 Linux is Non-Negotiable for DevOps</div>
+        <p>
+          If your application runs at any scale on the internet, it almost certainly runs on Linux.
+          Google, Amazon, Facebook, Netflix, every major bank's backend, and essentially every
+          cloud server you will ever provision in your career runs Linux. Learning Linux is not
+          optional for a DevOps engineer — it is as fundamental as learning to walk before you run.
+        </p>
+      </div>
+
+      <h2>The Linux File System — Everything is a File</h2>
+      <p>
+        Linux has a radical and elegant philosophy: <em>everything is a file</em>. Your documents
+        are files. Your programs are files. Your hardware devices — your hard drive, your keyboard,
+        your network interface — are represented as files. Even running processes have file
+        representations. This consistency is not just philosophical; it means you can use the same
+        tools to interact with almost anything on the system.
+      </p>
+      <p>
+        The file system is organized as a single tree, starting from the root directory <code>/</code>
+        (pronounced "slash" or "root"). Unlike Windows, which has multiple drives (C:, D:, etc.),
+        Linux has one tree, and everything hangs from it.
+      </p>
+      <p>Here are the directories you will encounter constantly:</p>
+
+      <div class="diagram">
+<pre>/                         ← Root of the entire file system
+├── home/
+│   └── ubuntu/           ← Your personal home directory
+├── etc/                  ← System and application configuration files
+├── var/
+│   └── log/              ← Log files — where apps write their diaries
+├── tmp/                  ← Temporary files (deleted on reboot)
+├── usr/
+│   └── bin/              ← Programs you can run (ls, grep, curl...)
+├── bin/                  ← Essential system programs
+├── proc/                 ← Live info about running processes (virtual)
+├── dev/                  ← Device files (hard drives, USB, etc.)
+└── opt/                  ← Optional, third-party software</pre>
+      </div>
+
+      <p>
+        A few of these deserve special attention. <code>/etc</code> is where almost all
+        configuration files live — when you want to change how Nginx serves traffic, or how
+        PostgreSQL authenticates users, you edit files in <code>/etc</code>. The name "etc" is
+        a legacy from Unix history, but think of it as the settings drawer of your workshop.
+      </p>
+      <p>
+        <code>/var/log</code> is where your applications write their diary entries. When something
+        goes wrong in production and you need to find out what happened, you will spend a lot of
+        time in <code>/var/log</code>. The <code>/proc</code> directory is particularly magical —
+        it is not a real directory on disk, but a virtual window into the running kernel. Reading
+        <code>/proc/meminfo</code> tells you the current memory state of the system in real time.
+      </p>
+
+      <div class="box key-term">
+        <div class="box-title">📚 Key Term: Path</div>
+        <p>
+          A <strong>path</strong> is the address of a file or directory in the file system.
+          An <strong>absolute path</strong> starts from root: <code>/home/ubuntu/projects/app.js</code>.
+          A <strong>relative path</strong> is relative to where you currently are: if you're already
+          in <code>/home/ubuntu</code>, then <code>projects/app.js</code> is the relative path to the same file.
+        </p>
+      </div>
+
+      <h2>The 20 Commands You Must Know</h2>
+      <p>
+        You do not need to memorize hundreds of commands on day one. These twenty will take you
+        through the vast majority of your daily work as a DevOps engineer. Master these before
+        moving on.
+      </p>
+
+      <h3>Navigation</h3>
+      <p>Before you can do anything, you need to know where you are and how to move around.</p>
+
+      <pre><code><span class="cmt"># Where am I right now?</span>
+<span class="fn">pwd</span>
+<span class="cmt"># Output: /home/ubuntu</span>
+
+<span class="cmt"># What files and folders are here?</span>
+<span class="fn">ls</span>
+
+<span class="cmt"># List everything, including hidden files, with details</span>
+<span class="fn">ls</span> <span class="flag">-la</span>
+
+<span class="cmt"># Go to a directory</span>
+<span class="fn">cd</span> /var/log
+
+<span class="cmt"># Go up one level</span>
+<span class="fn">cd</span> ..
+
+<span class="cmt"># Go to your home directory (shortcut)</span>
+<span class="fn">cd</span> ~
+
+<span class="cmt"># Go to the previous directory you were in</span>
+<span class="fn">cd</span> -</code></pre>
+
+      <p>
+        The output of <code>ls -la</code> deserves a moment of explanation. Each line looks like this:
+      </p>
+      <pre><code>-rwxr-xr-x  1  ubuntu  ubuntu  4096  May 3 09:14  deploy.sh</code></pre>
+      <p>
+        Reading left to right: file type and permissions, number of hard links, owner, group,
+        size in bytes, last modified date, and filename. We will cover the permissions string
+        in detail shortly.
+      </p>
+
+      <h3>Working with Files</h3>
+      <pre><code><span class="cmt"># Create a new directory</span>
+<span class="fn">mkdir</span> my-project
+
+<span class="cmt"># Create nested directories in one command</span>
+<span class="fn">mkdir</span> <span class="flag">-p</span> my-project/src/utils
+
+<span class="cmt"># Create an empty file</span>
+<span class="fn">touch</span> README.md
+
+<span class="cmt"># Copy a file</span>
+<span class="fn">cp</span> config.env config.env.backup
+
+<span class="cmt"># Copy a directory and all its contents</span>
+<span class="fn">cp</span> <span class="flag">-r</span> my-project/ my-project-backup/
+
+<span class="cmt"># Move or rename a file</span>
+<span class="fn">mv</span> old-name.txt new-name.txt
+
+<span class="cmt"># Delete a file (careful — there is no recycle bin)</span>
+<span class="fn">rm</span> unwanted.txt
+
+<span class="cmt"># Delete a directory and everything inside it</span>
+<span class="fn">rm</span> <span class="flag">-rf</span> old-project/
+
+<span class="cmt"># Print the contents of a file to the terminal</span>
+<span class="fn">cat</span> .env</code></pre>
+
+      <h3>Viewing File Contents</h3>
+      <pre><code><span class="cmt"># Page through a large file (press q to quit, space to advance)</span>
+<span class="fn">less</span> /var/log/nginx/access.log
+
+<span class="cmt"># See just the first 20 lines of a file</span>
+<span class="fn">head</span> <span class="flag">-n 20</span> application.log
+
+<span class="cmt"># Watch a log file grow in real time (essential for debugging)</span>
+<span class="fn">tail</span> <span class="flag">-f</span> /var/log/myapp/app.log
+
+<span class="cmt"># Search for a pattern in a file</span>
+<span class="fn">grep</span> <span class="str">"ERROR"</span> application.log
+
+<span class="cmt"># Search recursively through a directory</span>
+<span class="fn">grep</span> <span class="flag">-r</span> <span class="str">"database_url"</span> /etc/myapp/
+
+<span class="cmt"># Case-insensitive search</span>
+<span class="fn">grep</span> <span class="flag">-i</span> <span class="str">"error"</span> application.log</code></pre>
+
+      <p>
+        <code>tail -f</code> is one of the most used commands in production debugging. The <code>-f</code>
+        flag means "follow" — the terminal keeps the file open and prints new lines as they are appended.
+        When something is going wrong and you need to watch the logs in real time, this is your tool.
+      </p>
+
+      <h3>System Information</h3>
+      <pre><code><span class="cmt"># List all running processes in detail</span>
+<span class="fn">ps</span> <span class="flag">aux</span>
+
+<span class="cmt"># Find a specific process by name</span>
+<span class="fn">ps</span> <span class="flag">aux</span> | <span class="fn">grep</span> nginx
+
+<span class="cmt"># Stop a process (replace PID with the process ID number)</span>
+<span class="fn">kill</span> 1234
+
+<span class="cmt"># Force-kill a process that won't stop</span>
+<span class="fn">kill</span> <span class="flag">-9</span> 1234
+
+<span class="cmt"># Live view of CPU and memory usage</span>
+<span class="fn">top</span>
+
+<span class="cmt"># A nicer version of top (must install: sudo apt install htop)</span>
+<span class="fn">htop</span>
+
+<span class="cmt"># Disk usage of all mounted filesystems, human-readable</span>
+<span class="fn">df</span> <span class="flag">-h</span>
+
+<span class="cmt"># How much memory is available</span>
+<span class="fn">free</span> <span class="flag">-h</span></code></pre>
+
+      <div class="box warning">
+        <div class="box-title">⚠️ The Most Dangerous Command in Linux</div>
+        <p>
+          Never run <code>rm -rf /</code> or <code>rm -rf /*</code>. These commands delete your
+          entire file system, starting from root, with no confirmation and no recovery. Linux
+          will not ask "Are you sure?" It will simply execute. Some systems have a <code>--no-preserve-root</code>
+          safeguard, but do not rely on it. Any time you use <code>rm -rf</code>, double-check
+          the path. Triple-check it.
+        </p>
+      </div>
+
+      <h2>File Permissions Explained</h2>
+      <p>
+        Linux takes security seriously, and file permissions are the foundation of that security.
+        Every file and directory has three sets of permissions: what the <em>owner</em> can do,
+        what members of the <em>group</em> can do, and what <em>everyone else</em> can do.
+      </p>
+      <p>
+        The permission string looks like this: <code>-rwxr-xr-x</code>
+      </p>
+
+      <div class="diagram">
+<pre>-  rwx  r-x  r-x
+│   │    │    │
+│   │    │    └── Others: read + execute, no write
+│   │    └─────── Group: read + execute, no write
+│   └──────────── Owner: read + write + execute
+└──────────────── File type: - = file, d = directory, l = symlink
+
+r = read     (4)
+w = write    (2)
+x = execute  (1)
+- = no permission (0)</pre>
+      </div>
+
+      <p>
+        The numbers in parentheses are important. Permissions are often set using numeric codes,
+        where each digit is the sum of the permissions for that group:
+      </p>
+      <ul>
+        <li><code>chmod 755 script.sh</code> — owner can read/write/execute (7=4+2+1), group and others can read/execute (5=4+1). Standard for scripts.</li>
+        <li><code>chmod 644 config.txt</code> — owner can read/write (6=4+2), group and others can only read (4). Standard for config files.</li>
+        <li><code>chmod 600 id_rsa</code> — only the owner can read/write (6), nobody else can do anything. Required for SSH private keys — SSH will refuse to use a key with looser permissions.</li>
+        <li><code>chmod 777 file</code> — everyone can do everything. Almost always a bad idea in production.</li>
+      </ul>
+
+      <pre><code><span class="cmt"># Set permissions numerically</span>
+<span class="fn">chmod</span> 755 deploy.sh
+
+<span class="cmt"># Add execute permission for the owner</span>
+<span class="fn">chmod</span> u+x deploy.sh
+
+<span class="cmt"># Change the owner of a file</span>
+<span class="fn">chown</span> ubuntu:ubuntu /var/www/myapp
+
+<span class="cmt"># Change ownership recursively (all files in a directory)</span>
+<span class="fn">chown</span> <span class="flag">-R</span> ubuntu:ubuntu /var/www/myapp</code></pre>
+
+      <h2>Processes and Services</h2>
+      <p>
+        A <strong>process</strong> is a running program. When you start Nginx, a process appears.
+        When Nginx handles a request, that process does the work. Every process has a unique
+        number called a PID (Process ID), which is how you refer to it when you want to stop,
+        pause, or signal it.
+      </p>
+      <p>
+        On modern Linux systems, long-running background programs (called <em>services</em> or
+        <em>daemons</em>) are managed by a tool called <code>systemd</code>, controlled via
+        the <code>systemctl</code> command. This is the command you will use to start, stop,
+        and check on services like web servers, databases, and your own applications.
+      </p>
+
+      <pre><code><span class="cmt"># Start a service</span>
+<span class="fn">systemctl</span> start nginx
+
+<span class="cmt"># Stop a service</span>
+<span class="fn">systemctl</span> stop nginx
+
+<span class="cmt"># Restart a service (stop then start)</span>
+<span class="fn">systemctl</span> restart nginx
+
+<span class="cmt"># Reload config without full restart (if supported)</span>
+<span class="fn">systemctl</span> reload nginx
+
+<span class="cmt"># Enable a service to start automatically on boot</span>
+<span class="fn">systemctl</span> enable nginx
+
+<span class="cmt"># Disable automatic startup on boot</span>
+<span class="fn">systemctl</span> disable nginx
+
+<span class="cmt"># Check if a service is running</span>
+<span class="fn">systemctl</span> status nginx
+
+<span class="cmt"># See recent logs for a service</span>
+<span class="fn">journalctl</span> <span class="flag">-u</span> nginx <span class="flag">--since</span> <span class="str">"1 hour ago"</span></code></pre>
+
+      <p>
+        The <code>systemctl status</code> command is your first stop when investigating a
+        production issue. It shows whether the service is running, its PID, recent log lines,
+        and whether it exited cleanly or crashed.
+      </p>
+
+      <h2>Package Management</h2>
+      <p>
+        Installing software on Linux is done through a <strong>package manager</strong> — a
+        tool that downloads, installs, and keeps track of software packages from trusted
+        repositories. There is no hunting for .exe files or double-clicking installers.
+        One command, and the software is installed with all its dependencies.
+      </p>
+      <p>
+        There are two main families of package managers you will encounter in DevOps:
+      </p>
+
+      <pre><code><span class="cmt"># --- Ubuntu / Debian (used by most cloud servers, Docker base images) ---</span>
+
+<span class="cmt"># Update the package index (always do this before installing)</span>
+<span class="fn">sudo</span> apt update
+
+<span class="cmt"># Install a package</span>
+<span class="fn">sudo</span> apt install nginx
+
+<span class="cmt"># Install multiple packages at once</span>
+<span class="fn">sudo</span> apt install nginx curl git vim
+
+<span class="cmt"># Remove a package</span>
+<span class="fn">sudo</span> apt remove nginx
+
+<span class="cmt"># Remove package and its configuration files</span>
+<span class="fn">sudo</span> apt purge nginx
+
+<span class="cmt"># Upgrade all installed packages</span>
+<span class="fn">sudo</span> apt upgrade
+
+
+<span class="cmt"># --- RHEL / CentOS / Amazon Linux (used on many enterprise servers) ---</span>
+
+<span class="fn">sudo</span> yum install nginx
+<span class="fn">sudo</span> dnf install nginx   <span class="cmt"># newer systems use dnf</span></code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 Always Update Before Installing</div>
+        <p>
+          On Ubuntu/Debian, always run <code>sudo apt update</code> before installing anything.
+          This refreshes the local list of available packages. Without it, apt might install an
+          older version of a package or fail to find a new one entirely. Make it a habit:
+          <code>sudo apt update && sudo apt install &lt;package&gt;</code>.
+        </p>
+      </div>
+
+      <h2>SSH — Talking to Remote Machines</h2>
+      <p>
+        In DevOps, you rarely work on a machine that is sitting in front of you. You work on
+        servers in data centers, cloud instances in AWS or GCP, and VMs that may be thousands
+        of kilometers away. The way you connect to these machines is through
+        <strong>SSH — Secure Shell</strong>.
+      </p>
+      <p>
+        Think of SSH as making a secure phone call to another computer. Once connected, you get
+        a terminal prompt on that remote machine. Every command you type executes there, not on
+        your local machine. You see the output. You can do anything you would do if you were
+        physically sitting at that machine's keyboard.
+      </p>
+
+      <pre><code><span class="cmt"># Connect to a remote server using a username and password</span>
+<span class="fn">ssh</span> ubuntu@192.168.1.100
+
+<span class="cmt"># Connect using an SSH key file (the standard way for cloud servers)</span>
+<span class="fn">ssh</span> <span class="flag">-i</span> ~/.ssh/my-key.pem ubuntu@192.168.1.100
+
+<span class="cmt"># Connect to a non-standard port (default is 22)</span>
+<span class="fn">ssh</span> <span class="flag">-p</span> 2222 ubuntu@192.168.1.100
+
+<span class="cmt"># Copy a file from your machine to a remote server</span>
+<span class="fn">scp</span> config.env ubuntu@192.168.1.100:/var/www/myapp/
+
+<span class="cmt"># Copy a file FROM a remote server to your local machine</span>
+<span class="fn">scp</span> ubuntu@192.168.1.100:/var/log/app.log ./app.log
+
+<span class="cmt"># Generate an SSH key pair (do this once on your machine)</span>
+<span class="fn">ssh-keygen</span> <span class="flag">-t</span> ed25519 <span class="flag">-C</span> <span class="str">"yourname@example.com"</span></code></pre>
+
+      <h3>SSH Keys: Why Passwords Are Not Enough</h3>
+      <p>
+        When you connect to a server with a password, that password travels over the network
+        (encrypted, but still). It can be brute-forced. It can be leaked. It can be reused.
+        SSH keys are more secure because they use public-key cryptography.
+      </p>
+      <p>
+        Here is how it works. You generate a key pair: a <em>private key</em> (which stays on
+        your machine, never shared with anyone) and a <em>public key</em> (which you copy to
+        the server). When you connect, the server uses the public key to challenge you, and
+        only your private key can respond correctly. No password is ever transmitted.
+      </p>
+
+      <pre><code><span class="cmt"># Generate an Ed25519 key pair (modern, fast, secure)</span>
+<span class="fn">ssh-keygen</span> <span class="flag">-t</span> ed25519 <span class="flag">-C</span> <span class="str">"ubuntu@myserver"</span>
+<span class="cmt"># This creates:</span>
+<span class="cmt">#   ~/.ssh/id_ed25519       (private key — guard this with your life)</span>
+<span class="cmt">#   ~/.ssh/id_ed25519.pub   (public key — copy this to servers)</span>
+
+<span class="cmt"># Copy your public key to a remote server (enables key-based login)</span>
+<span class="fn">ssh-copy-id</span> ubuntu@192.168.1.100
+
+<span class="cmt"># Manually add your public key to the server's authorized_keys</span>
+<span class="fn">cat</span> ~/.ssh/id_ed25519.pub | <span class="fn">ssh</span> ubuntu@192.168.1.100 <span class="str">"mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"</span></code></pre>
+
+      <div class="box warning">
+        <div class="box-title">⚠️ Protect Your Private Key</div>
+        <p>
+          Your private key (<code>~/.ssh/id_ed25519</code>) is like the master key to every
+          server you have added it to. Never commit it to Git. Never share it in a chat message.
+          Never put it in your application's code. If it is compromised, regenerate your key
+          pair immediately and remove the old public key from every server.
+        </p>
+      </div>
+
+      <h2>Useful Tips for the Terminal</h2>
+      <p>
+        A few habits that will make you dramatically faster in the terminal:
+      </p>
+      <ul>
+        <li><strong>Tab completion:</strong> Press Tab while typing a command or path to auto-complete. Press it twice to see all options.</li>
+        <li><strong>History:</strong> Press the up arrow to scroll through previous commands. Run <code>history</code> to see your full history. Use <code>Ctrl+R</code> to search through it.</li>
+        <li><strong>Ctrl+C:</strong> Cancel the currently running command. Use this when a command hangs.</li>
+        <li><strong>Ctrl+L:</strong> Clear the terminal screen (same as the <code>clear</code> command).</li>
+        <li><strong>Pipe (<code>|</code>):</strong> Send the output of one command as the input to another. For example: <code>ps aux | grep nginx</code>.</li>
+        <li><strong>Redirect (<code>&gt;</code>):</strong> Write command output to a file: <code>ls -la &gt; files.txt</code>.</li>
+        <li><strong>Append (<code>&gt;&gt;</code>):</strong> Append output to a file without overwriting: <code>echo "done" &gt;&gt; deploy.log</code>.</li>
+      </ul>
+
+      <div class="box fun-fact">
+        <div class="box-title">🐧 Fun Fact: Linux Powers the World</div>
+        <p>
+          As of 2026, Linux runs on over 96% of the world's top web servers, 100% of the world's
+          fastest supercomputers, and all of Amazon, Google, and Microsoft's cloud infrastructure.
+          Android — the world's most-used mobile operating system — is built on a Linux kernel.
+          The International Space Station runs Linux. So does the Mars rover. When you learn Linux,
+          you are learning the language of the machines that run the planet.
+        </p>
+      </div>
+
+      <div class="summary">
+        <h4>Chapter Summary</h4>
+        <ul>
+          <li>Linux is the operating system of the internet. Nearly every server you work with in DevOps runs Linux.</li>
+          <li>Everything in Linux is a file — documents, devices, processes. One consistent interface to interact with everything.</li>
+          <li>The file system is a single tree starting at <code>/</code>. Key directories: <code>/etc</code> (configs), <code>/var/log</code> (logs), <code>/usr/bin</code> (programs), <code>/home</code> (users).</li>
+          <li>The 20 essential commands cover navigation, file management, viewing content, system information, and permissions.</li>
+          <li>File permissions control who can read, write, and execute each file. <code>chmod</code> and <code>chown</code> manage them.</li>
+          <li><code>systemctl</code> manages services — starting, stopping, enabling on boot, and checking status.</li>
+          <li>SSH is how you connect to remote machines. Use key-based authentication, never just passwords.</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="chapter-1.html">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Ch 1 · What is DevOps?</span>
+        </a>
+        <a href="chapter-3.html" class="next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Ch 3 · The Internet's Invisible Roads</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">☰</button>
+<script src="../nav.js"></script>
+</body>
+</html>

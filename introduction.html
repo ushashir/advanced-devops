@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Introduction — DevOps for Everyone</title>
+  <link rel="stylesheet" href="style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="index.html">📖 Table of Contents</a><a href="introduction.html">Introduction</a><a href="about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="part-1/chapter-4.html">Ch 4 · Git: The Best Time Machine</a><a href="part-1/chapter-5.html">Ch 5 · Bash &amp; Python Scripting</a><a href="part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="part-2/chapter-6.html">Ch 6 · Docker: Lunchboxes for Apps</a><a href="part-2/chapter-7.html">Ch 7 · CI/CD: The Robot Assembly Line</a><a href="part-2/chapter-8.html">Ch 8 · GitHub Actions Deep Dive</a><a href="part-2/chapter-9.html">Ch 9 · Kubernetes: The Coordinator</a><a href="part-2/chapter-10.html">Ch 10 · ArgoCD &amp; GitOps</a><a href="part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="part-3/chapter-11.html">Ch 11 · AWS: The Giant Supermarket</a><a href="part-3/chapter-12.html">Ch 12 · Google Cloud (GCP)</a><a href="part-3/chapter-13.html">Ch 13 · Azure: Microsoft's Cloud</a><a href="part-3/chapter-14.html">Ch 14 · Vercel, Netlify &amp; cPanel</a><a href="part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="part-4/chapter-15.html">Ch 15 · Terraform: LEGO for Servers</a><a href="part-4/chapter-16.html">Ch 16 · Ansible: Robot Setup Crew</a><a href="part-4/chapter-17.html">Ch 17 · Pulumi: IaC in Real Code</a><a href="part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="part-5/chapter-18.html">Ch 18 · Node.js &amp; PM2</a><a href="part-5/chapter-19.html">Ch 19 · Python &amp; FastAPI</a><a href="part-5/chapter-20.html">Ch 20 · Java Services</a><a href="part-5/chapter-21.html">Ch 21 · .NET Services</a><a href="part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="part-6/chapter-22.html">Ch 22 · Metrics &amp; Prometheus</a><a href="part-6/chapter-23.html">Ch 23 · Logs &amp; Loki/ELK</a><a href="part-6/chapter-24.html">Ch 24 · Traces &amp; OpenTelemetry</a><a href="part-6/chapter-25.html">Ch 25 · Security &amp; Secrets</a><a href="part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="part-7/chapter-26.html">Ch 26 · Developer Platforms</a><a href="part-7/chapter-27.html">Ch 27 · Crossplane</a><a href="part-7/chapter-28.html">Ch 28 · AI Ops</a><a href="part-7/conclusion.html">Conclusion</a><a href="part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag">Introduction</div>
+        <h1>The Wall Every Developer Hits</h1>
+        <p class="chapter-intro">You can build it. But can you ship it?</p>
+        <p style="margin-top:0.75rem;font-size:0.9rem;color:var(--text-light);">
+          By <a href="about-author.html"><strong>Ushahemba Shir</strong></a> —
+          Backend Engineer, Lagos, Nigeria ·
+          <a href="https://ushahembashir.vercel.app/" target="_blank">ushahembashir.vercel.app</a>
+        </p>
+      </div>
+
+      <h2>The Confession</h2>
+      <p>
+        I once spent three weeks building a beautiful backend API. Clean architecture,
+        proper validation, solid test coverage. I was proud of it. Then my manager asked
+        the question I had been quietly dreading: "Great — when can we deploy it?"
+      </p>
+      <p>
+        I had no idea what to say.
+      </p>
+      <p>
+        I knew how to write code. But I did not know how to take that code and put it
+        somewhere that real people could use. I did not know what a server was — not really.
+        I did not know how a domain name got connected to a machine. I did not know
+        what a deployment pipeline was, or why everyone kept talking about Docker,
+        or what Kubernetes actually did, or why AWS had 200 different services.
+      </p>
+      <p>
+        The gap between "writing code" and "running code in production" felt like
+        the gap between learning to cook in your kitchen and opening a restaurant.
+        The ingredients are the same. But everything else is different.
+      </p>
+      <p>
+        This book is my attempt to close that gap. For you. And for anyone who has
+        ever stared at a deployment tutorial and felt completely lost.
+      </p>
+
+      <h2>What Makes This Book Different</h2>
+      <p>
+        DevOps documentation tends to be written by people who already know DevOps.
+        It assumes familiarity. It uses jargon without defining it. It shows you commands
+        without explaining what those commands are <em>doing</em>.
+      </p>
+      <p>
+        This book takes a different approach. Every single concept in here is introduced
+        with an analogy first — something from everyday life that already makes sense to you.
+        The technical details come second, once your brain has a hook to hang them on.
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">🎯 The Core Promise</div>
+        <p>
+          If you can understand the analogy, you can understand the concept.
+          Every DevOps tool in this book does something that has an obvious real-world equivalent —
+          a lunchbox, a factory assembly line, a library card catalogue, a robot janitor.
+          Once you see the parallel, the technical version becomes obvious.
+        </p>
+      </div>
+
+      <h2>Who This Book is For</h2>
+      <p>
+        This book is for you if any of the following is true:
+      </p>
+      <ul>
+        <li>You can write code in at least one language, but have never deployed anything beyond a hobby project</li>
+        <li>You've clicked "Deploy" on Vercel or Netlify but have no idea what happens next</li>
+        <li>Your team has a CI/CD pipeline and you are too afraid to touch it</li>
+        <li>You've heard of Docker and Kubernetes but the documentation makes your eyes glaze over</li>
+        <li>You want to go from junior developer to someone who can own the full lifecycle of a production system</li>
+      </ul>
+
+      <h2>The Journey Ahead</h2>
+      <p>
+        We start at the very beginning: what even is DevOps, and why does it exist?
+        Then we build up — Linux, networking, Git, scripting, containers, pipelines,
+        cloud platforms, infrastructure as code, deployment strategies for every major
+        technology stack, observability, security, and finally the future of the field.
+      </p>
+      <p>
+        Every part has exercises. Do them. The only way to learn DevOps is to do DevOps.
+        Reading about containers is not the same as building and running one.
+      </p>
+
+      <div class="box tip">
+        <div class="box-title">💡 How to Read This Book</div>
+        <p>
+          Read it in order the first time. Each chapter builds on the last.
+          Parts 1 and 2 are non-negotiable — everything else assumes you know that material.
+          After your first read-through, use individual chapters as reference guides
+          when you're working on specific deployments.
+        </p>
+      </div>
+
+      <h2>A Note on the Field</h2>
+      <p>
+        DevOps moves fast. The tools that are "best practice" today may be outdated
+        in three years. This book focuses on <strong>concepts</strong> as much as commands —
+        because concepts don't expire. If you understand <em>why</em> you containerize an
+        application, you'll be able to adapt when the tool that does the containerizing changes.
+      </p>
+      <p>
+        Let's begin.
+      </p>
+
+      <div class="chapter-nav">
+        <a href="index.html">
+          <span class="nav-label">← Back</span>
+          <span class="nav-title">Table of Contents</span>
+        </a>
+        <a href="part-1/chapter-1.html" class="next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Ch 1 · What is DevOps?</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">☰</button>
+<script src="nav.js"></script>
+</body>
+</html>

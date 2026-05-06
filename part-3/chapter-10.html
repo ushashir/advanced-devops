@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 10: GCP &amp; Azure — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-3">Part 3 · Chapter 10</div>
+        <h1>GCP &amp; Azure: More Cloud Kingdoms</h1>
+        <p class="chapter-intro">The other giants — and when to choose them.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>What you'll learn in this chapter</h4>
+        <ul>
+          <li>The personality and strengths of each of the three major clouds</li>
+          <li>GCP's core services and how they map to AWS equivalents</li>
+          <li>Cloud Run — the easiest way to deploy a container on any cloud</li>
+          <li>GKE — why Google's managed Kubernetes is arguably the best</li>
+          <li>Azure's core services and Microsoft ecosystem advantages</li>
+          <li>Azure App Service — deploying web apps the Microsoft way</li>
+          <li>A practical framework for choosing between AWS, GCP, and Azure</li>
+          <li>Multi-cloud reality: why large companies use all three</li>
+        </ul>
+      </div>
+
+      <h2>The Three Kingdoms Analogy</h2>
+      <p>
+        Imagine three medieval kingdoms, each powerful, each ruling different territories, each
+        built by people with different priorities and different visions of what a kingdom should be.
+      </p>
+      <p>
+        <strong>AWS</strong> is the oldest kingdom — built by merchants who needed to manage enormous
+        warehouses and decided to rent them out. Over 18 years, they built a shop for absolutely
+        everything. The market is overwhelming. The selection is unmatched. Most developers in the
+        world have set foot in this market. It is the default.
+      </p>
+      <p>
+        <strong>GCP</strong> (Google Cloud Platform) is the kingdom of scholars and engineers.
+        Built on the same infrastructure that runs Google Search, Gmail, YouTube, and Google Maps —
+        systems that process more data per day than most companies will ever see in their lifetime.
+        GCP is the smart kingdom. It excels at data, machine learning, and container orchestration
+        (Google invented Kubernetes, after all). Its interfaces feel designed by engineers for engineers.
+      </p>
+      <p>
+        <strong>Azure</strong> is the enterprise kingdom — the one where all the big corporations
+        already live. Microsoft spent decades selling Windows Server, Active Directory, SQL Server,
+        and Office to every major company on earth. When those companies needed to move to the cloud,
+        Azure was the natural choice. Azure speaks the language of the enterprise: compliance, hybrid
+        cloud, .NET, and deep integration with Microsoft 365.
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">🏰 The Three Kingdoms</div>
+        <p>
+          <strong>AWS</strong>: The giant market that has everything. Most developers start here.
+          Most job postings mention it. The community is enormous.<br><br>
+          <strong>GCP</strong>: The technical wizard's kingdom. Brilliant for Kubernetes, AI/ML,
+          and analytics at scale. Runs on Google's global private fiber network.<br><br>
+          <strong>Azure</strong>: The enterprise fortress. If your company runs Windows, Active
+          Directory, and Office 365, Azure feels like home. Best for hybrid cloud (on-premises +
+          cloud).
+        </p>
+      </div>
+
+      <h2>GCP — Google's Cloud</h2>
+      <p>
+        GCP launched in 2011 (five years after AWS) and has been catching up aggressively ever
+        since. It is the second-largest cloud by market share. Its core infrastructure — the global
+        network of undersea fiber cables, the custom-built servers, the Andromeda software-defined
+        networking layer — is genuinely impressive engineering.
+      </p>
+      <p>
+        If you know AWS, GCP services will feel immediately familiar. Different names, same ideas.
+        Here is the translation table:
+      </p>
+
+      <div class="diagram">
+<pre>AWS → GCP Service Equivalents
+──────────────────────────────────────────────────────────────────
+AWS Service          GCP Service                 What it does
+──────────────────────────────────────────────────────────────────
+EC2                  Compute Engine              Virtual machines
+Lambda               Cloud Functions             Serverless functions
+EKS                  GKE                         Managed Kubernetes
+ECS / Fargate        Cloud Run                   Serverless containers
+S3                   Cloud Storage               Object storage
+RDS                  Cloud SQL                   Managed databases
+DynamoDB             Firestore / Bigtable        NoSQL database
+Aurora               AlloyDB                     High-perf PostgreSQL
+ElastiCache          Memorystore                 Managed Redis
+CloudFront           Cloud CDN                   Content delivery
+Route 53             Cloud DNS                   DNS service
+ALB                  Cloud Load Balancing        Load balancers
+API Gateway          API Gateway / Cloud Endpoints  Managed API
+VPC                  VPC                         Private networking
+IAM                  IAM                         Access control
+CloudWatch           Cloud Monitoring + Logging  Observability
+CloudTrail           Cloud Audit Logs            Audit trail
+ECR                  Artifact Registry           Container registry
+CodeBuild            Cloud Build                 CI builds
+CloudFormation       Deployment Manager / Config Connector  IaC
+──────────────────────────────────────────────────────────────────</pre>
+      </div>
+
+      <h3>GCP's Unique Strengths</h3>
+      <ul>
+        <li><strong>GKE (Google Kubernetes Engine)</strong>: Google literally invented Kubernetes and open-sourced it in 2014. Their managed Kubernetes is the most battle-tested on earth. Auto-upgrade, auto-repair, Autopilot mode (fully serverless Kubernetes where you pay per pod, not per node).</li>
+        <li><strong>Cloud Run</strong>: deploy any container in seconds without thinking about Kubernetes, nodes, or clusters. It scales to zero (no traffic = zero cost), scales to thousands of instances under load, and you pay only per request. Probably the simplest path to production containers in all of cloud.</li>
+        <li><strong>BigQuery</strong>: a serverless data warehouse that can query terabytes in seconds. Pay per query. No cluster to manage. The standard tool for analytics at scale.</li>
+        <li><strong>Vertex AI</strong>: Google's managed ML platform. Train models, deploy them as endpoints, run AutoML. Tightly integrated with the same infrastructure that runs Google's own AI products.</li>
+        <li><strong>Global Network</strong>: Google owns more undersea fiber cables than almost any private company. Traffic between your app and users anywhere in the world travels on Google's private network, not the public internet — lower latency, more reliability.</li>
+        <li><strong>Firebase</strong>: real-time database, authentication, hosting, and push notifications for mobile and web apps. Acquired by Google and tightly integrated with GCP.</li>
+      </ul>
+
+      <h3>GCP CLI Basics</h3>
+      <p>
+        GCP's command-line interface is called <code>gcloud</code>. Install it from
+        <code>cloud.google.com/sdk</code>. For storage, the separate <code>gsutil</code> command
+        handles Cloud Storage buckets.
+      </p>
+
+      <pre><code><span class="cmt"># Authenticate with your Google account</span>
+gcloud auth login
+
+<span class="cmt"># Set the active project</span>
+gcloud config set project my-project-id
+
+<span class="cmt"># List active configuration</span>
+gcloud config list
+
+<span class="cmt"># List all Compute Engine instances</span>
+gcloud compute instances list
+
+<span class="cmt"># SSH into a VM (handles key exchange automatically)</span>
+gcloud compute ssh my-instance <span class="flag">--zone</span>=us-central1-a
+
+<span class="cmt"># Create a VM</span>
+gcloud compute instances create my-server \
+  <span class="flag">--zone</span>=us-central1-a \
+  <span class="flag">--machine-type</span>=e2-medium \
+  <span class="flag">--image-family</span>=ubuntu-2204-lts \
+  <span class="flag">--image-project</span>=ubuntu-os-cloud \
+  <span class="flag">--boot-disk-size</span>=20GB
+
+<span class="cmt"># Upload to Cloud Storage</span>
+gsutil cp file.txt gs://my-bucket/
+gsutil rsync -r ./dist gs://my-bucket/
+
+<span class="cmt"># List objects in a bucket</span>
+gsutil ls gs://my-bucket/
+
+<span class="cmt"># Make a bucket publicly readable (for static websites)</span>
+gsutil iam ch allUsers:objectViewer gs://my-bucket</code></pre>
+
+      <h3>Cloud Run — The Simplest Container Deployment</h3>
+      <p>
+        Cloud Run is remarkable. You give it a Docker container image. It deploys it, gives it a
+        public HTTPS URL, automatically scales from zero to however many instances you need, and
+        charges you only when requests are actively being processed. It handles SSL, load balancing,
+        auto-scaling, and health checks — all automatically. For many applications, Cloud Run
+        eliminates the need for Kubernetes entirely.
+      </p>
+
+      <pre><code><span class="cmt"># Method 1: Build with Cloud Build, deploy to Cloud Run</span>
+<span class="cmt"># (Cloud Build runs in GCP — no local Docker needed)</span>
+gcloud builds submit <span class="flag">--tag</span> gcr.io/my-project/myapp
+
+<span class="cmt"># Deploy to Cloud Run (serverless containers)</span>
+gcloud run deploy myapp \
+  <span class="flag">--image</span> gcr.io/my-project/myapp \
+  <span class="flag">--platform</span> managed \
+  <span class="flag">--region</span> us-central1 \
+  <span class="flag">--allow-unauthenticated</span> \
+  <span class="flag">--port</span> 3000 \
+  <span class="flag">--memory</span> 512Mi \
+  <span class="flag">--cpu</span> 1 \
+  <span class="flag">--max-instances</span> 100 \
+  <span class="flag">--min-instances</span> 0 \
+  <span class="flag">--set-env-vars</span> <span class="str">NODE_ENV=production,LOG_LEVEL=info</span>
+
+<span class="cmt"># Method 2: Deploy directly from source code (no Dockerfile needed!)</span>
+<span class="cmt"># Cloud Run uses Buildpacks to automatically detect and build your app</span>
+gcloud run deploy myapp \
+  <span class="flag">--source</span> . \
+  <span class="flag">--region</span> us-central1 \
+  <span class="flag">--allow-unauthenticated</span>
+
+<span class="cmt"># View service details and URL</span>
+gcloud run services describe myapp <span class="flag">--region</span> us-central1
+
+<span class="cmt"># View logs</span>
+gcloud logging read <span class="str">"resource.type=cloud_run_revision AND resource.labels.service_name=myapp"</span> \
+  <span class="flag">--limit</span> 50 <span class="flag">--format</span> json
+
+<span class="cmt"># Rollback to a previous revision</span>
+gcloud run services update-traffic myapp \
+  <span class="flag">--region</span> us-central1 \
+  <span class="flag">--to-revisions</span> myapp-00003-abc=100</code></pre>
+
+      <h3>GKE — Managed Kubernetes</h3>
+      <p>
+        If you need full Kubernetes — multiple services, complex networking, stateful workloads —
+        GKE is the gold standard. Its Autopilot mode means you define pods and GKE handles the
+        underlying node infrastructure entirely. You don't think about EC2 equivalents at all.
+      </p>
+
+      <pre><code><span class="cmt"># Create a GKE Autopilot cluster (Google manages the nodes)</span>
+gcloud container clusters create-auto my-cluster \
+  <span class="flag">--region</span> us-central1
+
+<span class="cmt"># Get credentials so kubectl works with this cluster</span>
+gcloud container clusters get-credentials my-cluster \
+  <span class="flag">--region</span> us-central1
+
+<span class="cmt"># Now you can use kubectl normally</span>
+kubectl get nodes
+kubectl get pods <span class="flag">--all-namespaces</span>
+
+<span class="cmt"># Deploy your application</span>
+kubectl apply -f deployment.yaml</code></pre>
+
+      <div class="box fun-fact">
+        <div class="box-title">🤯 Fun Fact: GCP's Free Tier</div>
+        <p>
+          GCP's free tier includes one e2-micro VM running 24/7 forever (not just 12 months like
+          AWS), 5GB of Cloud Storage, 10GB of Cloud Logging per month, and the first 2 million
+          Cloud Run requests per month. The always-free e2-micro is genuinely useful for running
+          small hobby projects indefinitely.
+        </p>
+      </div>
+
+      <h2>Azure — Microsoft's Cloud Kingdom</h2>
+      <p>
+        Azure launched in 2010 and is now the second-largest cloud by revenue (neck and neck with
+        GCP for second place). Its growth has been explosive — fueled largely by Microsoft's
+        enormous enterprise customer base. Every company already running Windows Server, SQL Server,
+        Active Directory, and Office 365 found Azure to be the natural cloud extension of their
+        existing infrastructure.
+      </p>
+      <p>
+        Azure's service naming is... eclectic. Services have been renamed multiple times, some have
+        been retired, and the organizational structure is less intuitive than AWS or GCP. But once
+        you get past the naming, the services are comprehensive and often excellent for enterprise
+        scenarios.
+      </p>
+
+      <div class="diagram">
+<pre>AWS → Azure Service Equivalents
+──────────────────────────────────────────────────────────────────
+AWS Service          Azure Service               What it does
+──────────────────────────────────────────────────────────────────
+EC2                  Azure Virtual Machines      Virtual machines
+Lambda               Azure Functions             Serverless functions
+EKS                  AKS                         Managed Kubernetes
+ECS / Fargate        Azure Container Instances   Run containers
+S3                   Azure Blob Storage          Object storage
+RDS (PostgreSQL)     Azure Database for PostgreSQL  Managed DB
+RDS (MySQL)          Azure Database for MySQL    Managed DB
+DynamoDB             Azure Cosmos DB             NoSQL database
+ElastiCache          Azure Cache for Redis       Managed Redis
+CloudFront           Azure CDN                   Content delivery
+Route 53             Azure DNS                   DNS service
+ALB                  Azure Application Gateway   Load balancer
+API Gateway          Azure API Management        Managed API gateway
+VPC                  Azure Virtual Network (VNet)  Private networking
+IAM                  Azure AD / Entra ID + RBAC  Access control
+CloudWatch           Azure Monitor               Metrics & logs
+CloudTrail           Azure Activity Log          Audit trail
+ECR                  Azure Container Registry    Container registry
+CodePipeline         Azure DevOps Pipelines      CI/CD
+CloudFormation       Azure Resource Manager      IaC (ARM templates)
+Secrets Manager      Azure Key Vault             Secrets management
+──────────────────────────────────────────────────────────────────</pre>
+      </div>
+
+      <h3>Azure's Unique Strengths</h3>
+      <ul>
+        <li><strong>Azure Active Directory (now called Microsoft Entra ID)</strong>: the gold standard for enterprise identity management. SSO, MFA, Conditional Access, seamless integration with Office 365 and thousands of third-party SaaS apps. If your company uses Microsoft 365, your identity system is already there.</li>
+        <li><strong>Azure DevOps (formerly VSTS)</strong>: a complete platform covering Boards (project management), Repos (Git), Pipelines (CI/CD), Test Plans, and Artifacts (package registry) — all integrated. Many enterprises use it as their entire engineering platform.</li>
+        <li><strong>Hybrid Cloud</strong>: Azure Arc extends Azure management to on-premises servers and other clouds. Azure Stack brings Azure services to your own data center hardware. For enterprises that can't move everything to the cloud immediately, this is invaluable.</li>
+        <li><strong>App Service</strong>: the most mature PaaS for deploying web apps. Native support for .NET, Node.js, Python, Java, PHP, Ruby. Deployment slots for zero-downtime blue/green deployments. Auto-scaling baked in.</li>
+        <li><strong>Azure OpenAI Service</strong>: enterprise-grade access to OpenAI's GPT-4 and other models, with data privacy guarantees, compliance certifications, and VNet integration. The only place to get OpenAI models with Azure compliance.</li>
+      </ul>
+
+      <h3>Azure CLI Basics</h3>
+      <p>
+        Azure's CLI is called <code>az</code>. Install it from <code>docs.microsoft.com/cli/azure/install-azure-cli</code>.
+        Resources in Azure are organized into <strong>Resource Groups</strong> — logical containers for
+        related resources. Every resource belongs to exactly one resource group.
+      </p>
+
+      <pre><code><span class="cmt"># Login to Azure</span>
+az login
+<span class="cmt"># Opens a browser for authentication</span>
+
+<span class="cmt"># List all subscriptions</span>
+az account list <span class="flag">--output</span> table
+
+<span class="cmt"># Set the active subscription</span>
+az account set <span class="flag">--subscription</span> <span class="str">"My Subscription Name"</span>
+
+<span class="cmt"># Create a resource group (like an AWS account-level folder)</span>
+az group create \
+  <span class="flag">--name</span> my-rg \
+  <span class="flag">--location</span> eastus
+
+<span class="cmt"># List all resource groups</span>
+az group list <span class="flag">--output</span> table
+
+<span class="cmt"># Create a Virtual Machine</span>
+az vm create \
+  <span class="flag">--resource-group</span> my-rg \
+  <span class="flag">--name</span> my-server \
+  <span class="flag">--image</span> Ubuntu2204 \
+  <span class="flag">--size</span> Standard_B1s \
+  <span class="flag">--admin-username</span> azureuser \
+  <span class="flag">--generate-ssh-keys \</span>
+  <span class="flag">--public-ip-sku</span> Standard
+
+<span class="cmt"># SSH into the VM</span>
+az ssh vm \
+  <span class="flag">--resource-group</span> my-rg \
+  <span class="flag">--name</span> my-server
+
+<span class="cmt"># Deploy a container instance (like ECS single-container)</span>
+az container create \
+  <span class="flag">--resource-group</span> my-rg \
+  <span class="flag">--name</span> myapp \
+  <span class="flag">--image</span> myregistry.azurecr.io/myapp:latest \
+  <span class="flag">--ports</span> 3000 \
+  <span class="flag">--cpu</span> 1 \
+  <span class="flag">--memory</span> 1 \
+  <span class="flag">--registry-login-server</span> myregistry.azurecr.io \
+  <span class="flag">--registry-username</span> myuser \
+  <span class="flag">--registry-password</span> $ACR_PASSWORD \
+  <span class="flag">--dns-name-label</span> myapp-unique-dns</code></pre>
+
+      <h3>Azure App Service — The Simplest App Deployment</h3>
+      <p>
+        For web applications, Azure App Service is Azure's equivalent of a managed PaaS platform.
+        You define a plan (the compute tier) and a web app (your application), and Azure handles
+        the underlying OS, patching, scaling, and availability. It supports deployment from GitHub,
+        Azure DevOps, Docker containers, or local Git pushes.
+      </p>
+
+      <pre><code><span class="cmt"># Step 1: Create an App Service Plan (defines compute tier and OS)</span>
+az appservice plan create \
+  <span class="flag">--name</span> my-plan \
+  <span class="flag">--resource-group</span> my-rg \
+  <span class="flag">--sku</span> B1 \
+  <span class="flag">--is-linux</span>
+<span class="cmt"># SKUs: F1 (free), B1 (basic $13/mo), S1 (standard, autoscale), P1v3 (premium)</span>
+
+<span class="cmt"># Step 2: Create the Web App</span>
+az webapp create \
+  <span class="flag">--resource-group</span> my-rg \
+  <span class="flag">--plan</span> my-plan \
+  <span class="flag">--name</span> my-unique-app-name \
+  <span class="flag">--runtime</span> <span class="str">"NODE:20-lts"</span>
+<span class="cmt"># Other runtimes: "PYTHON:3.11", "DOTNETCORE:8.0", "JAVA:17-java17"</span>
+
+<span class="cmt"># Step 3: Deploy from a local directory</span>
+az webapp up \
+  <span class="flag">--name</span> my-unique-app-name \
+  <span class="flag">--resource-group</span> my-rg \
+  <span class="flag">--runtime</span> <span class="str">"NODE:20-lts"</span>
+
+<span class="cmt"># Or: Deploy from GitHub with continuous deployment</span>
+az webapp deployment source config \
+  <span class="flag">--name</span> my-unique-app-name \
+  <span class="flag">--resource-group</span> my-rg \
+  <span class="flag">--repo-url</span> https://github.com/myorg/myapp \
+  <span class="flag">--branch</span> main \
+  <span class="flag">--manual-integration
+
+# Set environment variables (like Heroku config vars)</span>
+az webapp config appsettings set \
+  <span class="flag">--name</span> my-unique-app-name \
+  <span class="flag">--resource-group</span> my-rg \
+  <span class="flag">--settings</span> DATABASE_URL=<span class="str">"postgresql://..."</span> NODE_ENV=<span class="str">"production"</span>
+
+<span class="cmt"># Scale the app to 3 instances</span>
+az appservice plan update \
+  <span class="flag">--name</span> my-plan \
+  <span class="flag">--resource-group</span> my-rg \
+  <span class="flag">--number-of-workers</span> 3
+
+<span class="cmt"># Stream live logs</span>
+az webapp log tail \
+  <span class="flag">--name</span> my-unique-app-name \
+  <span class="flag">--resource-group</span> my-rg</code></pre>
+
+      <h3>Azure Container Apps — The Cloud Run Equivalent</h3>
+      <p>
+        Azure Container Apps is Microsoft's answer to Cloud Run: serverless containers that scale
+        to zero, pay per request, no Kubernetes to manage. It is built on Kubernetes under the
+        hood but abstracts it completely.
+      </p>
+
+      <pre><code><span class="cmt"># Create a Container Apps environment</span>
+az containerapp env create \
+  <span class="flag">--name</span> my-env \
+  <span class="flag">--resource-group</span> my-rg \
+  <span class="flag">--location</span> eastus
+
+<span class="cmt"># Deploy a container app</span>
+az containerapp create \
+  <span class="flag">--name</span> myapp \
+  <span class="flag">--resource-group</span> my-rg \
+  <span class="flag">--environment</span> my-env \
+  <span class="flag">--image</span> myregistry.azurecr.io/myapp:latest \
+  <span class="flag">--target-port</span> 3000 \
+  <span class="flag">--ingress</span> external \
+  <span class="flag">--min-replicas</span> 0 \
+  <span class="flag">--max-replicas</span> 10 \
+  <span class="flag">--cpu</span> 0.5 \
+  <span class="flag">--memory</span> 1Gi</code></pre>
+
+      <h2>How to Choose Your Cloud</h2>
+      <p>
+        This is one of the most common questions developers ask, and the honest answer is: for most
+        projects, any of the three will work. The differences at small-to-medium scale are largely
+        cosmetic. At large scale, the differences start to matter.
+      </p>
+      <p>
+        Here is a practical decision framework:
+      </p>
+
+      <div class="diagram">
+<pre>Cloud Selection Decision Tree
+──────────────────────────────────────────────────────────────────
+
+Does your company use Microsoft 365 / Active Directory?
+  └── YES → Start with Azure. AAD integration alone is worth it.
+  └── NO ↓
+
+Is Kubernetes a core part of your platform?
+  └── YES → Consider GCP (GKE is best-in-class) or AWS (EKS)
+  └── NO ↓
+
+Do you have heavy AI/ML or analytics requirements?
+  └── YES → GCP (BigQuery, Vertex AI are exceptional)
+  └── NO ↓
+
+Do you want the biggest community, most third-party integrations,
+and best job market demand?
+  └── YES → AWS
+
+Is simplicity your top priority and you just want to run containers?
+  └── YES → GCP Cloud Run or Azure Container Apps
+
+Are you starting from scratch and don't know which to pick?
+  └── Pick AWS. Learn it deeply. Transfer knowledge later.
+
+──────────────────────────────────────────────────────────────────
+Quick Reference by Use Case:
+
+Kubernetes-heavy platform      → GKE (GCP) then EKS (AWS)
+Serverless containers          → Cloud Run (GCP) or App Service (Azure)
+Microsoft/.NET applications    → Azure App Service
+Machine learning / AI          → Vertex AI (GCP) or SageMaker (AWS)
+Data warehouse / analytics     → BigQuery (GCP) or Redshift (AWS)
+Enterprise SSO / Active Dir.   → Azure Entra ID
+Maximum service variety        → AWS
+Maximum simplicity             → Cloud Run (GCP)</pre>
+      </div>
+
+      <div class="box tip">
+        <div class="box-title">💡 Tip: Learn AWS First</div>
+        <p>
+          The cloud concepts transfer completely between providers. IAM on AWS, IAM on GCP,
+          and RBAC on Azure all solve the same problem with slightly different JSON.
+          VPCs on AWS are VPCs on GCP and VNets on Azure. S3 buckets are Cloud Storage
+          buckets are Blob Storage containers. Master the concepts on AWS — it has the
+          most learning resources, tutorials, and Stack Overflow answers — then translate
+          to GCP or Azure in a day.
+        </p>
+      </div>
+
+      <h2>Multi-Cloud Reality</h2>
+      <p>
+        Walk into any large technology company — a bank, a retailer, a media company — and you
+        will almost certainly find services running on multiple cloud providers simultaneously.
+        This is not because their engineers enjoy complexity. It happens for several practical reasons:
+      </p>
+      <ul>
+        <li><strong>Acquisitions</strong>: company A (on AWS) acquires company B (on GCP). Now you have both.</li>
+        <li><strong>Best-of-breed services</strong>: BigQuery is so much better for analytics that companies running primarily on AWS use it anyway. Azure OpenAI has compliance guarantees that AWS Bedrock doesn't match yet.</li>
+        <li><strong>Negotiation leverage</strong>: spending with multiple clouds gives you bargaining power on pricing.</li>
+        <li><strong>Risk mitigation</strong>: major cloud outages happen (AWS us-east-1 going down makes news). Running critical services across providers reduces single-provider risk.</li>
+      </ul>
+
+      <p>
+        Managing multiple clouds sounds terrifying, but tools like Terraform (covered in Part 4)
+        abstract the provider differences. You write infrastructure in one language and Terraform
+        talks to AWS, GCP, and Azure APIs on your behalf. The mental overhead is the naming
+        conventions, not the underlying infrastructure concepts.
+      </p>
+
+      <div class="diagram">
+<pre>Typical Multi-Cloud Architecture at a Large Company
+──────────────────────────────────────────────────────────────────
+
+AWS                     GCP                     Azure
+──────────────────────────────────────────────────────────────────
+Primary workloads       ML model training        Enterprise SSO
+Microservices (EKS)     BigQuery analytics       Office 365 integration
+S3 data lake            Vertex AI serving        Azure DevOps pipelines
+SQS/SNS messaging       Firebase (mobile app)    Azure Blob cold storage
+ElastiCache             Cloud Spanner
+
+──────────────────────────────────────────────────────────────────
+Connecting it all: Terraform for infrastructure,
+Kubernetes for workloads, Vault for secrets.</pre>
+      </div>
+
+      <div class="box fun-fact">
+        <div class="box-title">🤯 Fun Fact: Cloud Market Share</div>
+        <p>
+          As of 2024, AWS holds approximately 31% of the global cloud infrastructure market,
+          Azure holds 25%, and GCP holds 11%. The remaining 33% is split among hundreds of
+          smaller providers. AWS's lead has gradually narrowed as Azure and GCP have matured,
+          but AWS remains the default choice for new projects across the industry.
+        </p>
+      </div>
+
+      <div class="summary">
+        <h4>Chapter Summary</h4>
+        <ul>
+          <li>AWS is the biggest and most versatile cloud; GCP excels at Kubernetes, AI, and analytics; Azure dominates enterprise Microsoft environments.</li>
+          <li>GCP's Cloud Run is the simplest path to production containers — deploy any Docker image, scales to zero, pay per request.</li>
+          <li>GKE (Google Kubernetes Engine) is the most mature managed Kubernetes service, built by the team that invented Kubernetes.</li>
+          <li>Azure's greatest strength is enterprise identity management via Entra ID (formerly Active Directory), and .NET application hosting via App Service.</li>
+          <li>Azure Container Apps mirrors GCP Cloud Run — serverless containers without managing Kubernetes clusters.</li>
+          <li>Choose cloud based on your existing stack and requirements; learn AWS first, the concepts transfer to all three.</li>
+          <li>Multi-cloud is common at scale — use Terraform to manage infrastructure consistently across providers.</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="chapter-9.html">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Ch 9 · AWS</span>
+        </a>
+        <a href="chapter-11.html" class="next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Ch 11 · Vercel, Netlify &amp; cPanel</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">☰</button>
+<script src="../nav.js"></script>
+</body>
+</html>

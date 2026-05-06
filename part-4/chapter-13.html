@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 13: Ansible: Robot Setup Crew — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-4">Part 4 · Chapter 13</div>
+        <h1>Ansible: Teaching Robots to Set Up Rooms</h1>
+        <p class="chapter-intro">Automate server configuration — install software, manage files, run commands across dozens of servers at once.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>What you'll learn in this chapter</h4>
+        <ul>
+          <li>What Ansible is and the problem it solves (configuring many servers consistently)</li>
+          <li>The key difference between Ansible and Terraform — and why you often need both</li>
+          <li>Ansible's core vocabulary: inventory, playbook, task, module, role, handler, vault</li>
+          <li>How to write an inventory file and your first playbook from scratch</li>
+          <li>Jinja2 templates for dynamic configuration files</li>
+          <li>Organizing complex projects with Ansible roles</li>
+          <li>Protecting secrets with Ansible Vault</li>
+          <li>How Ansible compares to Puppet and Chef</li>
+        </ul>
+      </div>
+
+      <h2>The Robot Butler Analogy</h2>
+      <p>
+        Imagine you manage a hotel with 50 rooms. Before every guest checks in, each room must be prepared:
+        fresh towels folded precisely on the rack, a mint on the pillow, the TV set to the welcome channel,
+        the air conditioning at exactly 22°C, and the complimentary notepad placed at a 45-degree angle on
+        the desk. (This hotel has standards.)
+      </p>
+      <p>
+        You could walk through all 50 rooms yourself. It would take hours, be exhausting, and you'd almost
+        certainly miss something in room 37. Or you could hire a robot butler. You write the instructions
+        once — precisely, in a format the robot understands. Hand the robot the list of rooms and the
+        instructions. The robot visits every room in order, checks what needs doing, does it, and reports
+        back: "All 50 rooms ready. Three towel racks were already correct. 47 mints were placed."
+      </p>
+      <p>
+        <strong>Ansible is that robot butler — but for servers instead of hotel rooms.</strong> You write
+        instructions (called <em>playbooks</em>) in simple YAML. Ansible connects to all your servers via
+        SSH and carries out those instructions. No special software needs to be installed on the servers first.
+        As long as Ansible can SSH in, it can configure the machine.
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">🤖 Agentless — The Killer Feature</div>
+        <p>
+          One of Ansible's most important properties is that it is <strong>agentless</strong>. Tools like
+          Puppet and Chef require you to install a daemon (a background agent process) on every server you
+          want to manage. That agent then "phones home" to a central server for instructions. This creates
+          complexity — you have to manage the agent itself, its certificates, its upgrades.
+        </p>
+        <p>
+          Ansible doesn't work this way. It uses <strong>SSH</strong> — the same secure shell protocol you
+          already use to log into servers. Ansible connects, runs Python commands, disconnects. Nothing left
+          behind. This means you can start managing a brand new server immediately, with zero preparation,
+          as long as you have SSH access.
+        </p>
+      </div>
+
+      <h2>Terraform vs Ansible — What's the Difference?</h2>
+      <p>
+        This is one of the most commonly asked questions in DevOps, and it has a clear answer. These tools
+        solve different problems. Using both together is the most powerful approach.
+      </p>
+
+      <div class="diagram">
+        <strong>The Division of Labor</strong><br><br>
+        <strong>Terraform</strong>: "Build the building"<br>
+        Creates infrastructure: EC2 instances, VPCs, RDS databases, S3 buckets, load balancers<br><br>
+        <strong>Ansible</strong>: "Set up the building"<br>
+        Configures servers: installs software, copies config files, creates users, starts services<br><br>
+        Together: Terraform provisions the servers → Ansible configures them → app deployed
+      </div>
+
+      <p>
+        Think of it this way: Terraform builds the apartment building. Ansible furnishes and decorates
+        the apartments. You need both — an empty building isn't useful, and a beautifully furnished
+        apartment that doesn't exist isn't either.
+      </p>
+
+      <div class="box key-term">
+        <div class="box-title">📖 Ansible Core Vocabulary</div>
+        <ul>
+          <li><strong>Inventory</strong>: the list of servers Ansible knows about — IP addresses or hostnames, organized into groups</li>
+          <li><strong>Playbook</strong>: a YAML file containing one or more plays — the top-level instruction document you run</li>
+          <li><strong>Play</strong>: a mapping of tasks to a group of hosts. "Run these tasks on all web servers."</li>
+          <li><strong>Task</strong>: a single action — install this package, create this file, restart this service</li>
+          <li><strong>Module</strong>: Ansible's pre-built actions. <code>apt</code>, <code>yum</code>, <code>copy</code>, <code>template</code>, <code>service</code>, <code>user</code>, <code>git</code>, <code>docker_container</code> — hundreds of them, one for almost everything you'd ever need to do on a server</li>
+          <li><strong>Handler</strong>: a special task that only runs when explicitly triggered. The classic example: "Restart Nginx only if the config file actually changed."</li>
+          <li><strong>Role</strong>: a reusable, organized collection of tasks, files, templates, and variables packaged in a standard directory structure</li>
+          <li><strong>Vault</strong>: Ansible's encrypted secrets store — passwords and API keys live here, encrypted at rest</li>
+        </ul>
+      </div>
+
+      <h2>The Inventory — Who Are You Talking To?</h2>
+      <p>
+        Before Ansible can do anything, it needs to know which servers to work with. That's the inventory.
+        Think of it like an address book: "These are my web servers. These are my database servers. Here's
+        how to SSH into each one."
+      </p>
+      <p>
+        Inventories can be in INI format (old school, simple) or YAML format (modern, more flexible):
+      </p>
+
+      <h3>INI Inventory (hosts.ini)</h3>
+      <pre><code><span class="cmt"># hosts.ini — classic INI format</span>
+[web]
+web1.example.com
+web2.example.com
+192.168.1.10
+
+[database]
+db1.example.com
+
+[all:vars]
+<span class="fn">ansible_user</span>=ubuntu
+<span class="fn">ansible_ssh_private_key_file</span>=~/.ssh/my-key.pem</code></pre>
+
+      <h3>YAML Inventory (inventory.yml) — Preferred Modern Format</h3>
+      <pre><code><span class="cmt"># inventory.yml — modern YAML format</span>
+<span class="kw">all</span>:
+  <span class="kw">children</span>:
+    <span class="fn">web</span>:
+      <span class="kw">hosts</span>:
+        web1.example.com:
+        web2.example.com:
+    <span class="fn">database</span>:
+      <span class="kw">hosts</span>:
+        db1.example.com:
+  <span class="kw">vars</span>:
+    ansible_user: ubuntu
+    ansible_ssh_private_key_file: ~/.ssh/my-key.pem</code></pre>
+
+      <h3>Ad-Hoc Commands — Quick One-Liners</h3>
+      <p>
+        Before writing a full playbook, you can run quick one-liner commands against your inventory.
+        These are called ad-hoc commands — great for checking connectivity or running emergency fixes:
+      </p>
+      <pre><code><span class="cmt"># Test connectivity to all hosts (like ping)</span>
+<span class="fn">ansible</span> all <span class="flag">-i</span> hosts.ini <span class="flag">-m</span> ping
+
+<span class="cmt"># Run a shell command on all web servers</span>
+<span class="fn">ansible</span> web <span class="flag">-i</span> hosts.ini <span class="flag">-m</span> shell <span class="flag">-a</span> <span class="str">"df -h"</span>
+
+<span class="cmt"># Install nginx on web servers (--become = sudo)</span>
+<span class="fn">ansible</span> web <span class="flag">-i</span> hosts.ini <span class="flag">-m</span> apt <span class="flag">-a</span> <span class="str">"name=nginx state=present"</span> <span class="flag">--become</span>
+
+<span class="cmt"># Restart a service</span>
+<span class="fn">ansible</span> web <span class="flag">-i</span> hosts.ini <span class="flag">-m</span> service <span class="flag">-a</span> <span class="str">"name=nginx state=restarted"</span> <span class="flag">--become</span>
+
+<span class="cmt"># Check uptime on all hosts</span>
+<span class="fn">ansible</span> all <span class="flag">-i</span> hosts.ini <span class="flag">-a</span> <span class="str">"uptime"</span></code></pre>
+
+      <h2>Your First Playbook — Setting Up a Web Server</h2>
+      <p>
+        Ad-hoc commands are useful for quick tasks, but for anything serious you write a playbook.
+        The following playbook configures a complete Nginx web server setup — updating packages, installing
+        software, creating directories, copying configuration, and starting services. Notice how readable
+        the YAML is — even a non-engineer can understand roughly what it does:
+      </p>
+
+      <pre><code><span class="cmt">---
+# setup-webserver.yml</span>
+<span class="flag">- name</span>: Configure web servers
+  <span class="kw">hosts</span>: web
+  <span class="fn">become</span>: <span class="kw">true</span>   <span class="cmt"># run all tasks as sudo</span>
+
+  <span class="kw">vars</span>:
+    app_user: www-data
+    app_dir: /var/www/myapp
+    nginx_port: 80
+
+  <span class="kw">tasks</span>:
+    <span class="flag">- name</span>: Update apt package cache
+      <span class="fn">apt</span>:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    <span class="flag">- name</span>: Install required packages
+      <span class="fn">apt</span>:
+        name:
+          <span class="flag">-</span> nginx
+          <span class="flag">-</span> curl
+          <span class="flag">-</span> git
+        state: present
+
+    <span class="flag">- name</span>: Create application directory
+      <span class="fn">file</span>:
+        path: <span class="str">"{{ app_dir }}"</span>
+        state: directory
+        owner: <span class="str">"{{ app_user }}"</span>
+        mode: <span class="str">'0755'</span>
+
+    <span class="flag">- name</span>: Copy nginx configuration from template
+      <span class="fn">template</span>:
+        src: nginx.conf.j2
+        dest: /etc/nginx/sites-available/myapp
+      <span class="kw">notify</span>: Reload nginx      <span class="cmt"># triggers handler if this task makes a change</span>
+
+    <span class="flag">- name</span>: Enable nginx site (create symlink)
+      <span class="fn">file</span>:
+        src: /etc/nginx/sites-available/myapp
+        dest: /etc/nginx/sites-enabled/myapp
+        state: link
+      <span class="kw">notify</span>: Reload nginx
+
+    <span class="flag">- name</span>: Ensure nginx is started and enabled at boot
+      <span class="fn">service</span>:
+        name: nginx
+        state: started
+        enabled: yes
+
+  <span class="kw">handlers</span>:
+    <span class="flag">- name</span>: Reload nginx
+      <span class="fn">service</span>:
+        name: nginx
+        state: reloaded</code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 Idempotency — Run It a Hundred Times, Same Result</div>
+        <p>
+          Notice the task says <code>state: present</code> rather than "install nginx." This is intentional.
+          Ansible modules are designed to be <strong>idempotent</strong> — if nginx is already installed,
+          running the task again does nothing. It won't install it twice, break anything, or report an error.
+          This means you can run your playbook against a server repeatedly — to verify configuration, to
+          apply updates, or to onboard new servers — without fear of side effects.
+        </p>
+      </div>
+
+      <h2>Handlers — Only Run When Needed</h2>
+      <p>
+        Notice the <code>notify: Reload nginx</code> in the tasks above, and the <code>handlers:</code>
+        section at the bottom. Here's the key insight: the handler only fires if the task that notified it
+        actually <em>changed</em> something.
+      </p>
+      <p>
+        If your Nginx config file is already correct (no changes needed), the template task won't notify
+        the handler, and Nginx won't be reloaded. This avoids unnecessary service restarts — restarting
+        Nginx briefly drops connections, so you only want to do it when you actually changed its config.
+        The handler also only fires once, even if notified by multiple tasks.
+      </p>
+
+      <h2>Jinja2 Templates — Dynamic Config Files</h2>
+      <p>
+        Static config files are limited. What if you need the config file to contain the server's own
+        hostname? Or a variable that's different in staging versus production? Ansible uses Jinja2 templates
+        — files with <code>{{ variable }}</code> placeholders that Ansible fills in before copying.
+      </p>
+      <p>
+        The nginx template referenced in the playbook above:
+      </p>
+
+      <pre><code><span class="cmt"># templates/nginx.conf.j2 — Jinja2 template</span>
+server {
+    listen <span class="str">{{ nginx_port }}</span>;
+    server_name <span class="str">{{ inventory_hostname }}</span>;   <span class="cmt"># Ansible fills this in automatically</span>
+
+    access_log /var/log/nginx/<span class="str">{{ inventory_hostname }}</span>_access.log;
+    error_log  /var/log/nginx/<span class="str">{{ inventory_hostname }}</span>_error.log;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection <span class="str">'upgrade'</span>;
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    <span class="cmt"># Add SSL location if in production</span>
+    {% if environment == 'production' %}
+    listen 443 ssl;
+    ssl_certificate /etc/ssl/certs/myapp.crt;
+    ssl_certificate_key /etc/ssl/private/myapp.key;
+    {% endif %}
+}</code></pre>
+
+      <h2>Ansible Roles — Organized Playbooks for Real Projects</h2>
+      <p>
+        A single playbook file works fine for small projects. But once you're managing web servers,
+        database servers, monitoring agents, and application deployments, a single file becomes unwieldy.
+        Ansible <strong>roles</strong> solve this with a standard directory structure — like how a well-organized
+        kitchen has a place for everything, and everything is in its place.
+      </p>
+
+      <div class="diagram">
+        <strong>Standard Role Directory Structure</strong><br><br>
+        roles/<br>
+        &nbsp;&nbsp;webserver/<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;tasks/main.yml &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← the task definitions<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;handlers/main.yml &nbsp;&nbsp;← handler definitions<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;templates/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← Jinja2 template files (.j2)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;files/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← static files to copy to servers<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;defaults/main.yml &nbsp;&nbsp;← default variable values<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;vars/main.yml &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← role-specific variable overrides<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;meta/main.yml &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← role metadata and dependencies
+      </div>
+
+      <p>
+        Using roles makes your playbooks beautifully simple:
+      </p>
+
+      <pre><code><span class="cmt">---
+# site.yml — applies roles to host groups</span>
+<span class="flag">- hosts</span>: web
+  <span class="kw">roles</span>:
+    <span class="flag">-</span> common        <span class="cmt"># baseline setup for all servers</span>
+    <span class="flag">-</span> webserver     <span class="cmt"># nginx + app directory</span>
+    <span class="flag">-</span> nodejs        <span class="cmt"># Node.js runtime</span>
+    <span class="flag">-</span> monitoring    <span class="cmt"># Prometheus node exporter</span>
+
+<span class="flag">- hosts</span>: database
+  <span class="kw">roles</span>:
+    <span class="flag">-</span> common
+    <span class="flag">-</span> postgresql
+    <span class="flag">-</span> monitoring</code></pre>
+
+      <div class="box fun-fact">
+        <div class="box-title">🌟 Ansible Galaxy</div>
+        <p>
+          Just like Terraform has the Registry, Ansible has <strong>Galaxy</strong> (galaxy.ansible.com) —
+          a community repository of pre-built roles for almost every common task: installing PostgreSQL,
+          setting up Docker, configuring firewalls, deploying Java apps, setting up monitoring.
+          Before writing a role from scratch, check Galaxy. The community roles often handle edge cases
+          you haven't thought of yet.
+        </p>
+        <p>Install a role from Galaxy: <code>ansible-galaxy install geerlingguy.nginx</code></p>
+      </div>
+
+      <h2>Ansible Vault — Protecting Secrets</h2>
+      <p>
+        Here's a problem: your playbooks need passwords. Database passwords, API keys, TLS certificates.
+        But you can't just put them in plain text in a YAML file that's checked into Git. Anyone with
+        repo access — or anyone who ever gets access — would see all your secrets.
+      </p>
+      <p>
+        Ansible Vault solves this elegantly. It encrypts files (or individual values) using AES-256
+        encryption. The encrypted content is stored safely in Git. To run the playbook, you provide the
+        vault password — either interactively or from a password file. No secrets in plain text, ever.
+      </p>
+
+      <pre><code><span class="cmt"># Create a new encrypted secrets file</span>
+<span class="fn">ansible-vault</span> create secrets.yml
+
+<span class="cmt"># Encrypt an existing file</span>
+<span class="fn">ansible-vault</span> encrypt secrets.yml
+
+<span class="cmt"># View the contents of an encrypted file</span>
+<span class="fn">ansible-vault</span> view secrets.yml
+
+<span class="cmt"># Edit an encrypted file (opens in your $EDITOR)</span>
+<span class="fn">ansible-vault</span> edit secrets.yml
+
+<span class="cmt"># Run a playbook that uses vault-encrypted files</span>
+<span class="fn">ansible-playbook</span> site.yml <span class="flag">--ask-vault-pass</span>
+
+<span class="cmt"># Or use a vault password file (great for CI/CD)</span>
+<span class="fn">ansible-playbook</span> site.yml <span class="flag">--vault-password-file</span> .vault-pass</code></pre>
+
+      <p>
+        An encrypted <code>secrets.yml</code> looks like this in Git — completely unreadable without
+        the vault password:
+      </p>
+      <pre><code><span class="cmt">$ANSIBLE_VAULT;1.1;AES256
+61333363313931313263353661346135613661356332376361343161623961393736336364383335
+35383362393365303362383431323161336536373435373663353436333039323530376261373335
+...</span></code></pre>
+
+      <h2>Running the Playbook — Day-to-Day Commands</h2>
+      <p>
+        Once your playbooks are written, these are the commands you'll use every day:
+      </p>
+
+      <pre><code><span class="cmt"># Check syntax before running (catches YAML errors)</span>
+<span class="fn">ansible-playbook</span> setup-webserver.yml <span class="flag">--syntax-check</span>
+
+<span class="cmt"># Dry run — show what WOULD change without making any changes</span>
+<span class="fn">ansible-playbook</span> setup-webserver.yml <span class="flag">--check</span> <span class="flag">--diff</span>
+
+<span class="cmt"># Run against your full inventory</span>
+<span class="fn">ansible-playbook</span> <span class="flag">-i</span> inventory.yml setup-webserver.yml
+
+<span class="cmt"># Run against only specific hosts (useful for testing on one server first)</span>
+<span class="fn">ansible-playbook</span> setup-webserver.yml <span class="flag">--limit</span> web1.example.com
+
+<span class="cmt"># Run only tasks with specific tags</span>
+<span class="fn">ansible-playbook</span> setup-webserver.yml <span class="flag">--tags</span> <span class="str">"nginx,ssl"</span>
+
+<span class="cmt"># Skip tasks with specific tags</span>
+<span class="fn">ansible-playbook</span> setup-webserver.yml <span class="flag">--skip-tags</span> <span class="str">"slow-tasks"</span>
+
+<span class="cmt"># Pass extra variables on the command line</span>
+<span class="fn">ansible-playbook</span> setup-webserver.yml <span class="flag">-e</span> <span class="str">"environment=production nginx_port=8080"</span>
+
+<span class="cmt"># Increase verbosity for debugging (-v, -vv, -vvv)</span>
+<span class="fn">ansible-playbook</span> setup-webserver.yml <span class="flag">-vv</span></code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 The --check --diff Combo</div>
+        <p>
+          Running with <code>--check --diff</code> before a real run is one of the best habits in Ansible.
+          <code>--check</code> runs the playbook in "dry run" mode — no changes are made. <code>--diff</code>
+          shows you exactly what lines in files would be changed, like a git diff. Together, you can
+          see precisely what Ansible is about to do before it does it. Review the diff, then run without
+          the flags to apply.
+        </p>
+      </div>
+
+      <h2>A Complete Application Deployment Playbook</h2>
+      <p>
+        Here's a more complete real-world example — deploying a Node.js application from a Git repository:
+      </p>
+
+      <pre><code><span class="cmt">---
+# deploy-app.yml</span>
+<span class="flag">- name</span>: Deploy application
+  <span class="kw">hosts</span>: web
+  <span class="fn">become</span>: <span class="kw">true</span>
+
+  <span class="kw">vars_files</span>:
+    <span class="flag">-</span> secrets.yml   <span class="cmt"># ansible-vault encrypted</span>
+
+  <span class="kw">vars</span>:
+    app_repo: https://github.com/myorg/myapp.git
+    app_dir: /var/www/myapp
+    node_version: <span class="str">"20"</span>
+
+  <span class="kw">tasks</span>:
+    <span class="flag">- name</span>: Install Node.js {{ node_version }}
+      <span class="fn">shell</span>: |
+        curl -fsSL https://deb.nodesource.com/setup_{{ node_version }}.x | bash -
+        apt-get install -y nodejs
+      args:
+        creates: /usr/bin/node   <span class="cmt"># skip if already installed</span>
+
+    <span class="flag">- name</span>: Clone or update application repository
+      <span class="fn">git</span>:
+        repo: <span class="str">"{{ app_repo }}"</span>
+        dest: <span class="str">"{{ app_dir }}"</span>
+        version: main
+        force: yes
+      <span class="kw">notify</span>: Restart application
+
+    <span class="flag">- name</span>: Install npm dependencies
+      <span class="fn">npm</span>:
+        path: <span class="str">"{{ app_dir }}"</span>
+        production: yes
+
+    <span class="flag">- name</span>: Write environment configuration
+      <span class="fn">template</span>:
+        src: env.j2
+        dest: <span class="str">"{{ app_dir }}/.env"</span>
+        mode: <span class="str">'0600'</span>
+      <span class="kw">notify</span>: Restart application
+
+    <span class="flag">- name</span>: Ensure PM2 process manager is installed
+      <span class="fn">npm</span>:
+        name: pm2
+        global: yes
+
+    <span class="flag">- name</span>: Start application with PM2
+      <span class="fn">command</span>: pm2 start ecosystem.config.js <span class="flag">--env</span> production
+      args:
+        chdir: <span class="str">"{{ app_dir }}"</span>
+        creates: <span class="str">"{{ app_dir }}/.pm2-started"</span>
+
+  <span class="kw">handlers</span>:
+    <span class="flag">- name</span>: Restart application
+      <span class="fn">command</span>: pm2 restart all
+      become_user: www-data</code></pre>
+
+      <h2>Ansible vs Puppet vs Chef</h2>
+      <p>
+        Ansible entered a market that already had Puppet (2005) and Chef (2009). All three solve the same
+        problem — configuration management at scale. Here's how they differ:
+      </p>
+
+      <div class="box key-term">
+        <div class="box-title">📖 Configuration Management Tools Compared</div>
+        <ul>
+          <li><strong>Ansible</strong>: Agentless (uses SSH). YAML playbooks. Push-based (you run it). Easiest to learn and get started. Excellent for most use cases. The clear first choice for teams starting out.</li>
+          <li><strong>Puppet</strong>: Requires a Puppet agent on every server. Declarative DSL (custom language). Pull-based (agents pull config from Puppet server). Very mature, excellent for large enterprises. Steeper learning curve.</li>
+          <li><strong>Chef</strong>: Requires a Chef client on every server. Recipes written in Ruby (a real programming language). Pull-based. More flexible than Puppet for complex logic. Steep learning curve — you effectively need to know Ruby.</li>
+          <li><strong>SaltStack</strong>: Agent-based but can work agentless. YAML and Jinja2 (similar to Ansible). Push or pull. Faster than Ansible for very large fleets. Less popular outside large-scale deployments.</li>
+        </ul>
+        <p>For any team that doesn't already have Puppet or Chef, <strong>start with Ansible</strong>. It's the fastest to learn, requires no agents, and handles every production use case we've seen in this book.</p>
+      </div>
+
+      <div class="summary">
+        <h4>Chapter Summary</h4>
+        <ul>
+          <li>Ansible is a configuration management tool that connects to servers via SSH (agentless) and runs instructions from YAML files called playbooks.</li>
+          <li>Terraform and Ansible complement each other: Terraform builds infrastructure, Ansible configures it. Use both in sequence.</li>
+          <li>The core concepts are: inventory (server list), playbook (instruction file), task (single action), module (pre-built action), handler (conditional task), role (organized reusable collection), and vault (encrypted secrets).</li>
+          <li>Ansible modules are idempotent — running the same playbook twice produces the same result, with no unintended side effects.</li>
+          <li>Handlers only fire when triggered by a task that actually made a change — preventing unnecessary service restarts.</li>
+          <li>Jinja2 templates allow dynamic configuration files with variables, conditionals, and loops.</li>
+          <li>Ansible Vault protects secrets with AES-256 encryption, allowing you to safely commit encrypted credentials to Git.</li>
+          <li>Use <code>--check --diff</code> before every run to preview what will change — it's the Ansible equivalent of <code>terraform plan</code>.</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="chapter-12.html">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Ch 12 · Terraform</span>
+        </a>
+        <a href="chapter-14.html" class="next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Ch 14 · Pulumi</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">☰</button>
+<script src="../nav.js"></script>
+</body>
+</html>

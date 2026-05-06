@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 5: Docker: Lunchboxes for Your App — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-2">Part 2 · Chapter 5</div>
+        <h1>Docker: Lunchboxes for Your App</h1>
+        <p class="chapter-intro">The tool that solved "works on my machine" forever.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>What you'll learn in this chapter</h4>
+        <ul>
+          <li>Why "it works on my machine" was a catastrophic problem and how Docker solved it</li>
+          <li>The difference between virtual machines and containers</li>
+          <li>Core Docker concepts: images, containers, Dockerfiles, volumes, and networks</li>
+          <li>How to write a real Dockerfile and use layer caching to speed up builds</li>
+          <li>How Docker Compose orchestrates multiple containers together</li>
+          <li>Multi-stage builds that keep production images lean and secure</li>
+          <li>How to push images to container registries like AWS ECR and Docker Hub</li>
+        </ul>
+      </div>
+
+      <h2>The Lunchbox Analogy</h2>
+      <p>
+        Imagine you make an amazing meal for your friend. Jollof rice, the way your mother taught you —
+        the exact spice ratios, the smoky base, everything perfect. You write down the recipe and hand it
+        over. Your friend goes home, follows every step, and calls back an hour later saying: "It tasted
+        different. Mine isn't right." Why? Their kitchen runs hotter. Their tomatoes were a different
+        variety. Their stove distributes heat unevenly. The same recipe, in a different environment,
+        produces a different result.
+      </p>
+      <p>
+        For decades, software teams had exactly this problem. A developer would write code on their
+        MacBook with Node.js 18, a specific version of a library, and their own local environment
+        variables. The code worked perfectly. Then it landed on a production server running Node.js 16,
+        a slightly different library version, and a different operating system — and everything broke.
+        The developer would say: <em>"It works on my machine!"</em> The operations team would say:
+        <em>"Well your machine isn't our server."</em> This argument happened millions of times
+        at millions of companies. It was not a people problem. It was a structural problem.
+      </p>
+      <p>
+        Docker's solution was elegant: don't send the recipe. Send the lunchbox with the exact meal
+        already prepared, sealed inside a container that keeps it identical no matter where it is opened.
+        The container has the exact same application, the exact same version of Node.js, the exact same
+        libraries, the exact same configuration files. Open it on your laptop in Lagos, on a server
+        in London, or in a datacenter in Oregon — it is identical. The environment travels with the code.
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">🍱 The Lunchbox Analogy</div>
+        <p>
+          A Docker container is a sealed lunchbox. The food (your application) is prepared once,
+          in a controlled kitchen, with exact ingredients. The box is sealed and labeled. Wherever
+          that box goes — your laptop, a colleague's server, a cloud datacenter — the food inside
+          is always the same. No one needs to remake it in a different kitchen.
+        </p>
+      </div>
+
+      <h2>VMs vs Containers: Apartments vs Shared Housing</h2>
+      <p>
+        Before containers, the standard solution for environment consistency was the virtual machine (VM).
+        A VM is like renting an entire apartment. You get your own living room, bedroom, kitchen, bathroom —
+        all four walls, everything. It is completely isolated. But it is expensive: a VM includes a full
+        operating system, which can be gigabytes of data. Starting a VM takes two to five minutes.
+        Running ten VMs means running ten full operating systems simultaneously, eating enormous amounts
+        of RAM and CPU.
+      </p>
+      <p>
+        A Docker container is more like renting a single room in a co-living space. The building's
+        foundation — the plumbing, the electricity, the structural walls — is shared between all residents.
+        That shared foundation is the host operating system's kernel. But each room is private: its own
+        furniture, its own decorations, its own contents. A container starts in a second or two and uses
+        megabytes, not gigabytes, because it does not carry a full operating system. It only carries
+        the libraries and files that are unique to it, borrowing the kernel from the host.
+      </p>
+
+      <div class="diagram">
+<pre>VIRTUAL MACHINE STACK          CONTAINER STACK
+┌─────────────────────┐        ┌─────────────────────────────────┐
+│  Your Application   │        │  App A  │  App B  │  App C      │
+├─────────────────────┤        ├─────────┴─────────┴─────────    │
+│  Guest OS (Ubuntu)  │        │      Docker Engine               │
+├─────────────────────┤        ├─────────────────────────────────┤
+│  Hypervisor         │        │      Host OS (Linux)             │
+├─────────────────────┤        ├─────────────────────────────────┤
+│  Physical Hardware  │        │      Physical Hardware           │
+└─────────────────────┘        └─────────────────────────────────┘
+
+Each VM: full OS copy           Each container: shared kernel
+Start time: 1-5 minutes         Start time: 1-2 seconds
+Size: gigabytes                 Size: megabytes</pre>
+      </div>
+
+      <p>
+        This difference is not just academic. When you need to run 50 copies of your application to
+        handle a traffic spike, containers let you do that in seconds using a fraction of the resources
+        that 50 VMs would require. That speed and density is why containers transformed how software
+        is deployed at scale.
+      </p>
+
+      <div class="box key-term">
+        <div class="box-title">📚 Key Term: Container</div>
+        <p>
+          A <strong>container</strong> is a lightweight, isolated process running on a host operating
+          system. It packages an application together with all its dependencies (libraries, runtimes,
+          config files) into a portable unit that runs identically anywhere Docker is installed.
+          Containers share the host OS kernel but are isolated from each other using Linux kernel
+          features called namespaces and cgroups.
+        </p>
+      </div>
+
+      <h2>Core Docker Concepts</h2>
+      <p>
+        Docker has a small vocabulary of terms. Learn these six and the rest falls into place.
+      </p>
+
+      <h3>Image — The Recipe (Frozen)</h3>
+      <p>
+        A Docker image is a read-only snapshot of everything your application needs to run:
+        the operating system base, the runtime (Node.js, Python, Java), the libraries, your
+        application code, and a startup command. Images are built once and stored. When you
+        run an image, Docker creates a container from it — like waking up a frozen meal.
+        The image itself never changes.
+      </p>
+
+      <h3>Container — The Running Instance</h3>
+      <p>
+        A container is a live, running instance of an image. You can have ten containers all
+        running from the same image simultaneously, each completely independent. Stop a container
+        and it freezes. Delete it and it's gone. The image it came from is unaffected — you can
+        always start a fresh container from the same image.
+      </p>
+
+      <h3>Dockerfile — The Instructions</h3>
+      <p>
+        A Dockerfile is a text file containing the instructions Docker follows to build an image.
+        Think of it as the recipe for making the lunchbox. "Start with Alpine Linux. Install Node.js.
+        Copy my code files. Run npm install. Tell Docker which port I'll use. Start the server."
+        Each line in a Dockerfile becomes a layer in the image.
+      </p>
+
+      <h3>Registry — The Image Library</h3>
+      <p>
+        A registry is a place where images are stored and shared. Docker Hub is the public registry —
+        anyone can push and pull images there. Companies also run private registries: AWS ECR,
+        Google Artifact Registry, GitHub Container Registry. When you write <code>FROM node:20-alpine</code>
+        in your Dockerfile, Docker pulls that base image from Docker Hub.
+      </p>
+
+      <h3>Volume — Persistent Storage</h3>
+      <p>
+        Containers are ephemeral by default — when a container is deleted, any data it wrote to
+        its filesystem disappears. Volumes solve this. A volume is a directory that lives outside
+        the container's filesystem and persists independently. Your PostgreSQL container can write
+        database files to a volume. Delete the container, create a new one, mount the same volume —
+        your data is still there.
+      </p>
+
+      <h3>Network — Containers Talking to Each Other</h3>
+      <p>
+        Each container gets its own network interface. Docker networks let you group containers
+        so they can reach each other by name. Your Node.js app container can reach your PostgreSQL
+        container at the hostname <code>db</code> — as if they are on the same local network.
+        From outside the cluster, nothing can reach them unless you explicitly publish a port.
+      </p>
+
+      <h2>Your First Dockerfile</h2>
+      <p>
+        Let's write a real Dockerfile for a Node.js application. Every line matters — and understanding
+        why each line is written in this specific order will save you hours of build time frustration later.
+      </p>
+
+      <pre><code><span class="cmt"># Start from the official Node.js 20 Alpine image</span>
+<span class="cmt"># Alpine is a tiny Linux distro — keeps our image small (~180MB vs ~900MB)</span>
+<span class="kw">FROM</span> <span class="str">node:20-alpine</span>
+
+<span class="cmt"># Set the working directory inside the container</span>
+<span class="cmt"># All subsequent commands run from here</span>
+<span class="kw">WORKDIR</span> <span class="str">/app</span>
+
+<span class="cmt"># Copy ONLY the package files first — before copying source code</span>
+<span class="cmt"># This is critical for layer caching (explained below)</span>
+<span class="kw">COPY</span> <span class="str">package*.json ./</span>
+
+<span class="cmt"># Install production dependencies</span>
+<span class="cmt"># npm ci is faster and more reliable than npm install in CI environments</span>
+<span class="kw">RUN</span> <span class="fn">npm ci</span> <span class="flag">--only=production</span>
+
+<span class="cmt"># NOW copy the rest of the source code</span>
+<span class="kw">COPY</span> <span class="str">. .</span>
+
+<span class="cmt"># Tell Docker which port the app listens on (documentation — does not open the port)</span>
+<span class="kw">EXPOSE</span> <span class="str">3000</span>
+
+<span class="cmt"># The command to run when the container starts</span>
+<span class="cmt"># Use JSON array form — more reliable than shell string form</span>
+<span class="kw">CMD</span> [<span class="str">"node"</span>, <span class="str">"server.js"</span>]</code></pre>
+
+      <h3>Understanding Layer Caching</h3>
+      <p>
+        Docker builds images in layers — one layer per instruction. When you rebuild an image,
+        Docker checks: has anything changed since the last build? If a layer's input hasn't changed,
+        Docker reuses the cached version of that layer and every layer after it that's also unchanged.
+        This is why the order of instructions is so important.
+      </p>
+      <p>
+        If you <code>COPY . .</code> before running <code>npm install</code>, then every time you
+        change a single line of source code, Docker invalidates the copy layer, which invalidates
+        the npm install layer — meaning it re-downloads and reinstalls all your dependencies on
+        every build. That can take minutes. With the package.json copied first, changing your
+        source code only invalidates the final copy layer, and npm install uses the cache.
+        Builds that took three minutes now take ten seconds.
+      </p>
+
+      <div class="diagram">
+<pre>Layer Caching — Why Package Files Come First:
+
+BUILD 1:                    BUILD 2 (code changed, deps unchanged):
+├── FROM node:20-alpine ✓   ├── FROM node:20-alpine ✓ (cached)
+├── WORKDIR /app        ✓   ├── WORKDIR /app        ✓ (cached)
+├── COPY package*.json  ✓   ├── COPY package*.json  ✓ (cached — unchanged)
+├── RUN npm ci          ✓   ├── RUN npm ci          ✓ (cached — reused!)
+└── COPY . .            ✓   └── COPY . .            ↻ (CHANGED — rebuild only this)
+
+Result: 3-minute build → 10-second build</pre>
+      </div>
+
+      <div class="box tip">
+        <div class="box-title">💡 Layer Caching Rule</div>
+        <p>
+          Put things that change rarely (base image, system packages, dependencies) near the
+          top of your Dockerfile. Put things that change often (your source code) near the bottom.
+          Docker caches from top to bottom. Any change invalidates that layer and everything below it.
+        </p>
+      </div>
+
+      <h2>Docker Commands You Will Use Every Day</h2>
+      <p>
+        These are the commands you will type dozens of times a week. Learn them and Docker stops
+        feeling mysterious.
+      </p>
+
+      <pre><code><span class="cmt"># Build an image from the Dockerfile in the current directory</span>
+<span class="cmt"># -t gives it a name:tag</span>
+<span class="fn">docker build</span> <span class="flag">-t</span> <span class="str">myapp:1.0</span> .
+
+<span class="cmt"># Run a container in detached mode (-d = background)</span>
+<span class="cmt"># -p maps host port 3000 to container port 3000</span>
+<span class="cmt"># --name gives the container a memorable name</span>
+<span class="fn">docker run</span> <span class="flag">-d -p</span> <span class="str">3000:3000</span> <span class="flag">--name</span> <span class="str">myapp</span> <span class="str">myapp:1.0</span>
+
+<span class="cmt"># List running containers</span>
+<span class="fn">docker ps</span>
+
+<span class="cmt"># List ALL containers (including stopped ones)</span>
+<span class="fn">docker ps</span> <span class="flag">-a</span>
+
+<span class="cmt"># View the logs of a container</span>
+<span class="fn">docker logs</span> <span class="str">myapp</span>
+
+<span class="cmt"># Follow logs in real time (like tail -f)</span>
+<span class="fn">docker logs</span> <span class="flag">-f</span> <span class="str">myapp</span>
+
+<span class="cmt"># Open an interactive shell inside a running container</span>
+<span class="cmt"># -it = interactive + TTY; sh because Alpine doesn't have bash by default</span>
+<span class="fn">docker exec</span> <span class="flag">-it</span> <span class="str">myapp sh</span>
+
+<span class="cmt"># Stop a running container gracefully</span>
+<span class="fn">docker stop</span> <span class="str">myapp</span>
+
+<span class="cmt"># Remove a stopped container</span>
+<span class="fn">docker rm</span> <span class="str">myapp</span>
+
+<span class="cmt"># Remove an image</span>
+<span class="fn">docker rmi</span> <span class="str">myapp:1.0</span>
+
+<span class="cmt"># Pull an image from Docker Hub (runs automatically with docker run too)</span>
+<span class="fn">docker pull</span> <span class="str">postgres:16</span>
+
+<span class="cmt"># Push an image to a registry</span>
+<span class="fn">docker push</span> <span class="str">myregistry/myapp:1.0</span>
+
+<span class="cmt"># See all images on your machine</span>
+<span class="fn">docker images</span>
+
+<span class="cmt"># Remove stopped containers, unused images, dangling layers</span>
+<span class="cmt"># (reclaim disk space — run this when Docker eats your hard drive)</span>
+<span class="fn">docker system prune</span></code></pre>
+
+      <div class="box warning">
+        <div class="box-title">⚠️ Don't Run as Root</div>
+        <p>
+          By default, processes inside a container run as root. This is a security risk —
+          if an attacker breaks out of the container, they are root on the host. Add a
+          <code>USER</code> instruction to your Dockerfile to run as a non-root user:
+          <code>RUN addgroup -S appgroup &amp;&amp; adduser -S appuser -G appgroup</code>
+          followed by <code>USER appuser</code>. Production-grade Dockerfiles always do this.
+        </p>
+      </div>
+
+      <h2>Docker Compose — Running Multiple Containers Together</h2>
+      <p>
+        Real applications are not one container. A typical web application has a backend service,
+        a PostgreSQL database, a Redis cache for sessions, maybe a background worker queue.
+        Running these manually with individual <code>docker run</code> commands and networking
+        them together is tedious and error-prone.
+      </p>
+      <p>
+        Docker Compose solves this. You describe all your services in a single YAML file —
+        <code>docker-compose.yml</code> — and then start everything with one command:
+        <code>docker compose up</code>. Compose handles networking, environment variables,
+        startup order, and volumes. Tear it all down with <code>docker compose down</code>.
+        It is the closest thing to magic Docker offers.
+      </p>
+
+      <pre><code><span class="cmt"># docker-compose.yml — a Node.js app with PostgreSQL and Redis</span>
+<span class="kw">version</span>: <span class="str">'3.8'</span>
+
+<span class="kw">services</span>:
+  <span class="fn">app</span>:
+    <span class="kw">build</span>: .                         <span class="cmt"># build image from Dockerfile in current dir</span>
+    <span class="kw">ports</span>:
+      - <span class="str">"3000:3000"</span>
+    <span class="kw">environment</span>:
+      <span class="kw">DATABASE_URL</span>: <span class="str">postgresql://user:pass@db:5432/mydb</span>
+      <span class="kw">REDIS_URL</span>: <span class="str">redis://redis:6379</span>
+    <span class="kw">depends_on</span>:
+      <span class="fn">db</span>:
+        <span class="kw">condition</span>: <span class="str">service_healthy</span>   <span class="cmt"># wait for db to be ready</span>
+      - <span class="str">redis</span>
+
+  <span class="fn">db</span>:
+    <span class="kw">image</span>: <span class="str">postgres:16-alpine</span>
+    <span class="kw">volumes</span>:
+      - <span class="str">postgres_data:/var/lib/postgresql/data</span>  <span class="cmt"># persist data here</span>
+    <span class="kw">environment</span>:
+      <span class="kw">POSTGRES_USER</span>: <span class="str">user</span>
+      <span class="kw">POSTGRES_PASSWORD</span>: <span class="str">pass</span>
+      <span class="kw">POSTGRES_DB</span>: <span class="str">mydb</span>
+    <span class="kw">healthcheck</span>:
+      <span class="kw">test</span>: [<span class="str">"CMD-SHELL"</span>, <span class="str">"pg_isready -U user -d mydb"</span>]
+      <span class="kw">interval</span>: <span class="str">10s</span>
+      <span class="kw">retries</span>: <span class="str">5</span>
+
+  <span class="fn">redis</span>:
+    <span class="kw">image</span>: <span class="str">redis:7-alpine</span>
+
+<span class="kw">volumes</span>:
+  <span class="fn">postgres_data</span>:                       <span class="cmt"># Docker manages this volume</span></code></pre>
+
+      <p>
+        Notice that the app connects to the database at the hostname <code>db</code> — not
+        <code>localhost</code> or an IP address. Compose creates a private network between all
+        services, and each service is reachable by its service name. The app container can reach
+        the database container at <code>db:5432</code> just like two offices in the same building
+        can call each other by extension number.
+      </p>
+
+      <pre><code><span class="cmt"># Start all services in the background</span>
+<span class="fn">docker compose up</span> <span class="flag">-d</span>
+
+<span class="cmt"># Follow the logs from all services at once</span>
+<span class="fn">docker compose logs</span> <span class="flag">-f</span>
+
+<span class="cmt"># Follow logs from one service only</span>
+<span class="fn">docker compose logs</span> <span class="flag">-f</span> <span class="str">app</span>
+
+<span class="cmt"># Rebuild images if Dockerfile changed, then restart</span>
+<span class="fn">docker compose up</span> <span class="flag">--build -d</span>
+
+<span class="cmt"># Stop containers without removing them</span>
+<span class="fn">docker compose stop</span>
+
+<span class="cmt"># Stop and remove containers, networks (keeps volumes)</span>
+<span class="fn">docker compose down</span>
+
+<span class="cmt"># Stop and remove containers, networks, AND volumes (wipes the database!)</span>
+<span class="fn">docker compose down</span> <span class="flag">-v</span></code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 Development vs Production Compose Files</div>
+        <p>
+          Use Docker Compose for local development — it is excellent. For production,
+          you will want Kubernetes (Chapter 7). Compose lacks the self-healing, auto-scaling,
+          and advanced networking that production systems need. But for running a full stack
+          locally with a single command, nothing beats it.
+        </p>
+      </div>
+
+      <h2>Multi-Stage Builds — Lean Production Images</h2>
+      <p>
+        Here is a problem that surprises many developers the first time they encounter it.
+        You write a TypeScript application. To build it, you need the TypeScript compiler,
+        all your dev dependencies, test frameworks, build tools — hundreds of megabytes of
+        development tooling. But to <em>run</em> the compiled JavaScript, you need almost none of that.
+        Your production container should not be lugging around a compiler it will never use.
+      </p>
+      <p>
+        Multi-stage builds solve this elegantly. You define multiple <code>FROM</code> stages
+        in a single Dockerfile. One stage does the build work with all the heavy tools installed.
+        A second stage starts fresh from a minimal base image and copies only the compiled output
+        from the first stage. The final image is lean — just what's needed to run.
+      </p>
+
+      <pre><code><span class="cmt"># Stage 1: Build — has all dev tools, compiles the TypeScript</span>
+<span class="kw">FROM</span> <span class="str">node:20-alpine</span> <span class="kw">AS</span> <span class="fn">builder</span>
+<span class="kw">WORKDIR</span> <span class="str">/app</span>
+<span class="kw">COPY</span> <span class="str">package*.json ./</span>
+<span class="kw">RUN</span> <span class="fn">npm ci</span>                        <span class="cmt"># includes dev dependencies for building</span>
+<span class="kw">COPY</span> <span class="str">. .</span>
+<span class="kw">RUN</span> <span class="fn">npm run build</span>                   <span class="cmt"># outputs compiled JS to /app/dist</span>
+
+<span class="cmt"># Stage 2: Production — starts fresh, only copies compiled output</span>
+<span class="kw">FROM</span> <span class="str">node:20-alpine</span> <span class="kw">AS</span> <span class="fn">runner</span>
+<span class="kw">WORKDIR</span> <span class="str">/app</span>
+<span class="kw">ENV</span> <span class="str">NODE_ENV production</span>
+<span class="kw">COPY</span> <span class="flag">--from=builder</span> <span class="str">/app/dist ./dist</span>
+<span class="kw">COPY</span> <span class="flag">--from=builder</span> <span class="str">/app/package*.json ./</span>
+<span class="kw">RUN</span> <span class="fn">npm ci</span> <span class="flag">--only=production</span>       <span class="cmt"># only prod deps in the final image</span>
+
+<span class="cmt"># Run as non-root</span>
+<span class="kw">RUN</span> <span class="fn">addgroup -S appgroup</span> &amp;&amp; <span class="fn">adduser -S appuser -G appgroup</span>
+<span class="kw">USER</span> <span class="str">appuser</span>
+
+<span class="kw">EXPOSE</span> <span class="str">3000</span>
+<span class="kw">CMD</span> [<span class="str">"node"</span>, <span class="str">"dist/server.js"</span>]</code></pre>
+
+      <p>
+        The result is an image that may be 150MB instead of 900MB — and crucially, it does not
+        contain the TypeScript compiler, test files, or any development tooling that could represent
+        a security surface in production. Smaller images build faster, push faster, pull faster,
+        and start faster.
+      </p>
+
+      <div class="box fun-fact">
+        <div class="box-title">📊 Fun Fact: Image Size Matters</div>
+        <p>
+          A naive Node.js image using the full <code>node:20</code> base can easily reach 1.2GB.
+          The same application built with Alpine and multi-stage builds typically comes in under 200MB.
+          When Kubernetes pulls that image across 100 nodes during a deploy, the difference between
+          1.2GB and 200MB is the difference between a 20-minute deploy and a 3-minute one.
+          Image size is not vanity — it is operational speed.
+        </p>
+      </div>
+
+      <h2>Container Registries — Where Images Live</h2>
+      <p>
+        Once you build an image, you need somewhere to store it so that servers, CI pipelines,
+        and Kubernetes clusters can pull it. That somewhere is a container registry. Docker Hub
+        is the default public registry — you can push public images there for free. For production
+        environments, most companies use a private registry close to where their infrastructure lives.
+      </p>
+
+      <p>
+        The major cloud providers all offer registries: AWS has ECR (Elastic Container Registry),
+        Google Cloud has Artifact Registry, and Microsoft Azure has ACR (Azure Container Registry).
+        GitHub Container Registry (GHCR) is increasingly popular because it integrates directly
+        with GitHub Actions.
+      </p>
+
+      <h3>Pushing to AWS ECR</h3>
+      <pre><code><span class="cmt"># Step 1: Authenticate Docker with AWS ECR</span>
+<span class="cmt"># This gets a short-lived password from AWS and pipes it to docker login</span>
+<span class="fn">aws ecr get-login-password</span> <span class="flag">--region</span> <span class="str">us-east-1</span> | \
+  <span class="fn">docker login</span> <span class="flag">--username</span> <span class="str">AWS</span> <span class="flag">--password-stdin</span> \
+  <span class="str">123456789.dkr.ecr.us-east-1.amazonaws.com</span>
+
+<span class="cmt"># Step 2: Tag your local image with the ECR repository URL</span>
+<span class="fn">docker tag</span> <span class="str">myapp:1.0</span> \
+  <span class="str">123456789.dkr.ecr.us-east-1.amazonaws.com/myapp:1.0</span>
+
+<span class="cmt"># Step 3: Push the image to ECR</span>
+<span class="fn">docker push</span> \
+  <span class="str">123456789.dkr.ecr.us-east-1.amazonaws.com/myapp:1.0</span></code></pre>
+
+      <h3>Pushing to GitHub Container Registry</h3>
+      <pre><code><span class="cmt"># Authenticate with a personal access token (or GITHUB_TOKEN in Actions)</span>
+<span class="fn">echo</span> <span class="str">$GITHUB_TOKEN</span> | <span class="fn">docker login</span> <span class="str">ghcr.io</span> <span class="flag">-u</span> <span class="str">yourusername</span> <span class="flag">--password-stdin</span>
+
+<span class="cmt"># Tag with ghcr.io prefix</span>
+<span class="fn">docker tag</span> <span class="str">myapp:1.0</span> <span class="str">ghcr.io/yourusername/myapp:1.0</span>
+
+<span class="cmt"># Push</span>
+<span class="fn">docker push</span> <span class="str">ghcr.io/yourusername/myapp:1.0</span></code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 Tag Strategies</div>
+        <p>
+          Use meaningful tags. The <code>latest</code> tag is convenient but dangerous in production —
+          you never know exactly which version <code>latest</code> points to after a new push.
+          Use semantic versions (<code>1.2.3</code>) or, even better, Git commit SHAs
+          (<code>myapp:a3f9bc2</code>). Then you always know exactly which code is running.
+          CI/CD pipelines (Chapter 6) automate this tagging for you.
+        </p>
+      </div>
+
+      <h2>A Complete Example: Dockerizing a NestJS Microservice</h2>
+      <p>
+        Let's put everything together with a realistic example — a NestJS microservice with TypeScript,
+        production multi-stage build, non-root user, and proper health check support.
+      </p>
+
+      <pre><code><span class="cmt"># ---- Stage 1: Dependencies ----</span>
+<span class="kw">FROM</span> <span class="str">node:20-alpine</span> <span class="kw">AS</span> <span class="fn">deps</span>
+<span class="kw">WORKDIR</span> <span class="str">/app</span>
+<span class="kw">COPY</span> <span class="str">package*.json ./</span>
+<span class="kw">RUN</span> <span class="fn">npm ci</span>
+
+<span class="cmt"># ---- Stage 2: Build ----</span>
+<span class="kw">FROM</span> <span class="str">node:20-alpine</span> <span class="kw">AS</span> <span class="fn">builder</span>
+<span class="kw">WORKDIR</span> <span class="str">/app</span>
+<span class="kw">COPY</span> <span class="flag">--from=deps</span> <span class="str">/app/node_modules ./node_modules</span>
+<span class="kw">COPY</span> <span class="str">. .</span>
+<span class="kw">RUN</span> <span class="fn">npm run build</span>
+
+<span class="cmt"># ---- Stage 3: Production Runner ----</span>
+<span class="kw">FROM</span> <span class="str">node:20-alpine</span> <span class="kw">AS</span> <span class="fn">runner</span>
+<span class="kw">WORKDIR</span> <span class="str">/app</span>
+<span class="kw">ENV</span> <span class="str">NODE_ENV=production</span>
+
+<span class="cmt"># Create a non-root user</span>
+<span class="kw">RUN</span> <span class="fn">addgroup</span> <span class="flag">--system</span> <span class="str">appgroup</span> &amp;&amp; \
+    <span class="fn">adduser</span> <span class="flag">--system --ingroup</span> <span class="str">appgroup appuser</span>
+
+<span class="kw">COPY</span> <span class="flag">--from=builder</span> <span class="str">/app/dist ./dist</span>
+<span class="kw">COPY</span> <span class="flag">--from=deps</span> <span class="str">/app/node_modules ./node_modules</span>
+<span class="kw">COPY</span> <span class="str">package*.json ./</span>
+
+<span class="kw">USER</span> <span class="str">appuser</span>
+
+<span class="kw">EXPOSE</span> <span class="str">3000</span>
+
+<span class="cmt"># Health check — Kubernetes and Docker will use this</span>
+<span class="kw">HEALTHCHECK</span> <span class="flag">--interval=30s --timeout=5s --retries=3</span> \
+  <span class="kw">CMD</span> <span class="fn">wget -qO-</span> <span class="str">http://localhost:3000/health</span> || <span class="fn">exit</span> <span class="str">1</span>
+
+<span class="kw">CMD</span> [<span class="str">"node"</span>, <span class="str">"dist/main.js"</span>]</code></pre>
+
+      <div class="box key-term">
+        <div class="box-title">📚 Key Term: .dockerignore</div>
+        <p>
+          Just like <code>.gitignore</code> tells Git which files to ignore, a <code>.dockerignore</code>
+          file tells Docker which files to exclude from the build context. Always add
+          <code>node_modules</code>, <code>.git</code>, <code>*.log</code>, and <code>.env</code>
+          files to your <code>.dockerignore</code>. Sending <code>node_modules</code> (which can
+          be hundreds of thousands of files) to the Docker daemon on every build will make your
+          builds dramatically slower.
+        </p>
+      </div>
+
+      <div class="summary">
+        <h4>Chapter Summary</h4>
+        <ul>
+          <li>Docker solved the "works on my machine" problem by packaging an application with all its dependencies into a portable container that runs identically anywhere.</li>
+          <li>Containers are lighter than VMs because they share the host OS kernel rather than running a full guest operating system.</li>
+          <li>A Dockerfile is a set of instructions for building an image. Images are immutable snapshots; containers are live running instances of an image.</li>
+          <li>Layer caching speeds up builds dramatically — copy package files before source code so that npm install only re-runs when dependencies actually change.</li>
+          <li>Docker Compose orchestrates multi-container applications with a single YAML file, letting you bring up a full stack (app + database + cache) with one command.</li>
+          <li>Multi-stage builds produce lean production images by separating the build environment from the runtime environment, stripping out compilers and dev tools.</li>
+          <li>Container registries (Docker Hub, AWS ECR, GHCR) store and distribute images. Always use specific version tags in production, not <code>latest</code>.</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="../part-1/chapter-4.html">
+          <span class="nav-label">&larr; Previous</span>
+          <span class="nav-title">Ch 4 &middot; Git, Bash &amp; Python</span>
+        </a>
+        <a href="chapter-6.html" class="next">
+          <span class="nav-label">Next &rarr;</span>
+          <span class="nav-title">Ch 6 &middot; CI/CD &amp; GitHub Actions</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">&#9776;</button>
+<script src="../nav.js"></script>
+</body>
+</html>

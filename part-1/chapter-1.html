@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 1: What is DevOps? — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-1">Part 1 · Chapter 1</div>
+        <h1>What is DevOps?</h1>
+        <p class="chapter-intro">The story of how software gets from a developer's laptop to your phone.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>What you'll learn in this chapter</h4>
+        <ul>
+          <li>What DevOps actually means, in plain human language</li>
+          <li>Why the old way of building software was broken — and how DevOps fixed it</li>
+          <li>The five pillars every DevOps culture is built on</li>
+          <li>The DevOps infinity loop: the endless cycle of improvement</li>
+          <li>Why DevOps engineers are among the highest-paid in the technology industry</li>
+        </ul>
+      </div>
+
+      <h2>The Cookie Factory Story</h2>
+      <p>
+        Imagine your grandmother makes the best cookies in the world. People come from three streets over
+        just to taste them. She bakes them in her kitchen — a little oven, her own secret recipe, her
+        own hands shaping each one. The process is wonderful, but it only scales so far. She can make
+        maybe five dozen cookies on a good Saturday.
+      </p>
+      <p>
+        Now imagine she wants to sell cookies to everyone in Lagos. Suddenly her kitchen isn't enough.
+        She needs a factory. She needs conveyor belts, industrial ovens, quality control workers who
+        check every batch, delivery trucks, refrigeration, and a supply chain that makes sure flour
+        arrives before she runs out. She needs people who understand both how to bake the cookies
+        <em>and</em> how to run the factory that delivers them.
+      </p>
+      <p>
+        Software works exactly the same way.
+      </p>
+      <p>
+        A developer writes code on their laptop. That code is the cookie recipe. But getting that code
+        running reliably for a million users — on servers that never sleep, handling failures gracefully,
+        deploying updates without anyone noticing — that is the factory. <strong>DevOps is the bridge
+        between making the cookie and delivering it at scale.</strong>
+      </p>
+      <p>
+        For most of computing history, the people who baked the cookies and the people who ran the factory
+        barely spoke to each other. They had different goals, different incentives, and a wall between them
+        that caused enormous amounts of pain. DevOps tore down that wall.
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">🍪 The Cookie Factory Analogy</div>
+        <p>
+          Developers are the bakers — they care about the recipe, the ingredients, the flavor. Operations
+          engineers are the factory managers — they care about consistency, reliability, and getting the
+          product to the customer. Before DevOps, these two groups barely talked. DevOps says: they should
+          be the same team, sharing the same goals.
+        </p>
+      </div>
+
+      <h2>The Wall That Used to Exist</h2>
+      <p>
+        Before DevOps became a real movement, here is how software was typically built and deployed.
+        A team of developers would spend weeks or months writing code. Then, on some fateful day, they
+        would bundle everything up and hand it to the operations team — the people responsible for
+        running the servers.
+      </p>
+      <p>
+        This handoff was called "throwing it over the wall." The developers would toss their code over
+        an invisible barrier, and the operations team on the other side would catch it, look at it
+        in confusion, and try to figure out how to make it run on their servers. Almost inevitably,
+        something would break.
+      </p>
+      <p>
+        Developers would say: <em>"It works on my machine!"</em>
+        Operations would reply: <em>"Well, your machine isn't production."</em>
+      </p>
+      <p>
+        This argument happened thousands of times at thousands of companies. It was more than an
+        inconvenience — it was a structural problem. Developers were measured on how many features
+        they shipped. Operations teams were measured on how stable the systems stayed. These two
+        goals are directly opposed: shipping features means changing things; stability means
+        keeping things the same. When your rewards push you in opposite directions, conflict
+        is inevitable.
+      </p>
+
+      <div class="diagram">
+<pre>Old World:                        DevOps World:
+┌──────────────────┐              ┌──────────────────────────────┐
+│   Development    │              │   Development + Operations   │
+│                  │              │                              │
+│  writes code...  │              │   Write → Test → Build       │
+│  for months...   │              │   → Deploy → Monitor         │
+│                  │              │   → Fix → Write → ...        │
+│        │         │              │                              │
+│        ▼         │              │     (continuous loop)        │
+│   throws over    │              │                              │
+│      the wall    │              │   same team, same goals,     │
+│        │         │              │   shared responsibility      │
+│        ▼         │              └──────────────────────────────┘
+│   Operations     │
+│   (confused)     │
+│   "it's broken"  │
+│   "not our fault"│
+└──────────────────┘</pre>
+      </div>
+
+      <p>
+        The DevOps movement — which grew out of a famous 2009 talk by Patrick Debois and a handful of
+        other engineers who were exhausted by this dysfunction — proposed something radical: what if
+        developers and operations engineers were the same team? What if the people who wrote the code
+        were also responsible for running it in production? What if the wall simply didn't exist?
+      </p>
+      <p>
+        That is the core idea of DevOps. Everything else — the tools, the automation, the pipelines —
+        is in service of this one cultural insight.
+      </p>
+
+      <div class="box key-term">
+        <div class="box-title">📚 Key Term: DevOps</div>
+        <p>
+          <strong>DevOps</strong> = Development + Operations. It is a philosophy, culture, and set of
+          practices for delivering software faster and more reliably by breaking down the silos between
+          the people who build software and the people who run it. DevOps emphasizes automation,
+          collaboration, continuous feedback, and shared responsibility across the entire software lifecycle.
+        </p>
+      </div>
+
+      <h2>The Five Pillars of DevOps</h2>
+      <p>
+        DevOps is not a tool you install or a certification you earn. It is a way of working. The
+        following five pillars describe the mindset and practices that define a genuine DevOps culture.
+      </p>
+
+      <h3>1. Culture — Teams Work Together, Not in Silos</h3>
+      <p>
+        This is the foundation. No amount of tooling can substitute for people who share goals,
+        communicate openly, and feel collectively responsible for outcomes. A team that blames
+        each other when things go wrong is not a DevOps team, regardless of what tools they use.
+        A true DevOps culture celebrates learning from failures instead of hiding them.
+      </p>
+
+      <h3>2. Automation — Robots Do the Boring, Repetitive Work</h3>
+      <p>
+        Any task a human does more than twice should probably be automated. Running tests, building
+        the application, deploying to servers, checking configuration — these are all things machines
+        can do faster, more consistently, and without getting tired or making typos. Automation is
+        not about replacing people. It is about freeing people to do work that actually requires
+        human judgment.
+      </p>
+
+      <h3>3. Measurement — You Can't Fix What You Can't See</h3>
+      <p>
+        DevOps teams instrument everything. How long does a deployment take? How often do deployments
+        fail? When an error happens in production, how quickly does the team know about it and fix it?
+        These numbers — called metrics — are the heartbeat of a healthy DevOps organization. Without
+        measurement, all improvement is guesswork.
+      </p>
+
+      <h3>4. Sharing — Knowledge Is Shared, Not Hoarded</h3>
+      <p>
+        In old-style IT, knowledge was power. Individuals hoarded expertise because it made them
+        irreplaceable. This is catastrophically bad for organizations. If only one person knows how
+        to deploy the application, and that person gets sick, the company is in crisis. DevOps teams
+        document everything, write runbooks, pair program, and share knowledge freely — because the
+        team's resilience matters more than any individual's indispensability.
+      </p>
+
+      <h3>5. Continuous Everything — The Endless Loop of Improvement</h3>
+      <p>
+        "Continuous" is one of the most important words in DevOps. Continuous Integration (CI) means
+        developers merge their code into a shared branch many times per day. Continuous Delivery (CD)
+        means every merged change is automatically tested and prepared for release. Continuous Deployment
+        means successful changes are automatically pushed to production. Continuous Monitoring means
+        the system is always being watched. Continuous Improvement means the team is always asking
+        "how can we do this better?"
+      </p>
+
+      <h2>DevOps vs. Traditional IT</h2>
+      <p>
+        The contrast between traditional IT and a DevOps approach is stark. This table shows
+        the difference in practice:
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Traditional IT</th>
+            <th>DevOps</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Deployments</strong></td>
+            <td>Monthly or quarterly — big, scary, planned-weeks-in-advance events</td>
+            <td>Multiple times per day — routine, automated, boring (in a good way)</td>
+          </tr>
+          <tr>
+            <td><strong>Teams</strong></td>
+            <td>Separate Development and Operations teams with different managers and goals</td>
+            <td>Unified cross-functional teams who own the full lifecycle of their service</td>
+          </tr>
+          <tr>
+            <td><strong>Failure response</strong></td>
+            <td>Blame the developer, blame the ops team, write a report, find a scapegoat</td>
+            <td>Run a blameless postmortem, learn what went wrong, prevent it from recurring</td>
+          </tr>
+          <tr>
+            <td><strong>Automation</strong></td>
+            <td>Manual deployments via SSH and hand-crafted steps stored in someone's head</td>
+            <td>Everything automated — tests, builds, deployments, rollbacks, alerts</td>
+          </tr>
+          <tr>
+            <td><strong>Documentation</strong></td>
+            <td>Written after-the-fact (if at all), usually out of date immediately</td>
+            <td>Infrastructure is code; the codebase itself is the documentation</td>
+          </tr>
+          <tr>
+            <td><strong>On-call burden</strong></td>
+            <td>Operations team gets paged at 3am and resents developers who didn't care</td>
+            <td>Developers are on-call for their own services; reliability is everyone's problem</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>The DevOps Infinity Loop</h2>
+      <p>
+        One of the most famous images in DevOps is the infinity loop — the figure-eight symbol that
+        represents the continuous, never-ending cycle of software delivery. There is no "done" in
+        DevOps. Every deployment leads to monitoring, monitoring leads to insight, insight leads to
+        planning the next improvement, which leads to coding, which leads to deployment, which leads
+        to monitoring again.
+      </p>
+
+      <div class="diagram">
+<pre>
+         Plan ────────────────────── Monitor
+          │                              │
+         Code                        Operate
+          │                              │
+         Build                        Deploy
+          │                              │
+         Test ───────────────────── Release
+
+         ◄─────────── ∞ ───────────────►
+         (The loop never ends — it only improves)
+</pre>
+      </div>
+
+      <p>
+        Each phase of the loop has a purpose:
+      </p>
+      <ul>
+        <li><strong>Plan:</strong> The team decides what to build next based on user feedback and business needs.</li>
+        <li><strong>Code:</strong> Developers write the code, using version control (Git) to collaborate.</li>
+        <li><strong>Build:</strong> The code is compiled, bundled, or packaged into a deployable artifact.</li>
+        <li><strong>Test:</strong> Automated tests verify the code works correctly and doesn't break existing behavior.</li>
+        <li><strong>Release:</strong> The tested artifact is approved and marked ready for deployment.</li>
+        <li><strong>Deploy:</strong> The artifact is pushed to production, automatically and safely.</li>
+        <li><strong>Operate:</strong> The system runs; infrastructure is maintained and scaled.</li>
+        <li><strong>Monitor:</strong> Metrics, logs, and alerts watch for problems — and for opportunities.</li>
+      </ul>
+      <p>
+        Then it loops back to Plan. Every time around, the software is a little better, the team
+        is a little faster, and the users are a little happier. That is the DevOps promise.
+      </p>
+
+      <h2>Why DevOps Pays Well</h2>
+      <p>
+        Let's talk about money for a moment, because understanding why DevOps is valuable will
+        help you understand what you are actually learning in this book.
+      </p>
+      <p>
+        In 2026, a skilled DevOps engineer or Site Reliability Engineer (SRE) commands a salary
+        that rivals or exceeds most software developers. In many markets, senior DevOps engineers
+        earn more than senior developers. Why? Because the skill set is rare.
+      </p>
+      <p>
+        Most developers know how to build software. Most operations engineers know how to run servers.
+        Very few people know how to do both — how to write code <em>and</em> understand infrastructure,
+        how to design a CI/CD pipeline <em>and</em> debug a Kubernetes cluster, how to write Terraform
+        <em>and</em> read application logs to find the root cause of a production incident.
+      </p>
+      <p>
+        The tools, once you understand the concepts, are not impossibly hard to learn. What is hard
+        to find is someone who has invested the time to understand the whole picture: from a developer's
+        laptop all the way to a running application serving real users. That is exactly what this book
+        is going to teach you.
+      </p>
+
+      <div class="box fun-fact">
+        <div class="box-title">📊 Fun Fact: The DORA Metrics</div>
+        <p>
+          The DevOps Research and Assessment (DORA) team at Google has been studying DevOps practices
+          since 2014. Their research consistently shows that organizations which practice DevOps
+          deploy code <strong>46 times more frequently</strong>, recover from failures
+          <strong>96 times faster</strong>, and have <strong>5 times lower change failure rates</strong>
+          than organizations that don't. DevOps is not just a cultural preference — it is a
+          measurable competitive advantage.
+        </p>
+      </div>
+
+      <h2>What DevOps Is Not</h2>
+      <p>
+        Before we move on, it is worth clearing up some common misconceptions.
+      </p>
+      <p>
+        <strong>DevOps is not a job title.</strong> Well — it is now, because the industry needed
+        a shorthand. But the job title "DevOps Engineer" is really shorthand for "an engineer who
+        builds and maintains the infrastructure, automation, and pipelines that allow development
+        teams to ship software quickly and safely." The title can be misleading; DevOps is really
+        a team property, not an individual's specialty.
+      </p>
+      <p>
+        <strong>DevOps is not a tool.</strong> Jenkins, Kubernetes, Terraform, GitHub Actions — these
+        are all tools that support DevOps practices. But you can use all of them and still not have
+        a DevOps culture if the dev team and ops team still don't talk to each other.
+      </p>
+      <p>
+        <strong>DevOps is not just automation.</strong> Automation is a critical practice, but
+        automating a broken process gives you a fast broken process. DevOps starts with culture
+        and collaboration, then uses automation to amplify those.
+      </p>
+
+      <div class="box tip">
+        <div class="box-title">💡 Starting Point</div>
+        <p>
+          As you work through this book, keep one question in mind for every tool and technique
+          you learn: <em>how does this help software get to users faster and more reliably?</em>
+          If you can answer that question, you understand not just the tool, but the reason it exists.
+        </p>
+      </div>
+
+      <div class="summary">
+        <h4>Chapter Summary</h4>
+        <ul>
+          <li>DevOps is a culture and set of practices that bridges software development and operations, enabling faster and more reliable delivery.</li>
+          <li>The old "wall" between dev and ops created conflict, slow releases, and finger-pointing when things failed.</li>
+          <li>The five pillars of DevOps are: Culture, Automation, Measurement, Sharing, and Continuous Everything.</li>
+          <li>The DevOps infinity loop — Plan, Code, Build, Test, Release, Deploy, Operate, Monitor — never ends; it only improves.</li>
+          <li>Organizations practicing DevOps deploy far more often and recover from failures far faster than those that don't.</li>
+          <li>DevOps engineers are highly paid because they understand both how to build software and how to run it at scale — a rare combination.</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="../introduction.html">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Introduction</span>
+        </a>
+        <a href="chapter-2.html" class="next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Ch 2 · Linux: Your Magic Workshop</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">☰</button>
+<script src="../nav.js"></script>
+</body>
+</html>
