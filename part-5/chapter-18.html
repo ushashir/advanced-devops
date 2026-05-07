@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 18: .NET Services Deployment — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-5">Part 5 · Chapter 18</div>
+        <h1>.NET Services Deployment</h1>
+        <p class="chapter-intro">From <code>dotnet run</code> to Kestrel, Nginx, systemd, Docker, and Azure App Service — deploying the Microsoft stack on any platform.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>What you'll learn in this chapter</h4>
+        <ul>
+          <li>The three .NET deployment models: framework-dependent, self-contained, single file</li>
+          <li>Publishing and running ASP.NET Core apps with Kestrel</li>
+          <li>Nginx as a reverse proxy for .NET on Linux</li>
+          <li>Running as a systemd service on Linux servers</li>
+          <li>Multi-stage Docker builds for .NET</li>
+          <li>Azure App Service — the simplest .NET deployment</li>
+          <li>IIS on Windows Server</li>
+          <li>Health checks and environment-based configuration</li>
+        </ul>
+      </div>
+
+      <h2>The Swiss Army Knife</h2>
+      <p>
+        .NET (pronounced "dot net") is Microsoft's platform for building anything: web APIs,
+        desktop apps, mobile apps, games (Unity uses it), IoT devices, and ML workloads.
+        ASP.NET Core is the web framework — and it is, perhaps surprisingly, fully
+        cross-platform. It runs on Linux, macOS, and Windows.
+      </p>
+      <p>
+        The built-in web server, <strong>Kestrel</strong>, is embedded directly into your app.
+        You no longer need IIS to run .NET — though you might still use IIS on Windows as a
+        reverse proxy. On Linux, Nginx takes that role.
+      </p>
+
+      <div class="box analogy">
+        <div class="box-title">🔧 The Swiss Army Knife Analogy</div>
+        <p>
+          A Swiss Army knife has one handle but many tools: blade, scissors, screwdriver.
+          .NET is similar — one runtime, but you build anything: web APIs (ASP.NET Core),
+          console tools, background services, desktop GUIs. The deployment process
+          is the same regardless of which tool you picked.
+        </p>
+      </div>
+
+      <h2>The Three Deployment Models</h2>
+      <p>When you publish a .NET app, you choose one of three models:</p>
+
+      <table>
+        <thead>
+          <tr><th>Model</th><th>What it means</th><th>Artifact size</th><th>Runtime required on server</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Framework-dependent</td><td>App + your code only; .NET runtime must be installed on the server</td><td>Small (~5 MB)</td><td>Yes — install .NET on server</td></tr>
+          <tr><td>Self-contained</td><td>App + .NET runtime bundled together</td><td>Large (~70 MB)</td><td>No — runtime is inside the publish folder</td></tr>
+          <tr><td>Single file</td><td>Self-contained but compressed into one executable</td><td>Medium (~50 MB)</td><td>No</td></tr>
+        </tbody>
+      </table>
+
+<pre><code><span class="cmt"># Framework-dependent (smaller artifact)</span>
+dotnet publish -c Release -o ./publish
+
+<span class="cmt"># Self-contained for Linux x64</span>
+dotnet publish -c Release -r linux-x64 <span class="flag">--self-contained true</span> -o ./publish
+
+<span class="cmt"># Single-file self-contained</span>
+dotnet publish -c Release -r linux-x64 <span class="flag">--self-contained true</span> \
+  -p:PublishSingleFile=true -o ./publish
+
+<span class="cmt"># Run the app</span>
+dotnet ./publish/MyApp.dll        <span class="cmt"># framework-dependent</span>
+./publish/MyApp                   <span class="cmt"># self-contained executable</span></code></pre>
+
+      <h2>Kestrel + Nginx in Production</h2>
+      <p>
+        Kestrel is blazing fast, but it's not designed to face the public internet directly.
+        Use Nginx in front — it handles SSL termination, compression, rate limiting, and
+        static file serving, and passes dynamic requests to Kestrel.
+      </p>
+
+      <h3>appsettings.Production.json</h3>
+<pre><code>{
+  <span class="str">"Kestrel"</span>: {
+    <span class="str">"Endpoints"</span>: {
+      <span class="str">"Http"</span>: {
+        <span class="str">"Url"</span>: <span class="str">"http://localhost:5000"</span>
+      }
+    }
+  },
+  <span class="str">"ConnectionStrings"</span>: {
+    <span class="str">"DefaultConnection"</span>: <span class="str">"Server=localhost;Database=mydb;User Id=myapp;Password=${DB_PASSWORD};"</span>
+  },
+  <span class="str">"Logging"</span>: {
+    <span class="str">"LogLevel"</span>: {
+      <span class="str">"Default"</span>: <span class="str">"Warning"</span>,
+      <span class="str">"Microsoft.AspNetCore"</span>: <span class="str">"Warning"</span>
+    }
+  }
+}</code></pre>
+
+      <h3>Nginx config</h3>
+<pre><code>server {
+    listen 80;
+    server_name api.myapp.com;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name api.myapp.com;
+
+    ssl_certificate /etc/letsencrypt/live/api.myapp.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.myapp.com/privkey.pem;
+
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection keep-alive;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        client_max_body_size 10m;
+    }
+}</code></pre>
+
+      <h2>systemd Service on Linux</h2>
+<pre><code><span class="cmt"># /etc/systemd/system/myapp.service</span>
+[Unit]
+<span class="var">Description</span>=My ASP.NET Core Application
+<span class="var">After</span>=network.target
+
+[Service]
+<span class="var">WorkingDirectory</span>=/var/www/myapp
+<span class="var">ExecStart</span>=/usr/bin/dotnet /var/www/myapp/MyApp.dll
+<span class="var">Restart</span>=always
+<span class="var">RestartSec</span>=10
+<span class="var">KillSignal</span>=SIGINT
+<span class="var">SyslogIdentifier</span>=myapp
+<span class="var">User</span>=www-data
+<span class="var">EnvironmentFile</span>=/etc/myapp/app.env
+<span class="var">Environment</span>=ASPNETCORE_ENVIRONMENT=Production
+<span class="var">Environment</span>=ASPNETCORE_URLS=http://localhost:5000
+
+[Install]
+<span class="var">WantedBy</span>=multi-user.target</code></pre>
+
+<pre><code>sudo systemctl daemon-reload
+sudo systemctl enable myapp
+sudo systemctl start myapp
+sudo systemctl status myapp
+sudo journalctl -u myapp -f</code></pre>
+
+      <h2>Environment Variables in .NET</h2>
+      <p>
+        .NET maps environment variables to <code>appsettings.json</code> keys using double
+        underscore (<code>__</code>) as a path separator:
+      </p>
+<pre><code><span class="cmt"># These env vars override appsettings.json at runtime</span>
+<span class="var">ASPNETCORE_ENVIRONMENT</span>=Production
+<span class="var">ConnectionStrings__DefaultConnection</span>=Server=localhost;Database=mydb;...
+<span class="var">Jwt__SecretKey</span>=super-secret-signing-key
+<span class="var">Logging__LogLevel__Default</span>=Warning</code></pre>
+
+      <div class="box tip">
+        <div class="box-title">💡 Never Put Secrets in appsettings.json</div>
+        <p>
+          <code>appsettings.json</code> is committed to Git. Use environment variables,
+          Azure Key Vault, AWS Secrets Manager, or HashiCorp Vault for anything sensitive.
+          The <code>EnvironmentFile</code> in your systemd service is the right place for
+          server-level secrets.
+        </p>
+      </div>
+
+      <h2>Dockerfile for .NET — Multi-Stage Build</h2>
+<pre><code><span class="cmt"># Stage 1: Build</span>
+<span class="kw">FROM</span> <span class="str">mcr.microsoft.com/dotnet/sdk:8.0</span> <span class="kw">AS</span> builder
+<span class="kw">WORKDIR</span> /app
+
+<span class="cmt"># Restore dependencies first (cached layer)</span>
+<span class="kw">COPY</span> *.csproj ./
+<span class="kw">RUN</span> dotnet restore
+
+<span class="cmt"># Build and publish</span>
+<span class="kw">COPY</span> . .
+<span class="kw">RUN</span> dotnet publish -c Release -o /app/publish
+
+<span class="cmt"># Stage 2: Runtime (smaller ASP.NET runtime image)</span>
+<span class="kw">FROM</span> <span class="str">mcr.microsoft.com/dotnet/aspnet:8.0</span> <span class="kw">AS</span> runner
+<span class="kw">WORKDIR</span> /app
+
+<span class="kw">COPY</span> --from=builder /app/publish .
+
+<span class="kw">EXPOSE</span> 5000
+
+<span class="kw">ENV</span> ASPNETCORE_URLS=http://+:5000
+<span class="kw">ENV</span> ASPNETCORE_ENVIRONMENT=Production
+
+<span class="kw">ENTRYPOINT</span> [<span class="str">"dotnet"</span>, <span class="str">"MyApp.dll"</span>]</code></pre>
+
+      <h2>Azure App Service — The Simplest .NET Deployment</h2>
+      <p>
+        For teams already in Azure, App Service is purpose-built for .NET. Microsoft manages
+        the server, runtime, SSL, scaling, and deployment pipeline. You just ship your code.
+      </p>
+
+<pre><code><span class="cmt"># Create App Service plan and web app</span>
+az appservice plan create \
+  --name my-plan \
+  --resource-group my-rg \
+  --sku B2 \
+  --is-linux
+
+az webapp create \
+  --resource-group my-rg \
+  --plan my-plan \
+  --name my-dotnet-app \
+  --runtime <span class="str">"DOTNETCORE:8.0"</span>
+
+<span class="cmt"># Set environment variables</span>
+az webapp config appsettings set \
+  --resource-group my-rg \
+  --name my-dotnet-app \
+  --settings \
+    ASPNETCORE_ENVIRONMENT=Production \
+    DB_PASSWORD=<span class="str">"@Microsoft.KeyVault(...)"</span>
+
+<span class="cmt"># Deploy via zip</span>
+dotnet publish -c Release -o ./publish
+cd publish && zip -r ../deploy.zip .
+az webapp deployment source config-zip \
+  --resource-group my-rg \
+  --name my-dotnet-app \
+  --src ../deploy.zip</code></pre>
+
+      <h3>GitHub Actions to Azure App Service</h3>
+<pre><code>- <span class="var">name</span>: Build and publish
+  <span class="var">run</span>: dotnet publish -c Release -o publish
+
+- <span class="var">name</span>: Deploy to Azure App Service
+  <span class="var">uses</span>: azure/webapps-deploy@v3
+  <span class="var">with</span>:
+    <span class="var">app-name</span>: my-dotnet-app
+    <span class="var">publish-profile</span>: <span class="str">${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}</span>
+    <span class="var">package</span>: ./publish</code></pre>
+
+      <h2>IIS on Windows Server</h2>
+      <p>
+        For organisations running Windows Server, IIS remains the standard reverse proxy.
+        The key difference from the old ASP.NET days: IIS no longer <em>runs</em> your .NET code —
+        it proxies to Kestrel via the <strong>ASP.NET Core Module v2</strong>.
+      </p>
+      <ol>
+        <li>Install the .NET 8 Hosting Bundle on Windows Server (includes the ASP.NET Core Module)</li>
+        <li>Publish your app to a folder (e.g. <code>C:\inetpub\wwwroot\myapp</code>)</li>
+        <li>In IIS Manager: create a new Site pointing to that folder</li>
+        <li>Set the Application Pool's <strong>Managed Pipeline Mode</strong> to "No Managed Code" — Kestrel owns .NET now</li>
+        <li>IIS forwards requests to Kestrel; Kestrel processes them and returns responses</li>
+      </ol>
+
+      <div class="box fun-fact">
+        <div class="box-title">🎉 Fun Fact</div>
+        <p>
+          ASP.NET Core was a complete rewrite from the ground up, released in 2016.
+          Microsoft specifically built it to be Linux-compatible — a radical move for a
+          company historically synonymous with Windows. Today, many .NET services run
+          on Ubuntu servers in AWS, with no Windows in sight.
+        </p>
+      </div>
+
+      <h2>Health Checks in .NET</h2>
+<pre><code><span class="cmt">// Program.cs</span>
+builder.Services.<span class="fn">AddHealthChecks</span>()
+    .<span class="fn">AddDbContextCheck</span>&lt;AppDbContext&gt;()           <span class="cmt">// checks DB</span>
+    .<span class="fn">AddDiskStorageHealthCheck</span>(s => s.<span class="fn">AddDrive</span>(<span class="str">"/"</span>, <span class="num">1024</span>))   <span class="cmt">// checks disk</span>
+    .<span class="fn">AddUrlGroup</span>(<span class="kw">new</span> <span class="fn">Uri</span>(<span class="str">"https://api.stripe.com/v1"</span>), <span class="str">"stripe"</span>);
+
+app.<span class="fn">MapHealthChecks</span>(<span class="str">"/health"</span>);
+app.<span class="fn">MapHealthChecks</span>(<span class="str">"/health/ready"</span>, <span class="kw">new</span> HealthCheckOptions {
+    Predicate = check => check.Tags.<span class="fn">Contains</span>(<span class="str">"ready"</span>)
+});</code></pre>
+
+      <div class="summary">
+        <h4>Chapter Summary</h4>
+        <ul>
+          <li>Three deployment models: framework-dependent (small), self-contained (portable), single file (one executable)</li>
+          <li>Kestrel is the embedded web server — always put Nginx or IIS in front of it in production</li>
+          <li>Run as a systemd service on Linux with <code>ASPNETCORE_ENVIRONMENT=Production</code></li>
+          <li>Use double-underscore (<code>__</code>) environment variables to override <code>appsettings.json</code></li>
+          <li>Multi-stage Docker builds: SDK image for building, ASP.NET runtime image for running</li>
+          <li>Azure App Service is the most frictionless deployment target for ASP.NET Core</li>
+          <li>On Windows Server, IIS proxies to Kestrel via the ASP.NET Core Module</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="chapter-17.html">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Ch 17 · Java Services</span>
+        </a>
+        <a href="exercises.html" class="next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Part 5 Exercises</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">☰</button>
+<script src="../nav.js"></script>
+</body>
+</html>

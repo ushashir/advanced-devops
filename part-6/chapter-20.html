@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 20: Distributed Tracing — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-6">Part 6 · Chapter 20</div>
+        <h1>Distributed Tracing: Following the Breadcrumbs</h1>
+        <p class="chapter-intro">When a request touches 10 microservices and the response is slow, how do you know which one caused it? OpenTelemetry has the answer.</p>
+      </div>
+
+      <div class="learn-box">
+        <h4>What you'll learn in this chapter</h4>
+        <ul>
+          <li>What a trace is and what a span is — with real analogies</li>
+          <li>Why distributed tracing is the third pillar of observability</li>
+          <li>OpenTelemetry — the vendor-neutral standard</li>
+          <li>Auto-instrumenting Node.js, Python, and Java</li>
+          <li>The OpenTelemetry Collector</li>
+          <li>Viewing traces in Jaeger</li>
+          <li>Context propagation across services</li>
+          <li>Grafana Tempo for the full open-source stack</li>
+        </ul>
+      </div>
+
+      <h2>The Package Tracking Analogy</h2>
+      <p>
+        Imagine a package traveling through a logistics network. It leaves Lagos → arrives at
+        a sorting depot → loaded onto a truck → regional hub → local delivery rider →
+        delivered to your door. If the package is three days late, which step was the problem?
+        Without a tracking number scanned at every checkpoint, you have no idea.
+      </p>
+      <p>
+        In a microservices system, a single user request might travel through: API Gateway →
+        Auth Service → User Service → Product Service → Inventory Service → Payment Service.
+        If the final response takes 4 seconds instead of 200 ms, which service is the bottleneck?
+        Distributed tracing gives every request a unique ID — the tracking number — and records
+        exactly how long each service took to handle its part.
+      </p>
+
+      <div class="box key-term">
+        <div class="box-title">📌 Key Terms</div>
+        <ul>
+          <li><strong>Trace</strong>: the complete journey of one request through all services</li>
+          <li><strong>Span</strong>: a single operation within a trace (one service handling its part)</li>
+          <li><strong>Trace ID</strong>: the unique ID that connects all spans of one request</li>
+          <li><strong>Parent span / child span</strong>: spans nest — Service A calls B (B is a child of A)</li>
+          <li><strong>Attributes</strong>: key-value metadata on a span (HTTP method, user ID, status code)</li>
+        </ul>
+      </div>
+
+      <h2>What a Trace Looks Like</h2>
+
+      <div class="diagram">
+Trace ID: abc-123-xyz (total: 380ms)
+│
+├── API Gateway                        [0ms → 380ms]
+│   ├── Auth Service                   [5ms → 25ms]   ✓ fast
+│   ├── User Service                   [25ms → 60ms]  ✓ fast
+│   └── Product Service                [60ms → 350ms] ← SLOW
+│       ├── Database Query (no index)  [60ms → 310ms] ← ROOT CAUSE
+│       └── Redis Cache Lookup         [310ms → 320ms] ✓
+└── Response serialization             [350ms → 380ms] ✓
+      </div>
+
+      <p>
+        In seconds, you can see that <code>Product Service</code> took 290 ms — and within it,
+        a database query with a missing index took 250 ms. Without tracing, you'd grep logs
+        for hours and still not find this.
+      </p>
+
+      <h2>OpenTelemetry — Instrument Once, Export Anywhere</h2>
+      <p>
+        Before OpenTelemetry existed, every vendor (Datadog, New Relic, Jaeger, Zipkin,
+        AWS X-Ray) had its own proprietary SDK. If you instrumented your code for Datadog
+        and then switched to Jaeger, you'd have to re-instrument everything.
+      </p>
+      <p>
+        OpenTelemetry (OTel) created a vendor-neutral standard. You instrument your code
+        once with the OTel SDK. Then you export to <em>any</em> backend: Jaeger, Zipkin,
+        Datadog, New Relic, Grafana Tempo, AWS X-Ray — without changing your application code.
+      </p>
+
+      <div class="diagram">
+Your App (OTel SDK)
+       │  OTLP protocol
+       ▼
+OTel Collector ──────────► Jaeger
+       │           ├──────► Grafana Tempo
+       │           ├──────► Datadog
+       └───────────└──────► AWS X-Ray
+      </div>
+
+      <h2>Instrumenting Node.js with OpenTelemetry</h2>
+      <p>
+        The <strong>auto-instrumentations</strong> package automatically traces HTTP requests,
+        Express routes, database calls (PostgreSQL, MySQL, Redis), and outgoing HTTP calls —
+        without writing a single line of tracing code in your handlers.
+      </p>
+
+<pre><code><span class="cmt"># Install packages</span>
+npm install @opentelemetry/sdk-node \
+  @opentelemetry/auto-instrumentations-node \
+  @opentelemetry/exporter-trace-otlp-http \
+  @opentelemetry/resources \
+  @opentelemetry/semantic-conventions</code></pre>
+
+<pre><code><span class="cmt">// tracing.js — import this FIRST in your app entrypoint</span>
+<span class="kw">import</span> { <span class="var">NodeSDK</span> } <span class="kw">from</span> <span class="str">'@opentelemetry/sdk-node'</span>;
+<span class="kw">import</span> { <span class="var">OTLPTraceExporter</span> } <span class="kw">from</span> <span class="str">'@opentelemetry/exporter-trace-otlp-http'</span>;
+<span class="kw">import</span> { <span class="var">Resource</span> } <span class="kw">from</span> <span class="str">'@opentelemetry/resources'</span>;
+<span class="kw">import</span> { <span class="var">SEMRESATTRS_SERVICE_NAME</span> } <span class="kw">from</span> <span class="str">'@opentelemetry/semantic-conventions'</span>;
+<span class="kw">import</span> { <span class="fn">getNodeAutoInstrumentations</span> } <span class="kw">from</span> <span class="str">'@opentelemetry/auto-instrumentations-node'</span>;
+
+<span class="kw">const</span> <span class="var">sdk</span> = <span class="kw">new</span> <span class="fn">NodeSDK</span>({
+  resource: <span class="kw">new</span> <span class="fn">Resource</span>({
+    [<span class="var">SEMRESATTRS_SERVICE_NAME</span>]: <span class="str">'my-api'</span>,
+  }),
+  traceExporter: <span class="kw">new</span> <span class="fn">OTLPTraceExporter</span>({
+    url: <span class="str">'http://otel-collector:4318/v1/traces'</span>,
+  }),
+  instrumentations: [<span class="fn">getNodeAutoInstrumentations</span>()],
+});
+
+sdk.<span class="fn">start</span>();
+process.<span class="fn">on</span>(<span class="str">'SIGTERM'</span>, () => sdk.<span class="fn">shutdown</span>());
+</code></pre>
+
+      <p>Then in your <code>package.json</code> start script:</p>
+<pre><code><span class="str">"start"</span>: <span class="str">"node --require ./tracing.js server.js"</span></code></pre>
+
+      <h3>Manual Spans for Custom Operations</h3>
+<pre><code><span class="kw">import</span> { <span class="var">trace</span>, <span class="var">SpanStatusCode</span> } <span class="kw">from</span> <span class="str">'@opentelemetry/api'</span>;
+
+<span class="kw">const</span> <span class="var">tracer</span> = trace.<span class="fn">getTracer</span>(<span class="str">'my-api'</span>);
+
+<span class="kw">async function</span> <span class="fn">processPayment</span>(orderId, amount) {
+  <span class="kw">return</span> tracer.<span class="fn">startActiveSpan</span>(<span class="str">'process-payment'</span>, <span class="kw">async</span> (span) => {
+    <span class="kw">try</span> {
+      span.<span class="fn">setAttributes</span>({
+        <span class="str">'payment.order_id'</span>: orderId,
+        <span class="str">'payment.amount'</span>: amount,
+      });
+      <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">chargeCard</span>(orderId, amount);
+      span.<span class="fn">setStatus</span>({ code: SpanStatusCode.OK });
+      <span class="kw">return</span> result;
+    } <span class="kw">catch</span> (error) {
+      span.<span class="fn">setStatus</span>({ code: SpanStatusCode.ERROR, message: error.message });
+      span.<span class="fn">recordException</span>(error);
+      <span class="kw">throw</span> error;
+    } <span class="kw">finally</span> {
+      span.<span class="fn">end</span>();
+    }
+  });
+}</code></pre>
+
+      <h2>Instrumenting Python with OpenTelemetry</h2>
+<pre><code><span class="cmt"># Install</span>
+pip install opentelemetry-distro opentelemetry-exporter-otlp
+opentelemetry-bootstrap -a install
+
+<span class="cmt"># Run FastAPI with auto-instrumentation</span>
+opentelemetry-instrument \
+  --service_name my-api \
+  --exporter_otlp_endpoint http://otel-collector:4317 \
+  uvicorn main:app --host 0.0.0.0 --port 8000</code></pre>
+
+      <p>Or configure in code:</p>
+<pre><code><span class="kw">from</span> opentelemetry <span class="kw">import</span> trace
+<span class="kw">from</span> opentelemetry.sdk.trace <span class="kw">import</span> TracerProvider
+<span class="kw">from</span> opentelemetry.sdk.trace.export <span class="kw">import</span> BatchSpanProcessor
+<span class="kw">from</span> opentelemetry.exporter.otlp.proto.http.trace_exporter <span class="kw">import</span> OTLPSpanExporter
+
+provider = <span class="fn">TracerProvider</span>()
+provider.<span class="fn">add_span_processor</span>(
+    <span class="fn">BatchSpanProcessor</span>(<span class="fn">OTLPSpanExporter</span>(endpoint=<span class="str">"http://otel-collector:4318/v1/traces"</span>))
+)
+trace.<span class="fn">set_tracer_provider</span>(provider)
+tracer = trace.<span class="fn">get_tracer</span>(<span class="str">"my-api"</span>)</code></pre>
+
+      <h2>The OpenTelemetry Collector</h2>
+      <p>
+        The Collector is a middleman that sits between your apps and your tracing backends.
+        Apps send traces to the Collector; the Collector forwards them to Jaeger, Tempo,
+        Datadog, or all three simultaneously.
+      </p>
+
+<pre><code><span class="cmt"># otel-collector-config.yaml</span>
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+processors:
+  batch:
+    timeout: 5s
+  memory_limiter:
+    limit_mib: 400
+
+exporters:
+  jaeger:
+    endpoint: jaeger:14250
+    tls:
+      insecure: true
+  logging:
+    loglevel: debug
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [jaeger]</code></pre>
+
+      <h2>Running Jaeger for Local Development</h2>
+<pre><code>docker run -d \
+  -p 16686:16686 \   <span class="cmt"># Jaeger UI</span>
+  -p 14250:14250 \   <span class="cmt"># gRPC receiver</span>
+  -p 6831:6831/udp \ <span class="cmt"># Jaeger compact thrift</span>
+  --name jaeger \
+  jaegertracing/all-in-one:latest</code></pre>
+
+      <p>Open <code>http://localhost:16686</code>. Search by service name or trace ID. Click any trace to see the full span waterfall.</p>
+
+      <h2>Context Propagation — How Traces Cross Services</h2>
+      <p>
+        When Service A makes an HTTP call to Service B, it must pass the trace ID so that
+        Service B's spans are attached to the same trace. This is done via HTTP headers:
+      </p>
+<pre><code><span class="cmt"># W3C TraceContext header (the standard)</span>
+traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+<span class="cmt">#            version-traceId (32 hex)-spanId (16 hex)-flags</span></code></pre>
+
+      <p>
+        OpenTelemetry auto-instrumentations propagate this header automatically for all outgoing
+        HTTP calls. For message queues (Kafka, RabbitMQ), you inject the header into the message
+        metadata and extract it on the consumer side.
+      </p>
+
+      <h2>Grafana Tempo — Traces in the Grafana Stack</h2>
+      <p>
+        If you're already using Prometheus (metrics) and Loki (logs) with Grafana, adding
+        Grafana Tempo completes the observability triangle. Tempo stores traces efficiently,
+        and Grafana links traces to logs and metrics automatically.
+      </p>
+      <p>
+        The full open-source stack: <strong>Prometheus</strong> (metrics) +
+        <strong>Loki</strong> (logs) + <strong>Tempo</strong> (traces) +
+        <strong>Grafana</strong> (visualization). Everything from one vendor, all open source,
+        no cloud lock-in.
+      </p>
+
+      <div class="summary">
+        <h4>Chapter Summary</h4>
+        <ul>
+          <li>A <strong>trace</strong> is a request's complete journey; a <strong>span</strong> is one operation within that journey</li>
+          <li>OpenTelemetry is the vendor-neutral standard — instrument once, export anywhere</li>
+          <li>Auto-instrumentations handle HTTP, databases, and queues with no code changes</li>
+          <li>The OTel Collector decouples apps from specific tracing backends</li>
+          <li>Context propagation via <code>traceparent</code> headers ties spans across services</li>
+          <li>Jaeger provides an open-source trace viewer; Grafana Tempo integrates with the PLG stack</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="chapter-19.html">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Ch 19 · Metrics &amp; Logs</span>
+        </a>
+        <a href="chapter-21.html" class="next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Ch 21 · Security &amp; Secrets</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">☰</button>
+<script src="../nav.js"></script>
+</body>
+</html>

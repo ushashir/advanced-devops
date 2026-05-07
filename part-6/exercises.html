@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Part 6 Exercises — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-6">Part 6 · Exercises</div>
+        <h1>Part 6 Exercises</h1>
+        <p class="chapter-intro">See what you can't see — and lock what must not be open. These exercises drill observability and security skills that separate senior engineers from beginners.</p>
+      </div>
+
+      <div class="exercises">
+        <h3>Metrics &amp; Logs</h3>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 6.1</div>
+          <p>Explain the difference between a Prometheus <strong>Counter</strong>, a <strong>Gauge</strong>, and a <strong>Histogram</strong>. Give one real-world example of what you would measure with each type.</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 6.2</div>
+          <p>Write a PromQL query that returns the per-second HTTP request rate over the last 5 minutes, broken down by <code>status_code</code> label. Then write a second query that returns the 95th percentile latency from a histogram metric called <code>http_request_duration_seconds</code>.</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 6.3</div>
+          <p>Write a Prometheus alerting rule YAML that fires an alert named <code>HighErrorRate</code> when more than 5% of HTTP requests return status codes ≥ 500, sustained for 2 minutes. Include a <code>severity: critical</code> label and a human-readable <code>summary</code> annotation.</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 6.4</div>
+          <p>What is the difference between Loki and the ELK stack (Elasticsearch + Logstash + Kibana)? Describe a scenario where you would prefer one over the other, and explain why.</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 6.5</div>
+          <p>Write a LogQL query that finds all log lines from a job called <code>api-server</code> that contain the word <code>ERROR</code> and occurred in the last hour. Then extend the query to count the number of such errors per minute as a time-series.</p>
+        </div>
+      </div>
+
+      <div class="exercises">
+        <h3>Distributed Tracing</h3>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 6.6</div>
+          <p>Define the following OpenTelemetry terms in your own words: <strong>Trace</strong>, <strong>Span</strong>, <strong>TraceId</strong>, <strong>SpanId</strong>, and <strong>Parent Span</strong>. How do they combine to represent a request's journey across multiple services?</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 6.7</div>
+          <p>You have a Node.js Express API. Write the minimal code required to auto-instrument it with the OpenTelemetry SDK, exporting traces to an OTel Collector running at <code>http://collector:4317</code>. Your answer should include the packages to install and where the instrumentation code must be placed relative to the rest of your application startup.</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 6.8</div>
+          <p>What is the W3C <code>traceparent</code> header? Write an example value and decode each part: version, trace ID, parent span ID, and trace flags. Why is propagating this header between services critical for distributed tracing to work?</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 6.9</div>
+          <p>Write an OpenTelemetry Collector configuration (<code>otel-collector-config.yaml</code>) that: receives traces over gRPC (port 4317), exports traces to Jaeger at <code>http://jaeger:14268/api/traces</code>, and logs all received traces to stdout. Include the <code>receivers</code>, <code>exporters</code>, <code>processors</code>, and <code>service.pipelines</code> sections.</p>
+        </div>
+      </div>
+
+      <div class="exercises">
+        <h3>Security &amp; Secrets</h3>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 6.10</div>
+          <p>List five things that should <em>never</em> appear in a Git repository, even in a private one. For each, explain what the real-world consequence of accidentally committing it would be (e.g. leaked AWS keys, exposed database passwords, etc.).</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 6.11</div>
+          <p>Write the HashiCorp Vault CLI commands to: (1) enable the KV v2 secrets engine at path <code>secret/</code>, (2) store an API key at <code>secret/data/myapp/api</code>, and (3) read it back and display only the value of the <code>api_key</code> field using <code>jq</code>.</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 6.12</div>
+          <p>You need to scan a Docker image called <code>myapp:v1.2.0</code> for vulnerabilities before it can be deployed. Write the <code>trivy</code> command that scans the image, outputs results as a table, and exits with a non-zero status code if any <strong>HIGH</strong> or <strong>CRITICAL</strong> severity vulnerabilities are found. Then write a GitHub Actions step that runs this scan and blocks a merge if the check fails.</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 6.13 — Capstone</div>
+          <p>Design a complete observability and security pipeline for a three-service application (API Gateway → Order Service → Payment Service). Your design must specify: what metrics each service exposes and how Prometheus scrapes them, how logs are shipped to Loki, how distributed traces flow through all three services using OpenTelemetry, where secrets are stored and how each service retrieves them at runtime, and what security scans run in CI before any image is deployed. Write this as a design document with diagrams described in plain text.</p>
+        </div>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="chapter-21.html">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Ch 21 · Security &amp; Secrets</span>
+        </a>
+        <a href="../part-7/chapter-22.html" class="next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Ch 22 · Developer Platforms</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">☰</button>
+<script src="../nav.js"></script>
+</body>
+</html>

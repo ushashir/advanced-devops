@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Part 5 Exercises — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-5">Part 5 · Exercises</div>
+        <h1>Part 5 Exercises</h1>
+        <p class="chapter-intro">Deploy something. Each exercise below is a real task a working DevOps engineer does regularly.</p>
+      </div>
+
+      <div class="exercises">
+        <h3>Node.js &amp; PM2</h3>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 5.1</div>
+          <p>What is PM2 and why is it necessary instead of just running <code>node server.js</code> in production? Name at least three things PM2 provides that a raw <code>node</code> process doesn't.</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 5.2</div>
+          <p>Write the PM2 CLI command to start <code>index.js</code>, name the process <code>my-api</code>, use cluster mode with the maximum number of CPU cores, and then save the process list for survival across reboots.</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 5.3</div>
+          <p>Write a minimal <code>ecosystem.config.js</code> for a Node.js app that: runs <code>dist/server.js</code> in cluster mode, limits restarts if memory exceeds 300 MB, and sets <code>NODE_ENV=production</code>.</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 5.4</div>
+          <p>What is the difference between <code>pm2 restart</code> and <code>pm2 reload</code>? When would you use each?</p>
+        </div>
+      </div>
+
+      <div class="exercises">
+        <h3>Python &amp; FastAPI</h3>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 5.5</div>
+          <p>What is the difference between WSGI and ASGI? Which standard does FastAPI use and why does it matter for concurrency?</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 5.6</div>
+          <p>You have a 4-core server. How many Gunicorn workers should you run for a FastAPI application? Write the complete <code>gunicorn</code> command using Uvicorn workers.</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 5.7</div>
+          <p>Write a Dockerfile for a FastAPI app that installs dependencies from <code>requirements.txt</code> and starts Gunicorn with 4 Uvicorn workers on port 8000.</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 5.8</div>
+          <p>What does <code>alembic upgrade head</code> do? Why should you run this as part of a deployment, not before it?</p>
+        </div>
+      </div>
+
+      <div class="exercises">
+        <h3>Java Services</h3>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 5.9</div>
+          <p>What is a "fat JAR" in Spring Boot? How does it differ from a standard JAR?</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 5.10</div>
+          <p>Your server has 4 GB of RAM. Write the JVM flags you would use to set an appropriate heap size, enable G1GC, and activate the <code>production</code> Spring profile.</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 5.11</div>
+          <p>Write a systemd unit file for a Spring Boot JAR located at <code>/opt/myapp/app.jar</code>, running as the user <code>myapp</code>, loading environment variables from <code>/etc/myapp/app.env</code>.</p>
+        </div>
+      </div>
+
+      <div class="exercises">
+        <h3>.NET Services</h3>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 5.12</div>
+          <p>What is the difference between a framework-dependent and a self-contained .NET deployment? When would you prefer each?</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 5.13</div>
+          <p>What is Kestrel, and why should you always put Nginx (or IIS) in front of it in production? Give two specific reasons.</p>
+        </div>
+
+        <div class="exercise">
+          <div class="exercise-num">Exercise 5.14 — Capstone</div>
+          <p>Pick any technology from this part (Node.js, Python, Java, or .NET). Design a full deployment for a simple "Hello World" API on a single Ubuntu server, including: how to get the code onto the server, how to run the process, how to set up Nginx as a reverse proxy, how to set up SSL with Certbot, and how to ensure the process restarts on reboot. Write this as a step-by-step runbook.</p>
+        </div>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="chapter-18.html">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Ch 18 · .NET Services</span>
+        </a>
+        <a href="../part-6/chapter-19.html" class="next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Ch 19 · Metrics &amp; Logs</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">☰</button>
+<script src="../nav.js"></script>
+</body>
+</html>

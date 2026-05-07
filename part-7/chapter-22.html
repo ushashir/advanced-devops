@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch 22 · Developer Platforms — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-7">Part 7 · Chapter 22</div>
+        <h1>Developer Platforms</h1>
+        <p class="chapter-intro">You've learned to build pipelines, deploy containers, and secure secrets. Now learn to build the platform that lets your entire organisation do all of that without needing your help every day.</p>
+      </div>
+
+      <div class="analogy-box">
+        <strong>The Airport Analogy</strong><br>
+        Imagine your engineering org is an airport. Individual developers are passengers — they just want to get from A to B (idea to production). Without a platform, every passenger has to navigate a jungle: find their own plane, file their own flight plan, refuel the engine, and hope they land safely.<br><br>
+        A developer platform is the airport itself. Clear terminals, departure boards, security lanes, moving walkways. The passenger just shows up with a ticket and flies. The airport (your platform team) handles everything else behind the scenes. Backstage is the departure board and terminal map. Crossplane is the automated ground crew that provisions aircraft, fuel, and gates on demand.
+      </div>
+
+      <h2>What is Platform Engineering?</h2>
+      <p>Platform Engineering is the discipline of building internal tools and infrastructure that make other engineers more productive. Instead of every team figuring out how to deploy to Kubernetes, set up monitoring, or provision a database, the platform team builds a <strong>paved road</strong> — one well-lit, well-tested path that anyone can walk.</p>
+
+      <div class="key-term">
+        <strong>Internal Developer Platform (IDP)</strong> — a self-service layer that abstracts away infrastructure complexity. Developers interact with the platform through simple interfaces (a UI, a CLI, or a Git PR) and the platform handles provisioning, security, compliance, and deployment underneath.
+      </div>
+
+      <p>The goal is to reduce cognitive load. A backend engineer should not need to know the difference between a Kubernetes <code>NodePort</code> and a <code>LoadBalancer</code> just to ship a feature. That knowledge belongs in the platform, not in every engineer's head.</p>
+
+      <h2>Backstage: The Software Catalog</h2>
+      <p>Backstage is an open-source framework from Spotify for building developer portals. Think of it as the home page for your entire engineering organisation — a single place where developers can find every service, every API, every pipeline, and every piece of documentation.</p>
+
+      <h3>The Software Catalog</h3>
+      <p>The Catalog is Backstage's core feature. Every service, library, website, and data pipeline in your org is registered as an <strong>Entity</strong> described by a YAML file called a <code>catalog-info.yaml</code>.</p>
+
+      <pre><code class="language-yaml"># catalog-info.yaml — lives in the root of every service repo
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: payment-service
+  description: Handles payment processing for all orders
+  annotations:
+    github.com/project-slug: myorg/payment-service
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - java
+    - payments
+    - critical
+spec:
+  type: service
+  lifecycle: production
+  owner: payments-team
+  system: checkout-platform
+  dependsOn:
+    - component:order-service
+    - resource:payments-database</code></pre>
+
+      <p>Backstage reads this file from your repo and populates the catalog automatically. Now any engineer can open the portal and see: what services exist, who owns them, what they depend on, their current health, links to their Grafana dashboards, CI/CD status, and API documentation — all in one place.</p>
+
+      <h3>Installing Backstage</h3>
+      <pre><code class="language-bash"># Prerequisites: Node.js 18+, Yarn
+npx @backstage/create-app@latest
+
+# Follow the prompts — choose SQLite for local dev, PostgreSQL for production
+# This creates a full Backstage app in a new directory
+
+cd my-backstage-app
+yarn dev
+# Opens at http://localhost:3000</code></pre>
+
+      <h3>Software Templates</h3>
+      <p>Templates are Backstage's killer feature for platform teams. Instead of copy-pasting boilerplate from an old repo, developers open Backstage, pick a template ("Create a new Node.js microservice"), fill out a form (name, owner, database needed?), and Backstage automatically:</p>
+      <ul>
+        <li>Creates a new GitHub repo with the correct folder structure</li>
+        <li>Generates the <code>Dockerfile</code>, <code>kubernetes/</code> manifests, and <code>catalog-info.yaml</code></li>
+        <li>Sets up GitHub Actions CI/CD</li>
+        <li>Registers the new service in the catalog</li>
+        <li>Creates a Grafana dashboard</li>
+      </ul>
+
+      <pre><code class="language-yaml"># template.yaml — a Backstage Software Template
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: nodejs-microservice
+  title: Node.js Microservice
+  description: Creates a production-ready Node.js service with CI/CD
+  tags:
+    - nodejs
+    - microservice
+spec:
+  owner: platform-team
+  type: service
+
+  parameters:
+    - title: Service Details
+      required:
+        - name
+        - owner
+      properties:
+        name:
+          title: Service Name
+          type: string
+          description: Unique name for your service (kebab-case)
+        owner:
+          title: Owner Team
+          type: string
+          ui:field: OwnerPicker
+          ui:options:
+            allowedKinds:
+              - Group
+        needsDatabase:
+          title: Needs a PostgreSQL database?
+          type: boolean
+          default: false
+
+  steps:
+    - id: fetch-template
+      name: Fetch Template
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          name: ${{ parameters.name }}
+          owner: ${{ parameters.owner }}
+          needsDatabase: ${{ parameters.needsDatabase }}
+
+    - id: create-repo
+      name: Create GitHub Repository
+      action: publish:github
+      input:
+        repoUrl: github.com?repo=${{ parameters.name }}&owner=myorg
+        defaultBranch: main
+
+    - id: register
+      name: Register in Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['create-repo'].output.repoContentsUrl }}
+        catalogInfoPath: /catalog-info.yaml</code></pre>
+
+      <div class="tip-box">
+        <strong>Why Templates Matter</strong><br>
+        Before templates, a new service at Spotify took days of setup — copying configs, figuring out CI, setting up monitoring. With Backstage Templates, the same setup takes five minutes. Every new service starts golden: with tests, security scanning, observability, and documentation built in from day one.
+      </div>
+
+      <h3>TechDocs</h3>
+      <p>TechDocs is Backstage's documentation system. Engineers write docs as Markdown files alongside their code (in a <code>docs/</code> folder), and Backstage renders them as a searchable, versioned documentation site. No more hunting for the right Confluence page — everything is in the catalog next to the service that owns it.</p>
+
+      <pre><code class="language-yaml"># mkdocs.yml — at the root of your service repo
+site_name: Payment Service
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - API Reference: api.md
+  - Runbooks: runbooks.md
+docs_dir: docs</code></pre>
+
+      <h2>Crossplane: Kubernetes as a Cloud Control Plane</h2>
+      <p>Crossplane is an open-source Kubernetes add-on that lets you provision and manage cloud infrastructure — AWS RDS databases, GCP buckets, Azure Redis caches — using Kubernetes manifests, the same way you manage Deployments and Services.</p>
+
+      <div class="analogy-box">
+        <strong>The Hotel Concierge Analogy</strong><br>
+        Normally, if you need a database, you go to the AWS console, click through eight screens, wait 15 minutes, copy the connection string, and paste it into a Secret manually. With Crossplane, your developer writes a Kubernetes YAML that says "I need a PostgreSQL database, please." Crossplane is the concierge — it takes that YAML, calls AWS on your behalf, provisions the RDS instance, and drops the connection secret directly into your namespace. The developer never touches the AWS console.
+      </div>
+
+      <h3>Installing Crossplane</h3>
+      <pre><code class="language-bash"># Install Crossplane into your Kubernetes cluster
+helm repo add crossplane-stable https://charts.crossplane.io/stable
+helm repo update
+
+helm install crossplane \
+  --namespace crossplane-system \
+  --create-namespace \
+  crossplane-stable/crossplane
+
+# Install the AWS provider
+kubectl apply -f - <<EOF
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-aws-rds
+spec:
+  package: xpkg.upbound.io/upbound/provider-aws-rds:v0.46.0
+EOF</code></pre>
+
+      <h3>Managed Resources</h3>
+      <p>A <strong>Managed Resource</strong> is a Crossplane object that maps 1:1 to a real cloud resource. When you create a <code>RDSInstance</code> in Kubernetes, Crossplane calls the AWS API and creates an actual RDS database.</p>
+
+      <pre><code class="language-yaml"># rds-instance.yaml — provisions a real AWS RDS PostgreSQL database
+apiVersion: rds.aws.upbound.io/v1beta1
+kind: Instance
+metadata:
+  name: orders-db
+  namespace: production
+spec:
+  forProvider:
+    region: us-east-1
+    dbInstanceClass: db.t3.micro
+    engine: postgres
+    engineVersion: "14"
+    allocatedStorage: 20
+    dbName: orders
+    username: admin
+    skipFinalSnapshot: true
+    publiclyAccessible: false
+  writeConnectionSecretsToRef:
+    namespace: production
+    name: orders-db-connection  # Crossplane writes credentials here</code></pre>
+
+      <pre><code class="language-bash"># Apply it like any Kubernetes resource
+kubectl apply -f rds-instance.yaml
+
+# Watch Crossplane provision the database
+kubectl get instance orders-db -n production -w
+
+# NAME        READY   SYNCED   EXTERNAL-NAME                    AGE
+# orders-db   False   True     orders-db-xyz123.us-east-1.rds   30s
+# orders-db   True    True     orders-db-xyz123.us-east-1.rds   4m
+
+# The connection string is now a Kubernetes Secret
+kubectl get secret orders-db-connection -n production -o yaml</code></pre>
+
+      <h3>Compositions: Building Your Own Abstractions</h3>
+      <p>Raw Managed Resources expose every AWS option, which is overwhelming for developers. Compositions let the platform team create <strong>higher-level abstractions</strong> — a <code>PostgreSQLDatabase</code> that automatically includes the right instance size, backup retention, security groups, and monitoring, without the developer needing to know any of that.</p>
+
+      <pre><code class="language-yaml"># composite-resource-definition.yaml — defines a custom resource type
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xpostgresqldatabases.platform.mycompany.com
+spec:
+  group: platform.mycompany.com
+  names:
+    kind: XPostgreSQLDatabase
+    plural: xpostgresqldatabases
+  claimNames:
+    kind: PostgreSQLDatabase    # This is what developers use
+    plural: postgresqldatabases
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                size:
+                  type: string
+                  enum: [small, medium, large]  # Simple choice, no AWS jargon
+                region:
+                  type: string
+                  default: us-east-1</code></pre>
+
+      <pre><code class="language-yaml"># composition.yaml — maps the simple spec to real AWS resources
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: postgresql-aws
+spec:
+  compositeTypeRef:
+    apiVersion: platform.mycompany.com/v1alpha1
+    kind: XPostgreSQLDatabase
+  resources:
+    - name: rds-instance
+      base:
+        apiVersion: rds.aws.upbound.io/v1beta1
+        kind: Instance
+        spec:
+          forProvider:
+            engine: postgres
+            engineVersion: "14"
+            skipFinalSnapshot: true
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+        - fromFieldPath: spec.size
+          toFieldPath: spec.forProvider.dbInstanceClass
+          transforms:
+            - type: map
+              map:
+                small: db.t3.micro
+                medium: db.t3.medium
+                large: db.r6g.large</code></pre>
+
+      <p>Now a developer can claim a database with a five-line YAML — no AWS knowledge required:</p>
+
+      <pre><code class="language-yaml"># my-app-database.yaml — written by the application developer
+apiVersion: platform.mycompany.com/v1alpha1
+kind: PostgreSQLDatabase
+metadata:
+  name: my-app-db
+  namespace: my-team
+spec:
+  size: small
+  region: us-east-1
+  writeConnectionSecretToRef:
+    name: my-app-db-credentials</code></pre>
+
+      <h2>Putting It All Together: The Golden Path</h2>
+      <p>The <strong>golden path</strong> is the platform engineering term for the happy path — the well-paved route through your infrastructure that you've made so easy that developers naturally use it.</p>
+
+      <div class="diagram">
+        <pre>
+Developer opens Backstage
+         │
+         ▼
+  Picks "New Microservice" Template
+         │
+         ▼
+  Fills in: name, team, "needs database? yes"
+         │
+         ▼
+  Backstage scaffolds:
+  ├── GitHub repo with Node.js boilerplate
+  ├── Dockerfile + Kubernetes manifests
+  ├── GitHub Actions pipeline
+  ├── catalog-info.yaml
+  └── PostgreSQLDatabase claim (Crossplane)
+         │
+         ▼
+  ArgoCD detects the new repo → deploys to staging
+         │
+         ▼
+  Crossplane sees the claim → provisions RDS database
+  └── Injects credentials as a Kubernetes Secret
+         │
+         ▼
+  Developer pushes first feature → pipeline runs:
+  tests → security scan → build image → deploy
+         │
+         ▼
+  Grafana dashboard auto-created
+  Backstage catalog shows service health
+  TechDocs renders README as documentation
+        </pre>
+      </div>
+
+      <p>The developer wrote a feature. They never touched AWS, Kubernetes YAML, GitHub Actions setup, Prometheus configuration, or Vault. The platform handled all of it. That's the dream.</p>
+
+      <div class="tip-box">
+        <strong>Platform Team as Product Team</strong><br>
+        The best platform teams treat their internal developers as customers. They run user research, gather feedback, measure time-to-first-deploy for new engineers, and iterate on their tools the same way product teams iterate on user-facing features. If developers are bypassing the platform and doing things manually, that's a bug — not a discipline problem.
+      </div>
+
+      <div class="summary">
+        <h3>Chapter Summary</h3>
+        <ul>
+          <li><strong>Platform Engineering</strong> builds internal tools that reduce cognitive load for developers — the goal is self-service infrastructure.</li>
+          <li><strong>Backstage</strong> is an open-source developer portal. Its core features are the Software Catalog (every service in one place), Software Templates (automated service scaffolding), and TechDocs (docs-as-code).</li>
+          <li><strong>Crossplane</strong> turns Kubernetes into a universal control plane. It provisions cloud resources (RDS, S3, Redis) via Kubernetes manifests, and Compositions let you build simple abstractions over complex AWS primitives.</li>
+          <li>The <strong>golden path</strong> combines all these tools: a developer picks a template, Backstage scaffolds a repo, ArgoCD deploys it, and Crossplane provisions its dependencies — all without the developer needing deep infrastructure knowledge.</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="../part-6/chapter-21.html">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Ch 21 · Security &amp; Secrets</span>
+        </a>
+        <a href="chapter-23.html" class="next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Ch 23 · AI Ops</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">☰</button>
+<script src="../nav.js"></script>
+</body>
+</html>

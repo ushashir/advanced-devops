@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch 23 · AI Ops — DevOps for Everyone</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})()</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><a href="../index.html"><div class="book-title">DevOps for Everyone</div><div class="book-subtitle">From zero to production</div></a></div>
+    <nav>
+      <div class="nav-part"><a href="../index.html">📖 Table of Contents</a><a href="../introduction.html">Introduction</a><a href="../about-author.html">About the Author</a></div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 1 — Foundations</div>
+        <a href="../part-1/chapter-1.html">Ch 1 · What is DevOps?</a><a href="../part-1/chapter-2.html">Ch 2 · Linux: Your Magic Workshop</a><a href="../part-1/chapter-3.html">Ch 3 · The Internet's Invisible Roads</a><a href="../part-1/chapter-4.html">Ch 4 · Git, Bash &amp; Python</a><a href="../part-1/exercises.html">Part 1 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 2 — CI/CD &amp; Containers</div>
+        <a href="../part-2/chapter-5.html">Ch 5 · Docker: Lunchboxes for Apps</a><a href="../part-2/chapter-6.html">Ch 6 · CI/CD &amp; GitHub Actions</a><a href="../part-2/chapter-7.html">Ch 7 · Kubernetes: The Coordinator</a><a href="../part-2/chapter-8.html">Ch 8 · ArgoCD &amp; GitOps</a><a href="../part-2/exercises.html">Part 2 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 3 — Cloud Platforms</div>
+        <a href="../part-3/chapter-9.html">Ch 9 · AWS: The Giant Supermarket</a><a href="../part-3/chapter-10.html">Ch 10 · GCP &amp; Azure</a><a href="../part-3/chapter-11.html">Ch 11 · Vercel, Netlify &amp; cPanel</a><a href="../part-3/exercises.html">Part 3 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 4 — Infrastructure as Code</div>
+        <a href="../part-4/chapter-12.html">Ch 12 · Terraform: LEGO for Servers</a><a href="../part-4/chapter-13.html">Ch 13 · Ansible: Robot Setup Crew</a><a href="../part-4/chapter-14.html">Ch 14 · Pulumi: IaC in Real Code</a><a href="../part-4/exercises.html">Part 4 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 5 — Deploy by Technology</div>
+        <a href="../part-5/chapter-15.html">Ch 15 · Node.js &amp; PM2</a><a href="../part-5/chapter-16.html">Ch 16 · Python &amp; FastAPI</a><a href="../part-5/chapter-17.html">Ch 17 · Java Services</a><a href="../part-5/chapter-18.html">Ch 18 · .NET Services</a><a href="../part-5/exercises.html">Part 5 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 6 — Observability &amp; Security</div>
+        <a href="../part-6/chapter-19.html">Ch 19 · Metrics &amp; Logs</a><a href="../part-6/chapter-20.html">Ch 20 · Distributed Tracing</a><a href="../part-6/chapter-21.html">Ch 21 · Security &amp; Secrets</a><a href="../part-6/exercises.html">Part 6 Exercises</a>
+      </div>
+      <div class="nav-part">
+        <div class="nav-part-title">Part 7 — Platform Engineering</div>
+        <a href="../part-7/chapter-22.html">Ch 22 · Developer Platforms</a><a href="../part-7/chapter-23.html">Ch 23 · AI Ops</a><a href="../part-7/conclusion.html">Conclusion</a><a href="../part-7/exercises.html">Part 7 Exercises</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <main class="content">
+
+      <div class="chapter-header">
+        <div class="chapter-tag part-7">Part 7 · Chapter 23</div>
+        <h1>AI Ops: The Future of DevOps</h1>
+        <p class="chapter-intro">Machines that write code, predict outages before they happen, and triage alerts at 3 AM so you don't have to. This is where DevOps is going — and you should be going there too.</p>
+      </div>
+
+      <div class="analogy-box">
+        <strong>The Smart Mall Security Analogy</strong><br>
+        Traditional ops is like a single security guard in a giant shopping mall, manually watching 500 camera feeds on one monitor. They can't possibly catch everything, so they miss most incidents until a customer complains.<br><br>
+        AI Ops is like upgrading that mall with thousands of smart cameras that detect unusual patterns automatically, alert the guard only to real threats, log everything with context, and even lock a suspicious door before the guard arrives. The guard's job shifts from staring at screens to handling the few things that genuinely need human judgment.
+      </div>
+
+      <h2>What is AIOps?</h2>
+      <p>AIOps (Artificial Intelligence for IT Operations) is the use of machine learning, large language models, and data analytics to automate and enhance IT operations tasks — monitoring, alerting, incident response, capacity planning, and infrastructure code generation.</p>
+
+      <p>The goal is not to replace engineers. It's to eliminate the dull, repetitive, 3 AM alarm-fatigue work so engineers can focus on meaningful problems.</p>
+
+      <div class="key-term">
+        <strong>Alert Fatigue</strong> — the exhaustion and desensitisation that happens when a team receives so many alerts that they start ignoring them. Studies show that ops teams receive thousands of alerts per day, the vast majority of which are false positives or duplicates. AI Ops targets alert fatigue directly.
+      </div>
+
+      <h2>Anomaly Detection</h2>
+      <p>Traditional alerting uses static thresholds: "alert when CPU > 80%." The problem is that 80% CPU might be completely normal during your Black Friday sale but catastrophic at 2 AM on a Tuesday. Static thresholds produce too many false positives and miss real anomalies.</p>
+
+      <p>Anomaly detection algorithms learn what "normal" looks like for your system and alert only when something deviates from that baseline — regardless of the absolute value.</p>
+
+      <h3>Statistical Anomaly Detection</h3>
+      <p>The simplest approach uses Z-scores or moving averages. A value is anomalous if it's more than N standard deviations from the recent mean.</p>
+
+      <pre><code class="language-python">import numpy as np
+from collections import deque
+
+class AnomalyDetector:
+    def __init__(self, window_size=60, threshold=3.0):
+        self.window = deque(maxlen=window_size)
+        self.threshold = threshold
+
+    def is_anomaly(self, value: float) -> bool:
+        self.window.append(value)
+        if len(self.window) < 10:
+            return False  # Not enough data yet
+
+        mean = np.mean(self.window)
+        std = np.std(self.window)
+
+        if std == 0:
+            return False
+
+        z_score = abs((value - mean) / std)
+        return z_score > self.threshold
+
+detector = AnomalyDetector(window_size=60, threshold=3.0)
+
+# Simulate streaming metrics
+import random
+for i in range(100):
+    cpu = random.gauss(40, 5)  # Normal: mean 40%, std 5%
+    if i == 80:
+        cpu = 95  # Inject a spike
+    if detector.is_anomaly(cpu):
+        print(f"ANOMALY at tick {i}: CPU={cpu:.1f}%")</code></pre>
+
+      <h3>Seasonal Anomaly Detection with Prophet</h3>
+      <p>Real traffic has daily and weekly seasons — lower at night, higher during business hours, spike every Monday morning. Prophet (open-source from Meta) handles these patterns automatically.</p>
+
+      <pre><code class="language-python">from prophet import Prophet
+import pandas as pd
+
+# Load historical request rate (one row per minute)
+df = pd.read_csv("request_rate.csv")
+df = df.rename(columns={"timestamp": "ds", "requests_per_second": "y"})
+
+# Fit the model on historical data
+model = Prophet(
+    seasonality_mode="multiplicative",
+    daily_seasonality=True,
+    weekly_seasonality=True,
+)
+model.fit(df)
+
+# Forecast the next 24 hours
+future = model.make_future_dataframe(periods=1440, freq="1min")
+forecast = model.predict(future)
+
+# Detect anomalies: where actual values fall outside predicted bounds
+df_merged = df.merge(forecast[["ds", "yhat_lower", "yhat_upper"]], on="ds")
+anomalies = df_merged[
+    (df_merged["y"] < df_merged["yhat_lower"]) |
+    (df_merged["y"] > df_merged["yhat_upper"])
+]
+print(f"Found {len(anomalies)} anomalous data points")</code></pre>
+
+      <h2>LLM-Assisted Alert Triage</h2>
+      <p>When an alert fires, an on-call engineer typically needs to: understand what the alert means, find the relevant logs, check recent deployments, identify likely root causes, and find the right runbook. This can take 10–30 minutes for every alert.</p>
+
+      <p>An LLM-powered triage assistant can compress that to seconds by pulling all relevant context automatically and presenting a summary in plain English.</p>
+
+      <pre><code class="language-python">import anthropic
+import requests
+
+def triage_alert(alert: dict) -> str:
+    """Given an alert payload, fetch context and ask Claude to triage it."""
+
+    # 1. Fetch recent logs for the failing service
+    loki_query = f'{{job="{alert["service"]}"}} |= "ERROR" | last 50'
+    logs_response = requests.get(
+        "http://loki:3100/loki/api/v1/query",
+        params={"query": loki_query}
+    )
+    recent_logs = "\n".join([
+        line["values"][0][1]
+        for stream in logs_response.json()["data"]["result"]
+        for line in stream["values"][:10]
+    ])
+
+    # 2. Fetch recent deployments from ArgoCD
+    deployments_response = requests.get(
+        f"http://argocd:8080/api/v1/applications/{alert['service']}/events",
+        headers={"Authorization": f"Bearer {ARGOCD_TOKEN}"}
+    )
+    recent_events = [e["message"] for e in deployments_response.json()["items"][-5:]]
+
+    # 3. Ask Claude to triage
+    client = anthropic.Anthropic()
+    message = client.messages.create(
+        model="claude-opus-4-7",
+        max_tokens=1024,
+        messages=[{
+            "role": "user",
+            "content": f"""You are an expert DevOps engineer performing alert triage.
+
+Alert: {alert['name']}
+Service: {alert['service']}
+Severity: {alert['severity']}
+Description: {alert['description']}
+
+Recent error logs from this service:
+{recent_logs}
+
+Recent deployment events:
+{chr(10).join(recent_events)}
+
+Please provide:
+1. A plain-English explanation of what this alert means (2 sentences max)
+2. The most likely root cause based on the evidence
+3. The recommended immediate action
+4. Whether this looks like a code issue, infrastructure issue, or traffic issue"""
+        }]
+    )
+    return message.content[0].text
+
+
+# Example usage
+alert = {
+    "name": "HighErrorRate",
+    "service": "payment-service",
+    "severity": "critical",
+    "description": "Error rate above 5% for 2+ minutes"
+}
+
+triage_result = triage_alert(alert)
+print(triage_result)
+# Output example:
+# Root cause: The payment-service started returning 500 errors at 14:32 UTC,
+# 3 minutes after a deployment that updated the Stripe SDK version.
+# Recommended action: Roll back the deployment using: kubectl rollout undo
+# deployment/payment-service -n production</code></pre>
+
+      <div class="tip-box">
+        <strong>Sending Triage to Slack</strong><br>
+        Hook this into your alerting pipeline. When Alertmanager fires, your script runs, Claude triages, and the result posts to your on-call Slack channel — with a recommended action — before the on-call engineer even opens their laptop. They arrive to a problem already half-diagnosed.
+      </div>
+
+      <h2>Automated Runbooks</h2>
+      <p>A runbook is a document describing step-by-step how to respond to a specific incident. Traditional runbooks go stale fast — the commands change, the service evolves, but no one updates the doc. AI-powered runbooks are dynamic: they pull current state, decide which steps apply, and execute them.</p>
+
+      <pre><code class="language-python">import anthropic
+import subprocess
+
+RUNBOOKS = {
+    "HighMemoryUsage": """
+When memory usage exceeds 85%:
+1. Check which pods are using the most memory: kubectl top pods -n {namespace}
+2. If one pod is using >70% of total memory, restart it: kubectl rollout restart deployment/{service}
+3. Check for memory leaks in recent logs: recent error logs
+4. If memory is still high after restart, scale up: kubectl scale deployment/{service} --replicas=+1
+5. Page the on-call engineer if memory doesn't drop within 5 minutes
+""",
+    "ServiceDown": """
+When a service has 0 healthy replicas:
+1. Check pod status: kubectl get pods -n {namespace} -l app={service}
+2. Describe the failing pod for events: kubectl describe pod -n {namespace} -l app={service}
+3. Check recent logs: kubectl logs -n {namespace} -l app={service} --previous
+4. Check if the image exists in the registry
+5. If CrashLoopBackOff and last deploy was recent, roll back
+"""
+}
+
+def execute_automated_runbook(alert_name: str, service: str, namespace: str):
+    runbook_template = RUNBOOKS.get(alert_name, "No runbook found for this alert.")
+    runbook = runbook_template.format(service=service, namespace=namespace)
+
+    # Get current cluster state
+    pod_status = subprocess.run(
+        ["kubectl", "get", "pods", "-n", namespace, "-l", f"app={service}"],
+        capture_output=True, text=True
+    ).stdout
+
+    client = anthropic.Anthropic()
+    response = client.messages.create(
+        model="claude-opus-4-7",
+        max_tokens=2048,
+        messages=[{
+            "role": "user",
+            "content": f"""You are executing an automated incident runbook.
+
+Alert: {alert_name}
+Service: {service}
+Namespace: {namespace}
+
+Current pod status:
+{pod_status}
+
+Runbook:
+{runbook}
+
+Based on the current state, which step should be executed first?
+Provide the exact kubectl command to run. Be specific and safe — prefer non-destructive actions first.
+Format your response as:
+ACTION: <description>
+COMMAND: <exact kubectl command>
+RISK: low|medium|high"""
+        }]
+    )
+
+    print(response.content[0].text)
+    # In production: parse the command, get human approval for medium/high risk,
+    # then execute it and loop back for the next step</code></pre>
+
+      <h2>AI-Assisted Infrastructure Code</h2>
+      <p>LLMs are remarkably good at writing Terraform, Kubernetes YAML, Dockerfiles, and CI/CD pipelines. This is already happening in practice — GitHub Copilot, Cursor, and similar tools are used daily by infrastructure engineers.</p>
+
+      <p>The key is knowing what to ask for and how to verify what you get. AI-generated infrastructure code can contain subtle bugs — wrong IAM permissions, insecure defaults, deprecated API versions. Always review and test before applying.</p>
+
+      <h3>Practical Example: Generating Terraform from a Description</h3>
+      <pre><code class="language-python">import anthropic
+
+def generate_terraform(description: str) -> str:
+    client = anthropic.Anthropic()
+    response = client.messages.create(
+        model="claude-opus-4-7",
+        max_tokens=4096,
+        system="""You are a senior DevOps engineer who writes production-quality Terraform.
+Follow these rules:
+- Always use variables for values that change between environments
+- Include tags on all resources
+- Use the least-privilege IAM principle
+- Add comments explaining non-obvious decisions
+- Use current, non-deprecated resource types""",
+        messages=[{
+            "role": "user",
+            "content": f"Write Terraform HCL for the following: {description}"
+        }]
+    )
+    return response.content[0].text
+
+terraform_code = generate_terraform(
+    "An AWS S3 bucket for storing application logs. "
+    "Enable versioning and server-side encryption with KMS. "
+    "Block all public access. "
+    "Add a lifecycle rule to move objects to Glacier after 90 days and delete after 365 days."
+)
+print(terraform_code)</code></pre>
+
+      <h2>Capacity Planning with AI</h2>
+      <p>Capacity planning — deciding how many servers you need next month — used to require an expert analyst with spreadsheets. ML models can do this continuously and automatically.</p>
+
+      <pre><code class="language-python">from prophet import Prophet
+import pandas as pd
+import numpy as np
+
+def predict_capacity(metric_df: pd.DataFrame, days_ahead: int = 30) -> dict:
+    """
+    Predict future resource usage and determine when current capacity will be exhausted.
+    metric_df: DataFrame with 'ds' (datetime) and 'y' (metric value, e.g. CPU%)
+    """
+    model = Prophet(
+        seasonality_mode="multiplicative",
+        changepoint_prior_scale=0.1,  # Less sensitive to historical changepoints
+    )
+    model.fit(metric_df)
+
+    future = model.make_future_dataframe(periods=days_ahead * 24, freq="1h")
+    forecast = model.predict(future)
+
+    # Find when predicted usage exceeds 80% threshold
+    future_forecast = forecast[forecast["ds"] > metric_df["ds"].max()]
+    breach_date = future_forecast[future_forecast["yhat"] > 80]["ds"].min()
+
+    current_usage = metric_df["y"].iloc[-1]
+    peak_predicted = future_forecast["yhat_upper"].max()
+
+    return {
+        "current_usage_pct": round(current_usage, 1),
+        "peak_predicted_pct": round(peak_predicted, 1),
+        "capacity_breach_date": str(breach_date.date()) if pd.notna(breach_date) else "None predicted",
+        "recommendation": (
+            f"Scale up before {breach_date.date()}"
+            if pd.notna(breach_date)
+            else "Current capacity sufficient for next 30 days"
+        )
+    }
+
+# Example
+result = predict_capacity(df, days_ahead=30)
+print(result)
+# {'current_usage_pct': 62.3,
+#  'peak_predicted_pct': 87.4,
+#  'capacity_breach_date': '2026-06-01',
+#  'recommendation': 'Scale up before 2026-06-01'}</code></pre>
+
+      <h2>The Right Mental Model for AI in DevOps</h2>
+      <p>AI Ops tools are powerful but they are not magic. Here is the right way to think about them:</p>
+
+      <div class="key-term">
+        <strong>AI as a Junior Engineer, Not a Senior One</strong><br>
+        An LLM can write reasonable Terraform code, triage familiar alerts, and suggest runbook steps. But it can make confident mistakes — wrong region, insecure default, deprecated API. Your job is to be the senior engineer reviewing a junior's work: fast to use their output as a starting point, careful to verify before shipping.
+      </div>
+
+      <p>The pattern that works:</p>
+      <ol>
+        <li><strong>Automate the boring parts</strong> — log correlation, alert deduplication, initial triage, runbook lookup. These have well-defined right answers and benefit enormously from automation.</li>
+        <li><strong>Assist with the creative parts</strong> — code generation, architecture suggestions, documentation. Use AI as a fast first draft, then apply your expertise.</li>
+        <li><strong>Keep humans for judgment calls</strong> — should we roll back? Is this a security incident? Should we page the whole team? These require context, accountability, and wisdom that AI doesn't have.</li>
+      </ol>
+
+      <div class="fun-fact">
+        <strong>The Numbers</strong><br>
+        According to the 2024 DORA report, teams that use AI-assisted development tools deploy 50% more frequently and have 25% lower change failure rates than teams that don't. The biggest gains are in cognitive load reduction — developers make fewer mistakes when they're less overwhelmed.
+      </div>
+
+      <h2>AI Ops in Practice: What to Actually Use Today</h2>
+
+      <div class="key-term">
+        <strong>GitHub Copilot / Cursor</strong> — AI pair programming in your editor. Excellent for writing Dockerfiles, Kubernetes YAML, Terraform, and Bash scripts. Use it daily for infrastructure code.
+      </div>
+
+      <div class="key-term">
+        <strong>Grafana ML</strong> — Grafana's built-in anomaly detection plugin applies ML directly to your Prometheus metrics without any coding. Enable it in Grafana and point it at noisy metrics.
+      </div>
+
+      <div class="key-term">
+        <strong>PagerDuty AIOps</strong> — commercial alert correlation and noise reduction. Groups related alerts into a single incident. Reduces alert volume by up to 90% for large teams.
+      </div>
+
+      <div class="key-term">
+        <strong>Anthropic Claude API</strong> — for building custom triage bots, runbook executors, capacity planning assistants, and Slack integrations. Start with the patterns in this chapter and adapt them to your stack.
+      </div>
+
+      <div class="summary">
+        <h3>Chapter Summary</h3>
+        <ul>
+          <li><strong>AIOps</strong> applies ML and LLMs to IT operations — reducing alert fatigue, speeding up incident response, and automating capacity planning.</li>
+          <li><strong>Anomaly detection</strong> replaces static thresholds with adaptive baselines. Z-score detectors handle simple cases; Prophet handles seasonal traffic patterns.</li>
+          <li><strong>LLM-assisted triage</strong> pulls logs, deployment history, and metrics together and summarises the likely root cause in plain English — before the on-call engineer opens their laptop.</li>
+          <li><strong>Automated runbooks</strong> execute predefined steps based on current cluster state, with human approval gates for high-risk actions.</li>
+          <li><strong>AI as junior engineer</strong>: fast, useful for first drafts and routine tasks, but always needs a senior engineer's review before applying to production.</li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav">
+        <a href="chapter-22.html">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Ch 22 · Developer Platforms</span>
+        </a>
+        <a href="conclusion.html" class="next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Conclusion</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+<button class="menu-btn" aria-label="Open menu">☰</button>
+<script src="../nav.js"></script>
+</body>
+</html>
